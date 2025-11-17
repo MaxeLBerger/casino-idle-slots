@@ -621,7 +621,6 @@ function App() {
         setWinBannerType('ultra')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        toast.success(`✨ ULTRA JACKPOT!!! +${winAmount} coins!`, { duration: 6000 })
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
@@ -633,7 +632,6 @@ function App() {
         setWinBannerType('jackpot')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        toast.success(`💰 JACKPOT!!! +${winAmount} coins!`, { duration: 5000 })
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
@@ -645,7 +643,6 @@ function App() {
         setWinBannerType('mega')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        toast.success(`👑 MEGA WIN! +${winAmount} coins!`, { duration: 4000 })
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
@@ -657,7 +654,6 @@ function App() {
         setWinBannerType('big')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        toast.success(`💎 BIG WIN! +${winAmount} coins!`, { duration: 3500 })
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
@@ -669,7 +665,6 @@ function App() {
         setWinBannerType('small')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        toast.success(`🎰 WIN! +${winAmount} coins!`, { duration: 3000 })
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
@@ -678,7 +673,6 @@ function App() {
         playSmallWinSound()
         setConfettiIntensity('low')
         setShowConfetti(true)
-        toast.success(`🎰 WIN! +${winAmount} coins!`, { duration: 2500 })
         setTimeout(() => setShowConfetti(false), 1500)
       }
       
