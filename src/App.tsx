@@ -1000,10 +1000,10 @@ function App() {
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
       <AchievementNotification 
-        achievement={achievementNotification} 
-        onClose={() => setAchievementNotification(null)}
-      />
       
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <motion.div
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <motion.div
