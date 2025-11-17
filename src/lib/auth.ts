@@ -57,10 +57,19 @@ export async function signInWithGitHub(): Promise<boolean> {
   }
 
   try {
+    // Determine the correct redirect URL
+    // In production, always use the production URL
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const redirectTo = isLocalhost 
+      ? window.location.origin + window.location.pathname
+      : 'https://maximilianhaak.de/CasinoIdleSlots/'
+    
+    console.log('[Auth] Signing in with GitHub, redirect to:', redirectTo)
+    
     const { error } = await supabase!.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo
       }
     })
 
