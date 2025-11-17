@@ -87,6 +87,26 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'wins'
   },
   {
+    id: 'ultra-jackpot-master',
+    title: 'Ultra Jackpot Master',
+    description: 'Win 25000 coins in a single spin',
+    icon: '✨',
+    requirement: 25000,
+    rewardCoins: 25000,
+    rewardPrestige: 5,
+    category: 'wins'
+  },
+  {
+    id: 'cosmic-fortune',
+    title: 'Cosmic Fortune',
+    description: 'Win 50000 coins in a single spin',
+    icon: '🌟',
+    requirement: 50000,
+    rewardCoins: 50000,
+    rewardPrestige: 10,
+    category: 'wins'
+  },
+  {
     id: 'millionaire',
     title: 'Millionaire',
     description: 'Earn a total of 1,000,000 coins',

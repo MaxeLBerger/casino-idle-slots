@@ -38,7 +38,9 @@ const SYMBOL_SETS = [
 ]
 
 const JACKPOT_SYMBOLS = ['💰', '💎', '👑', '⭐', '🔥']
+const ULTRA_JACKPOT_SYMBOLS = ['🌟', '💫', '✨']
 const JACKPOT_CHANCE = 0.03
+const ULTRA_JACKPOT_CHANCE = 0.005
 
 const SLOT_MACHINE_CONFIGS = [
   { name: 'Classic', rows: 1, reels: 3, prestigeCost: 0, symbols: SYMBOL_SETS[0] },
@@ -122,10 +124,10 @@ function App() {
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const coinParticleContainer = useRef<HTMLDivElement>(null)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega' | 'jackpot'>('medium')
+  const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega' | 'jackpot' | 'ultra'>('medium')
   const [showWinBanner, setShowWinBanner] = useState(false)
   const [winBannerAmount, setWinBannerAmount] = useState(0)
-  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot'>('small')
+  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot' | 'ultra'>('small')
   const [showAchievements, setShowAchievements] = useState(false)
   const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
@@ -497,6 +499,11 @@ function App() {
     const stoppedReels = Array(machine.reels).fill(false)
     const finalReels = Array(machine.rows).fill(0).map(() =>
       Array(machine.reels).fill(0).map(() => {
+        const ultraRoll = Math.random()
+        if (ultraRoll < ULTRA_JACKPOT_CHANCE) {
+          return ULTRA_JACKPOT_SYMBOLS[Math.floor(Math.random() * ULTRA_JACKPOT_SYMBOLS.length)]
+        }
+        
         const shouldBeJackpot = Math.random() < JACKPOT_CHANCE
         if (shouldBeJackpot && JACKPOT_SYMBOLS.some(s => machine.symbols.includes(s))) {
           const availableJackpots = JACKPOT_SYMBOLS.filter(s => machine.symbols.includes(s))
@@ -537,6 +544,7 @@ function App() {
     let winAmount = 0
     let hasWin = false
     let isJackpot = false
+    let isUltraJackpot = false
 
     for (let row = 0; row < machine.rows; row++) {
       const rowSymbols = finalReels[row]
@@ -546,6 +554,7 @@ function App() {
         hasWin = true
         const symbol = rowSymbols[0]
         const isJackpotSymbol = JACKPOT_SYMBOLS.includes(symbol)
+        const isUltraSymbol = ULTRA_JACKPOT_SYMBOLS.includes(symbol)
         
         let symbolMultiplier = 20
         if (symbol === '💎') symbolMultiplier = 100
@@ -556,9 +565,25 @@ function App() {
           symbolMultiplier = 300
           isJackpot = true
         }
+        else if (symbol === '🌟') {
+          symbolMultiplier = 500
+          isUltraJackpot = true
+        }
+        else if (symbol === '💫') {
+          symbolMultiplier = 750
+          isUltraJackpot = true
+        }
+        else if (symbol === '✨') {
+          symbolMultiplier = 1000
+          isUltraJackpot = true
+        }
         
         if (isJackpotSymbol && allMatch) {
           symbolMultiplier *= 2
+        }
+        
+        if (isUltraSymbol && allMatch) {
+          symbolMultiplier *= 3
         }
         
         winAmount += Math.floor(symbolMultiplier * gameState.spinMultiplier * machine.reels)
@@ -574,6 +599,14 @@ function App() {
           winAmount += jackpotBonus
           hasWin = true
         }
+        
+        const ultraCount = rowSymbols.filter(s => ULTRA_JACKPOT_SYMBOLS.includes(s)).length
+        if (ultraCount >= 2) {
+          const ultraBonus = Math.floor(200 * ultraCount * gameState.spinMultiplier)
+          winAmount += ultraBonus
+          hasWin = true
+          isUltraJackpot = true
+        }
       }
     }
 
@@ -581,7 +614,19 @@ function App() {
       createCoinParticles(winAmount)
       
       const spinCost = SPIN_COST
-      if (isJackpot || winAmount >= spinCost * 100) {
+      if (isUltraJackpot) {
+        playJackpotSound()
+        setConfettiIntensity('ultra')
+        setShowConfetti(true)
+        setWinBannerType('ultra')
+        setWinBannerAmount(winAmount)
+        setShowWinBanner(true)
+        toast.success(`✨ ULTRA JACKPOT!!! +${winAmount} coins!`, { duration: 6000 })
+        setTimeout(() => {
+          setShowConfetti(false)
+          setShowWinBanner(false)
+        }, 5000)
+      } else if (isJackpot || winAmount >= spinCost * 100) {
         playJackpotSound()
         setConfettiIntensity('jackpot')
         setShowConfetti(true)
@@ -641,8 +686,10 @@ function App() {
       checkAchievement('big-winner', winAmount)
       checkAchievement('mega-winner', winAmount)
       checkAchievement('jackpot-legend', winAmount)
+      checkAchievement('ultra-jackpot-master', winAmount)
+      checkAchievement('cosmic-fortune', winAmount)
       
-      if (isJackpot) {
+      if (isJackpot || isUltraJackpot) {
         checkAchievement('jackpot-hunter', 1)
       }
     }
@@ -1060,6 +1107,9 @@ function App() {
             <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/50 text-yellow-200">
               💰 Jackpot symbols give 2x multiplier!
             </Badge>
+            <Badge className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border-cyan-400/50 text-cyan-200">
+              ✨ Ultra-Jackpot symbols give 3x multiplier!
+            </Badge>
           </div>
         </motion.div>
 
@@ -1103,11 +1153,21 @@ function App() {
                         className={`bg-muted rounded-xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center border-4 shadow-lg relative overflow-hidden ${
                           reelStates[rowIndex][colIndex] && isSpinning
                             ? 'border-primary glow-pulse'
+                            : ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            ? 'border-cyan-400 shadow-cyan-400/80 shadow-2xl'
                             : JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
                             ? 'border-yellow-500 shadow-yellow-500/50'
                             : 'border-primary/30'
                         }`}
                       >
+                        {ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex] && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                            className="absolute inset-0 bg-gradient-to-br from-cyan-400/30 via-blue-500/30 via-purple-500/30 to-pink-500/30 rounded-xl"
+                          />
+                        )}
                         {JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex] && (
                           <motion.div
                             initial={{ opacity: 0 }}
@@ -1118,6 +1178,7 @@ function App() {
                         )}
                         <motion.span 
                           className={`text-3xl md:text-5xl relative z-10 ${
+                            ULTRA_JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_12px_rgba(34,211,238,1)]' :
                             JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]' : ''
                           }`}
                           animate={reelStates[rowIndex][colIndex] && isSpinning ? {
