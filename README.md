@@ -222,3 +222,5 @@ Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) fü
 **Made with  and TypeScript**
 
 Viel Spaß beim Spielen! 
+
+<!-- Test portfolio integration -->
