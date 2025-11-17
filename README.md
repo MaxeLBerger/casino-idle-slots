@@ -1,6 +1,6 @@
-﻿#  Casino Idle Slots
+﻿# 🎰 Casino Idle Slots
 
-Ein browser-basiertes Idle-Casino-Spiel mit Slot-Maschinen, Upgrades, Achievements und Leaderboards. Gebaut mit React, TypeScript und GitHub Spark.
+Ein browser-basiertes Idle-Casino-Spiel mit Slot-Maschinen, Upgrades, Achievements und Leaderboards. Gebaut mit React, TypeScript und Supabase.
 
 ##  Live Demo
 
@@ -48,9 +48,9 @@ Ein browser-basiertes Idle-Casino-Spiel mit Slot-Maschinen, Upgrades, Achievemen
 - **Sonner** - Toast Notifications
 
 ### Backend & Storage
-- **GitHub Spark** - Authentication & Key-Value Storage
-- **GitHub Spark KV** - Cloud-basierte Datenspeicherung
-- **Octokit** - GitHub API Integration
+- **Supabase** - PostgreSQL Database & Authentication
+- **Supabase Auth** - GitHub OAuth Integration
+- **PostgreSQL** - Cloud-basierte Datenspeicherung
 
 ##  Projekt-Struktur
 
@@ -173,13 +173,13 @@ Workflow kann auch manuell im Actions Tab getriggert werden.
 -  Daily Challenges für Extra-XP completieren
 -  Login Streak für Bonus-Multiplier aufrechterhalten
 
-##  Architektur-Entscheidungen
+## 🏛️ Architektur-Entscheidungen
 
-### Warum GitHub Spark?
-- **Kostenlos** - Keine Backend-Kosten
-- **Cloud Storage** - KV-Store für User-Daten
-- **Authentication** - GitHub OAuth out-of-the-box
-- **Real-time Sync** - Automatische Synchronisation
+### Warum Supabase?
+- **Kostenlos** - Generous free tier
+- **PostgreSQL** - Vollwertige relationale Datenbank
+- **Authentication** - GitHub OAuth Integration
+- **Real-time** - WebSocket-basierte Updates
 
 ### Warum Vite?
 - **Fast** - Schneller als Webpack
@@ -210,9 +210,9 @@ Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) fü
 - **MaxeLBerger** - Initial Development
 - **Community** - Bug Reports & Feedback
 
-##  Danksagungen
+## 🙏 Danksagungen
 
-- **GitHub Spark** - Backend & Storage
+- **Supabase** - Backend & Database
 - **shadcn/ui** - Component Library
 - **Radix UI** - UI Primitives
 - **Vercel** - Inspiration für moderne Web-Apps

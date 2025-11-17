@@ -37,9 +37,9 @@ The Casino Idle Slots game now features automatic cloud saving through GitHub ac
 - **No Data Loss**: Cloud backup protects your investment
 
 ## Technical Implementation
-- Uses Spark's `useKV` persistence API with user-specific keys
-- Unique storage keys per GitHub user ID: `casino-game-state-user-{userId}`
-- Local fallback: `casino-game-state-local` for non-authenticated play
+- Uses Supabase PostgreSQL database with user-specific rows
+- Game state stored per GitHub user ID in `game_states` table
+- Local fallback: localStorage for non-authenticated play
 - Automatic migration from local to cloud storage on first login
 - Loading states during authentication and data retrieval
 
