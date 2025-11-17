@@ -31,7 +31,7 @@ export default defineConfig({
     // Optimierungen für Production
     outDir: 'dist',
     sourcemap: false,
-    minify: 'terser',
+    minify: 'esbuild', // esbuild ist schneller und default in Vite
     rollupOptions: {
       output: {
         manualChunks: {
