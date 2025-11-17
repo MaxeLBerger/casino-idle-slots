@@ -106,7 +106,6 @@ const DEFAULT_STATE: GameState = {
 function App() {
   const [gameState, setGameState, , isLoadingGameState, gameStateUserId] = useUserLinkedKV<GameState>('casino-game-state', DEFAULT_STATE)
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null)
-  const [isInitializing, setIsInitializing] = useState(true)
   const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
   const [hasMigratedData, setHasMigratedData] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState<number>(Date.now())
@@ -147,7 +146,6 @@ function App() {
       const user = await getCurrentUser()
       if (mounted) {
         setCurrentUser(user)
-        setIsInitializing(false)
       }
     }
 
@@ -170,7 +168,7 @@ function App() {
   }, [isLoadingGameState, gameState, gameStateUserId, currentUser])
 
   useEffect(() => {
-    if (isInitializing || isLoadingGameState) return
+    if (isLoadingGameState) return
 
     const checkDataMigration = async () => {
       if (currentUser && !hasMigratedData && gameStateUserId) {
@@ -184,7 +182,7 @@ function App() {
     }
 
     checkDataMigration()
-  }, [currentUser, isInitializing, isLoadingGameState, hasMigratedData, gameStateUserId])
+  }, [currentUser, isLoadingGameState, hasMigratedData, gameStateUserId])
 
   useEffect(() => {
     const syncInterval = setInterval(() => {
@@ -837,7 +835,7 @@ function App() {
     unlockAchievement(achievementId)
   }
 
-  if (isInitializing || isLoadingGameState) {
+  if (isLoadingGameState) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">

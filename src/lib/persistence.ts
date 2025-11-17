@@ -10,9 +10,12 @@ export interface UserInfo {
 
 export async function getCurrentUser(): Promise<UserInfo | null> {
   try {
-    const user = await window.spark.user()
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+    const userPromise = window.spark.user()
+    const user = await Promise.race([userPromise, timeoutPromise])
     return user || null
-  } catch {
+  } catch (error) {
+    console.error('[Persistence] Error getting user:', error)
     return null
   }
 }
@@ -23,31 +26,48 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
   const [value, setValue] = useState<T>(defaultValue)
   const isInitializedRef = useRef(false)
   const userIdRef = useRef<string | null>(null)
+  const defaultValueRef = useRef(defaultValue)
 
   useEffect(() => {
     let mounted = true
     
     const initialize = async () => {
-      const user = await getCurrentUser()
-      if (!mounted) return
-      
-      const userIdStr = user ? user.id.toString() : null
-      setUserId(userIdStr)
-      userIdRef.current = userIdStr
-      
-      const storageKey = userIdStr ? `${baseKey}-user-${userIdStr}` : `${baseKey}-local`
-      console.log(`[Persistence] Loading from key: ${storageKey}`)
-      const storedValue = await window.spark.kv.get<T>(storageKey)
-      
-      if (storedValue !== undefined && storedValue !== null) {
-        console.log(`[Persistence] Loaded data from ${storageKey}:`, storedValue)
-        setValue(storedValue)
-      } else {
-        console.log(`[Persistence] No data found at ${storageKey}, using default`)
+      try {
+        const user = await getCurrentUser()
+        if (!mounted) return
+        
+        const userIdStr = user ? user.id.toString() : null
+        setUserId(userIdStr)
+        userIdRef.current = userIdStr
+        
+        const storageKey = userIdStr ? `${baseKey}-user-${userIdStr}` : `${baseKey}-local`
+        console.log(`[Persistence] Loading from key: ${storageKey}`)
+        
+        try {
+          const storedValue = await window.spark.kv.get<T>(storageKey)
+          
+          if (storedValue !== undefined && storedValue !== null) {
+            console.log(`[Persistence] Loaded data from ${storageKey}:`, storedValue)
+            setValue(storedValue)
+          } else {
+            console.log(`[Persistence] No data found at ${storageKey}, using default`)
+            setValue(defaultValueRef.current)
+          }
+        } catch (kvError) {
+          console.error('[Persistence] Error loading from KV:', kvError)
+          setValue(defaultValueRef.current)
+        }
+        
+        isInitializedRef.current = true
+      } catch (error) {
+        console.error('[Persistence] Error during initialization:', error)
+        setValue(defaultValueRef.current)
+        isInitializedRef.current = true
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
       }
-      
-      isInitializedRef.current = true
-      setIsLoading(false)
     }
     
     initialize()
@@ -78,7 +98,7 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
   const deleteValue = async () => {
     const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
     await window.spark.kv.delete(storageKey)
-    setValue(defaultValue)
+    setValue(defaultValueRef.current)
   }
 
   return [value, setValueAndPersist, deleteValue, isLoading, userId] as const
