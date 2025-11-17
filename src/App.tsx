@@ -995,7 +995,14 @@ function App() {
   const idleIncomeCost = calculateUpgradeCost(effectiveGameState.idleIncomeLevel, 100)
   const canPrestige = effectiveGameState.totalEarnings >= PRESTIGE_EARNINGS_REQUIREMENT
 
-      </AnimatePresence>
+  return (
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <Confetti active={showConfetti} intensity={confettiIntensity} />
+      <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
+      <AchievementNotification 
+        achievement={achievementNotification} 
+        onClose={() => setAchievementNotification(null)}
+      />
       
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
@@ -1106,17 +1113,6 @@ function App() {
                         coinChange.isPositive ? 'text-green-400' : 'text-red-400'
                       }`}
                       style={{
-                <AnimatePresence>
-                  {coinChange && (
-                    <motion.span
-                      initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, y: -40, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5 }}
-                      transition={{ duration: 0.5 }}
-                      className={`absolute right-0 top-0 font-bold text-2xl tabular-nums ${
-                        coinChange.isPositive ? 'text-green-400' : 'text-red-400'
-                      }`}
-                      style={{
                         textShadow: coinChange.isPositive 
                           ? "0 0 20px rgba(34, 197, 94, 0.8)" 
                           : "0 0 20px rgba(239, 68, 68, 0.8)"
@@ -1126,8 +1122,7 @@ function App() {
                     </motion.span>
                   )}
                 </AnimatePresence>
-                </motion.div>
-              )}
+              </div>
             </Card>
           </motion.div>
           
