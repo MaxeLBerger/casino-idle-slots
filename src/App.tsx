@@ -292,7 +292,7 @@ function App() {
   }
 
   const unlockSlotMachine = (machineIndex: number) => {
-    if (!gameState) return
+    if (!gameState || !gameState.unlockedSlotMachines) return
     
     const machine = SLOT_MACHINE_CONFIGS[machineIndex]
     if (gameState.prestigePoints < machine.prestigeCost) {
@@ -318,7 +318,7 @@ function App() {
   }
 
   const switchSlotMachine = (machineIndex: number) => {
-    if (!gameState) return
+    if (!gameState || !gameState.unlockedSlotMachines) return
     
     if (!gameState.unlockedSlotMachines.includes(machineIndex)) {
       toast.error('Slot machine not unlocked!')
@@ -625,9 +625,9 @@ function App() {
               </div>
               <div className="space-y-3">
                 {SLOT_MACHINE_CONFIGS.map((machine, index) => {
-                  const isUnlocked = gameState.unlockedSlotMachines.includes(index)
-                  const isCurrent = gameState.currentSlotMachine === index
-                  const canAfford = gameState.prestigePoints >= machine.prestigeCost
+                  const isUnlocked = gameState?.unlockedSlotMachines?.includes(index) ?? false
+                  const isCurrent = gameState?.currentSlotMachine === index
+                  const canAfford = (gameState?.prestigePoints ?? 0) >= machine.prestigeCost
                   
                   return (
                     <Card key={index} className={`p-4 ${isCurrent ? 'border-primary border-2' : ''}`}>
