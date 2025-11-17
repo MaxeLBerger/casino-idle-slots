@@ -219,26 +219,46 @@ export function generateDailyChallenge(date: string): DailyChallenge {
   }
 }
 
+let achievementAudioContext: AudioContext | null = null
+
+const getAudioContext = () => {
+  if (typeof window === 'undefined') return null
+  
+  if (!achievementAudioContext) {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      if (AudioContextClass) {
+        achievementAudioContext = new AudioContextClass()
+      }
+    } catch (error) {
+      console.warn('Failed to create AudioContext:', error)
+      return null
+    }
+  }
+  
+  return achievementAudioContext
+}
+
 export function playAchievementSound() {
-  const audioContext = typeof window !== 'undefined' ? new (window.AudioContext || (window as any).webkitAudioContext)() : null
-  if (!audioContext) return
+  const ctx = getAudioContext()
+  if (!ctx) return
   
   const notes = [659.25, 783.99, 1046.50, 1318.51]
   
   notes.forEach((freq, index) => {
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    const oscillator = ctx.createOscillator()
+    const gainNode = ctx.createGain()
     
     oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
+    gainNode.connect(ctx.destination)
     
     oscillator.type = 'sine'
-    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.1)
+    oscillator.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.1)
     
-    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + index * 0.1)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.1 + 0.3)
+    gainNode.gain.setValueAtTime(0.15, ctx.currentTime + index * 0.1)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + index * 0.1 + 0.3)
     
-    oscillator.start(audioContext.currentTime + index * 0.1)
-    oscillator.stop(audioContext.currentTime + index * 0.1 + 0.3)
+    oscillator.start(ctx.currentTime + index * 0.1)
+    oscillator.stop(ctx.currentTime + index * 0.1 + 0.3)
   })
 }
