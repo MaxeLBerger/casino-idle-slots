@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock } from '@phosphor-icons/react'
+import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock, Calendar, Medal } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Confetti, WinBanner } from '@/components/Confetti'
+import { UserProfile } from '@/components/UserProfile'
+import { Achievements, AchievementNotification } from '@/components/Achievements'
+import { DailyChallenges, DailyChallengeCard } from '@/components/DailyChallenges'
 import { 
   playSpinSound, 
   playReelStopSound, 
@@ -20,6 +23,7 @@ import {
   playUpgradeSound,
   playPrestigeSound 
 } from '@/lib/sounds'
+import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
 
 const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔'],
@@ -55,6 +59,19 @@ interface GameState {
   currentSlotMachine: number
   unlockedSlotMachines: number[]
   lastTimestamp: number
+  level: number
+  experience: number
+  totalWins: number
+  winStreak: number
+  maxWinStreak: number
+  totalUpgrades: number
+  unlockedAchievements: string[]
+  achievementProgress: Record<string, number>
+  dailyChallengeDate: string
+  dailyChallengeProgress: number
+  dailyChallengeCompleted: boolean
+  lastLoginDate: string
+  loginStreak: number
 }
 
 const DEFAULT_STATE: GameState = {
@@ -70,10 +87,24 @@ const DEFAULT_STATE: GameState = {
   currentSlotMachine: 0,
   unlockedSlotMachines: [0],
   lastTimestamp: Date.now(),
+  level: 1,
+  experience: 0,
+  totalWins: 0,
+  winStreak: 0,
+  maxWinStreak: 0,
+  totalUpgrades: 0,
+  unlockedAchievements: [],
+  achievementProgress: {},
+  dailyChallengeDate: '',
+  dailyChallengeProgress: 0,
+  dailyChallengeCompleted: false,
+  lastLoginDate: '',
+  loginStreak: 0,
 }
 
 function App() {
   const [gameState, setGameState] = useKV<GameState>('casino-game-state', DEFAULT_STATE)
+  const [userProfile, setUserProfile] = useKV<{ username: string; avatarUrl: string; isLoggedIn: boolean } | null>('casino-user-profile', null)
   const [isSpinning, setIsSpinning] = useState(false)
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState(0)
@@ -83,6 +114,9 @@ function App() {
   const [showWinBanner, setShowWinBanner] = useState(false)
   const [winBannerAmount, setWinBannerAmount] = useState(0)
   const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega'>('small')
+  const [showAchievements, setShowAchievements] = useState(false)
+  const [showDailyChallenge, setShowDailyChallenge] = useState(false)
+  const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -97,8 +131,161 @@ function App() {
     Array(currentMachine.rows).fill(0).map(() => Array(currentMachine.reels).fill(false))
   )
 
+  const getTodayString = () => new Date().toISOString().split('T')[0]
+  const dailyChallenge = useMemo(() => generateDailyChallenge(getTodayString()), [])
+  
+  const getTimeUntilReset = () => {
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+    tomorrow.setUTCHours(0, 0, 0, 0)
+    const diff = tomorrow.getTime() - now.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    return `${hours}h ${minutes}m`
+  }
+
+  const calculateLevelProgress = (level: number) => {
+    return level * 100
+  }
+
+  const addExperience = (amount: number) => {
+    setGameState(prev => {
+      if (!prev) return DEFAULT_STATE
+      const newExp = prev.experience + amount
+      const expNeeded = calculateLevelProgress(prev.level)
+      
+      if (newExp >= expNeeded) {
+        const newLevel = prev.level + 1
+        toast.success(`🌟 Level Up! You are now level ${newLevel}!`)
+        return {
+          ...prev,
+          level: newLevel,
+          experience: newExp - expNeeded,
+          coins: prev.coins + (newLevel * 100)
+        }
+      }
+      
+      return {
+        ...prev,
+        experience: newExp
+      }
+    })
+  }
+
+  const checkAchievement = (achievementId: string, currentValue: number) => {
+    if (!gameState) return
+    
+    const achievement = ACHIEVEMENTS.find(a => a.id === achievementId)
+    if (!achievement) return
+    
+    const isUnlocked = gameState.unlockedAchievements?.includes(achievementId)
+    if (isUnlocked) return
+    
+    setGameState(prev => {
+      if (!prev) return DEFAULT_STATE
+      return {
+        ...prev,
+        achievementProgress: {
+          ...prev.achievementProgress,
+          [achievementId]: Math.max(prev.achievementProgress?.[achievementId] || 0, currentValue)
+        }
+      }
+    })
+  }
+
+  const unlockAchievement = (achievementId: string) => {
+    if (!gameState) return
+    
+    const achievement = ACHIEVEMENTS.find(a => a.id === achievementId)
+    if (!achievement) return
+    
+    const isAlreadyUnlocked = gameState.unlockedAchievements?.includes(achievementId)
+    if (isAlreadyUnlocked) return
+    
+    playAchievementSound()
+    setAchievementNotification(achievement)
+    
+    setGameState(prev => {
+      if (!prev) return DEFAULT_STATE
+      return {
+        ...prev,
+        coins: prev.coins + achievement.rewardCoins,
+        prestigePoints: prev.prestigePoints + (achievement.rewardPrestige || 0),
+        unlockedAchievements: [...(prev.unlockedAchievements || []), achievementId]
+      }
+    })
+    
+    setTimeout(() => setAchievementNotification(null), 5000)
+    addExperience(50)
+  }
+
+  const updateDailyChallengeProgress = (type: string, value: number) => {
+    if (!gameState || !dailyChallenge || gameState.dailyChallengeCompleted) return
+    
+    const today = getTodayString()
+    if (gameState.dailyChallengeDate !== today) {
+      setGameState(prev => {
+        if (!prev) return DEFAULT_STATE
+        return {
+          ...prev,
+          dailyChallengeDate: today,
+          dailyChallengeProgress: 0,
+          dailyChallengeCompleted: false
+        }
+      })
+    }
+    
+    if (dailyChallenge.type === type) {
+      setGameState(prev => {
+        if (!prev) return DEFAULT_STATE
+        const newProgress = type === 'bigWin' ? Math.max(prev.dailyChallengeProgress, value) : prev.dailyChallengeProgress + value
+        return {
+          ...prev,
+          dailyChallengeProgress: newProgress
+        }
+      })
+    }
+  }
+
   useEffect(() => {
     if (!gameState) return
+
+    const today = getTodayString()
+    if (gameState.dailyChallengeDate !== today) {
+      setGameState(prev => {
+        if (!prev) return DEFAULT_STATE
+        return {
+          ...prev,
+          dailyChallengeDate: today,
+          dailyChallengeProgress: 0,
+          dailyChallengeCompleted: false
+        }
+      })
+    }
+
+    if (gameState.lastLoginDate !== today) {
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const yesterdayString = yesterday.toISOString().split('T')[0]
+      
+      const newStreak = gameState.lastLoginDate === yesterdayString ? gameState.loginStreak + 1 : 1
+      
+      setGameState(prev => {
+        if (!prev) return DEFAULT_STATE
+        return {
+          ...prev,
+          lastLoginDate: today,
+          loginStreak: newStreak
+        }
+      })
+      
+      if (newStreak > 1) {
+        toast.success(`🔥 ${newStreak} day login streak!`)
+      }
+      
+      checkAchievement('dedicated-player', newStreak)
+    }
 
     const now = Date.now()
     const elapsed = (now - gameState.lastTimestamp) / 1000
@@ -135,11 +322,12 @@ function App() {
             lastTimestamp: Date.now(),
           }
         })
+        updateDailyChallengeProgress('earnings', Math.floor(gameState.idleIncomePerSecond))
       }
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [gameState?.idleIncomePerSecond])
+  }, [gameState?.idleIncomePerSecond, gameState?.lastLoginDate])
 
   const createCoinParticles = (amount: number) => {
     if (!coinParticleContainer.current) return
@@ -287,18 +475,44 @@ function App() {
         toast.success(`🎰 WIN! +${winAmount} coins!`, { duration: 2500 })
         setTimeout(() => setShowConfetti(false), 1500)
       }
+      
+      updateDailyChallengeProgress('wins', 1)
+      checkAchievement('big-winner', winAmount)
+      checkAchievement('mega-winner', winAmount)
     }
+
+    const newTotalSpins = (gameState?.totalSpins || 0) + 1
+    const newTotalWins = (gameState?.totalWins || 0) + (hasWin ? 1 : 0)
+    const newWinStreak = hasWin ? (gameState?.winStreak || 0) + 1 : 0
+    const newMaxWinStreak = Math.max(newWinStreak, gameState?.maxWinStreak || 0)
+    const newTotalEarnings = (gameState?.totalEarnings || 0) + winAmount
 
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
       return {
         ...prev,
         coins: prev.coins + winAmount,
-        totalSpins: prev.totalSpins + 1,
+        totalSpins: newTotalSpins,
         biggestWin: Math.max(prev.biggestWin, winAmount),
-        totalEarnings: prev.totalEarnings + winAmount,
+        totalEarnings: newTotalEarnings,
+        totalWins: newTotalWins,
+        winStreak: newWinStreak,
+        maxWinStreak: newMaxWinStreak,
       }
     })
+
+    updateDailyChallengeProgress('spins', 1)
+    updateDailyChallengeProgress('earnings', winAmount)
+    updateDailyChallengeProgress('bigWin', winAmount)
+    
+    checkAchievement('first-spin', newTotalSpins)
+    checkAchievement('spin-master', newTotalSpins)
+    checkAchievement('spin-legend', newTotalSpins)
+    checkAchievement('first-win', newTotalWins)
+    checkAchievement('millionaire', newTotalEarnings)
+    checkAchievement('lucky-streak', newWinStreak)
+    
+    addExperience(hasWin ? 10 : 2)
 
     setIsSpinning(false)
   }
@@ -316,18 +530,26 @@ function App() {
       return
     }
 
+    const newLevel = gameState.spinPowerLevel + 1
+    const newTotalUpgrades = (gameState.totalUpgrades || 0) + 1
+
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
       return {
         ...prev,
         coins: prev.coins - cost,
-        spinPowerLevel: prev.spinPowerLevel + 1,
+        spinPowerLevel: newLevel,
         spinMultiplier: prev.spinMultiplier + 0.5,
+        totalUpgrades: newTotalUpgrades,
       }
     })
 
     playUpgradeSound()
     toast.success('Spin Power upgraded!')
+    addExperience(5)
+    
+    checkAchievement('upgrade-beginner', newTotalUpgrades)
+    checkAchievement('upgrade-expert', newLevel)
   }
 
   const upgradeIdleIncome = () => {
@@ -339,18 +561,26 @@ function App() {
       return
     }
 
+    const newLevel = gameState.idleIncomeLevel + 1
+    const newTotalUpgrades = (gameState.totalUpgrades || 0) + 1
+
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
       return {
         ...prev,
         coins: prev.coins - cost,
-        idleIncomeLevel: prev.idleIncomeLevel + 1,
+        idleIncomeLevel: newLevel,
         idleIncomePerSecond: prev.idleIncomePerSecond + 1,
+        totalUpgrades: newTotalUpgrades,
       }
     })
 
     playUpgradeSound()
     toast.success('Idle Income upgraded!')
+    addExperience(5)
+    
+    checkAchievement('upgrade-beginner', newTotalUpgrades)
+    checkAchievement('upgrade-expert', newLevel)
   }
 
   const unlockSlotMachine = (machineIndex: number) => {
@@ -412,15 +642,25 @@ function App() {
       return
     }
 
+    const newPrestigePoints = (gameState.prestigePoints || 0) + 1
+
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
-      const newPrestigePoints = prev.prestigePoints + 1
       return {
         ...DEFAULT_STATE,
         prestigePoints: newPrestigePoints,
         currentSlotMachine: 0,
         unlockedSlotMachines: [0],
         lastTimestamp: Date.now(),
+        level: prev.level,
+        experience: prev.experience,
+        unlockedAchievements: prev.unlockedAchievements || [],
+        achievementProgress: prev.achievementProgress || {},
+        dailyChallengeDate: prev.dailyChallengeDate,
+        dailyChallengeProgress: prev.dailyChallengeProgress,
+        dailyChallengeCompleted: prev.dailyChallengeCompleted,
+        lastLoginDate: prev.lastLoginDate,
+        loginStreak: prev.loginStreak,
       }
     })
 
@@ -436,6 +676,78 @@ function App() {
     setShowConfetti(true)
     toast.success('🌟 Prestige! +1 Prestige Point!')
     setTimeout(() => setShowConfetti(false), 4000)
+    
+    addExperience(100)
+    checkAchievement('prestige-first', newPrestigePoints)
+    checkAchievement('prestige-veteran', newPrestigePoints)
+  }
+
+  const handleLogin = async () => {
+    try {
+      const user = await window.spark.user()
+      if (!user) {
+        toast.error('Login failed. Please try again.')
+        return
+      }
+      setUserProfile({
+        username: user.login,
+        avatarUrl: user.avatarUrl,
+        isLoggedIn: true
+      })
+      toast.success(`Welcome, ${user.login}!`)
+    } catch (error) {
+      toast.error('Login failed. Please try again.')
+    }
+  }
+
+  const handleLogout = () => {
+    setUserProfile(null)
+    toast.success('Logged out successfully')
+  }
+
+  const claimDailyChallenge = () => {
+    if (!gameState || !dailyChallenge) return
+    
+    if (gameState.dailyChallengeProgress < dailyChallenge.target) {
+      toast.error('Challenge not completed yet!')
+      return
+    }
+    
+    if (gameState.dailyChallengeCompleted) {
+      toast.error('Already claimed!')
+      return
+    }
+    
+    setGameState(prev => {
+      if (!prev) return DEFAULT_STATE
+      return {
+        ...prev,
+        coins: prev.coins + dailyChallenge.reward,
+        prestigePoints: prev.prestigePoints + (dailyChallenge.rewardPrestige || 0),
+        dailyChallengeCompleted: true,
+      }
+    })
+    
+    playAchievementSound()
+    setConfettiIntensity('medium')
+    setShowConfetti(true)
+    toast.success(`🎉 Challenge complete! +${dailyChallenge.reward} coins!`)
+    setTimeout(() => setShowConfetti(false), 2000)
+    addExperience(50)
+  }
+
+  const claimAchievement = (achievementId: string) => {
+    if (!gameState) return
+    
+    const progress = gameState.achievementProgress?.[achievementId] || 0
+    const achievement = ACHIEVEMENTS.find(a => a.id === achievementId)
+    
+    if (!achievement || progress < achievement.requirement) {
+      toast.error('Achievement not completed!')
+      return
+    }
+    
+    unlockAchievement(achievementId)
   }
 
   if (!gameState) return null
@@ -448,16 +760,69 @@ function App() {
     <div className="min-h-screen bg-background text-foreground p-4 md:p-6">
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
+      <AnimatePresence>
+        {achievementNotification && (
+          <AchievementNotification
+            achievement={achievementNotification}
+            onClose={() => setAchievementNotification(null)}
+          />
+        )}
+      </AnimatePresence>
       
       <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight">
+              🎰 CASINO IDLE SLOTS
+            </h1>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2"
+          >
+            <Button
+              onClick={() => setShowAchievements(true)}
+              variant="outline"
+              size="sm"
+              className="hidden md:flex"
+            >
+              <Trophy size={20} weight="fill" className="mr-2" />
+              Achievements
+            </Button>
+            <Button
+              onClick={() => setShowAchievements(true)}
+              variant="outline"
+              size="sm"
+              className="md:hidden"
+            >
+              <Trophy size={20} weight="fill" />
+            </Button>
+            <UserProfile
+              isLoggedIn={userProfile?.isLoggedIn || false}
+              username={userProfile?.username || ''}
+              avatarUrl={userProfile?.avatarUrl}
+              level={gameState.level || 1}
+              experience={gameState.experience || 0}
+              experienceToNextLevel={calculateLevelProgress(gameState.level || 1)}
+              coins={gameState.coins}
+              prestigePoints={gameState.prestigePoints}
+              totalSpins={gameState.totalSpins}
+              onLogin={handleLogin}
+              onLogout={handleLogout}
+            />
+          </motion.div>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-primary tracking-tight mb-2">
-            🎰 CASINO IDLE SLOTS
-          </h1>
           <div className="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold orbitron">
             <Coins size={32} weight="fill" className="text-primary" />
             <motion.span
@@ -469,6 +834,22 @@ function App() {
               {gameState.coins.toLocaleString()}
             </motion.span>
           </div>
+          
+          {userProfile?.isLoggedIn && (
+            <div className="max-w-md mx-auto mt-3">
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="font-semibold">Level {gameState.level || 1}</span>
+                <span className="text-muted-foreground text-xs">
+                  {gameState.experience || 0} / {calculateLevelProgress(gameState.level || 1)} XP
+                </span>
+              </div>
+              <Progress 
+                value={((gameState.experience || 0) / calculateLevelProgress(gameState.level || 1)) * 100} 
+                className="h-2"
+              />
+            </div>
+          )}
+
           <div className="flex items-center justify-center gap-4 mt-2">
             {gameState.prestigePoints > 0 && (
               <Badge className="bg-accent text-accent-foreground">
@@ -690,6 +1071,19 @@ function App() {
 
             <Card className="p-6 bg-card/50 border-border">
               <div className="flex items-center gap-2 mb-4">
+                <Calendar size={24} weight="fill" className="text-accent" />
+                <h2 className="text-2xl font-bold">Daily Challenge</h2>
+              </div>
+              <DailyChallengeCard
+                dailyChallenge={dailyChallenge}
+                challengeProgress={gameState.dailyChallengeProgress || 0}
+                challengeCompleted={gameState.dailyChallengeCompleted || false}
+                onClick={() => setShowDailyChallenge(true)}
+              />
+            </Card>
+
+            <Card className="p-6 bg-card/50 border-border">
+              <div className="flex items-center gap-2 mb-4">
                 <Sparkle size={24} weight="fill" className="text-primary" />
                 <h2 className="text-2xl font-bold">Slot Machines</h2>
               </div>
@@ -775,6 +1169,24 @@ function App() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      <Achievements
+        open={showAchievements}
+        onOpenChange={setShowAchievements}
+        unlockedAchievements={gameState.unlockedAchievements || []}
+        achievementProgress={gameState.achievementProgress || {}}
+        onClaim={claimAchievement}
+      />
+
+      <DailyChallenges
+        open={showDailyChallenge}
+        onOpenChange={setShowDailyChallenge}
+        dailyChallenge={dailyChallenge}
+        challengeProgress={gameState.dailyChallengeProgress || 0}
+        challengeCompleted={gameState.dailyChallengeCompleted || false}
+        onClaim={claimDailyChallenge}
+        timeUntilReset={getTimeUntilReset()}
+      />
     </div>
   )
 }

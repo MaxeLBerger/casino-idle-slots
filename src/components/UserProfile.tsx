@@ -1,0 +1,154 @@
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, SignOut, Trophy, Sparkle, Coins, Lightning } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
+interface UserProfileProps {
+  isLoggedIn: boolean
+  username: string
+  avatarUrl?: string
+  level: number
+  experience: number
+  experienceToNextLevel: number
+  coins: number
+  prestigePoints: number
+  totalSpins: number
+  onLogin: () => void
+  onLogout: () => void
+}
+
+export function UserProfile({
+  isLoggedIn,
+  username,
+  avatarUrl,
+  level,
+  experience,
+  experienceToNextLevel,
+  coins,
+  prestigePoints,
+  totalSpins,
+  onLogin,
+  onLogout
+}: UserProfileProps) {
+  const [showProfile, setShowProfile] = useState(false)
+
+  if (!isLoggedIn) {
+    return (
+      <Button
+        onClick={onLogin}
+        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+      >
+        <User size={20} weight="fill" className="mr-2" />
+        Login with GitHub
+      </Button>
+    )
+  }
+
+  const progressPercent = (experience / experienceToNextLevel) * 100
+
+  return (
+    <>
+      <Button
+        onClick={() => setShowProfile(true)}
+        variant="ghost"
+        className="flex items-center gap-2 hover:bg-accent/20"
+      >
+        <Avatar className="w-8 h-8">
+          <AvatarImage src={avatarUrl} alt={username} />
+          <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="hidden md:flex flex-col items-start">
+          <span className="text-sm font-semibold">{username}</span>
+          <span className="text-xs text-muted-foreground">Level {level}</span>
+        </div>
+      </Button>
+
+      <Dialog open={showProfile} onOpenChange={setShowProfile}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <User size={28} weight="fill" className="text-primary" />
+              Player Profile
+            </DialogTitle>
+            <DialogDescription>Your casino stats and progress</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="w-20 h-20 border-4 border-primary">
+                <AvatarImage src={avatarUrl} alt={username} />
+                <AvatarFallback className="text-2xl">{username[0]?.toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold orbitron">{username}</h3>
+                <Badge className="mt-1 bg-primary text-primary-foreground">
+                  <Sparkle size={14} weight="fill" className="mr-1" />
+                  Level {level}
+                </Badge>
+              </div>
+            </div>
+
+            <Card className="p-4 bg-muted/50">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-semibold">Experience</span>
+                <span className="text-xs text-muted-foreground">
+                  {experience} / {experienceToNextLevel}
+                </span>
+              </div>
+              <Progress value={progressPercent} className="h-3" />
+              <p className="text-xs text-muted-foreground mt-2">
+                {experienceToNextLevel - experience} XP to Level {level + 1}
+              </p>
+            </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4 bg-card border-primary/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Coins size={20} weight="fill" className="text-primary" />
+                  <span className="text-sm font-semibold">Coins</span>
+                </div>
+                <div className="text-2xl font-bold orbitron tabular-nums">
+                  {coins.toLocaleString()}
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-card border-accent/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy size={20} weight="fill" className="text-accent" />
+                  <span className="text-sm font-semibold">Prestige</span>
+                </div>
+                <div className="text-2xl font-bold orbitron tabular-nums">
+                  {prestigePoints}
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-card border-secondary/20 col-span-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightning size={20} weight="fill" className="text-secondary" />
+                  <span className="text-sm font-semibold">Total Spins</span>
+                </div>
+                <div className="text-2xl font-bold orbitron tabular-nums">
+                  {totalSpins.toLocaleString()}
+                </div>
+              </Card>
+            </div>
+
+            <Button
+              onClick={onLogout}
+              variant="destructive"
+              className="w-full"
+            >
+              <SignOut size={20} className="mr-2" />
+              Logout
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
