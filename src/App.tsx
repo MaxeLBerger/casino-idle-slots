@@ -999,11 +999,8 @@ function App() {
     <div className="min-h-screen bg-background p-4 md:p-8">
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
-      <AchievementNotification 
+      <AchievementNotification achievement={achievementNotification} />
       
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <motion.div
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <motion.div
