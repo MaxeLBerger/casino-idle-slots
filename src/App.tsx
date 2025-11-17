@@ -133,8 +133,7 @@ function App() {
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [topRank, setTopRank] = useState<number | null>(null)
-  const [lastSpinProfit, setLastSpinProfit] = useState<number | null>(null)
-  const [showProfitLabel, setShowProfitLabel] = useState(false)
+  const [lastSpinWin, setLastSpinWin] = useState<number | null>(null)
   const [coinChange, setCoinChange] = useState<{amount: number, isPositive: boolean} | null>(null)
   const prevCoinsRef = useRef<number>(STARTING_COINS)
 
@@ -627,9 +626,7 @@ function App() {
     }
 
     const profit = winAmount - SPIN_COST
-    setLastSpinProfit(profit)
-    setShowProfitLabel(true)
-    setTimeout(() => setShowProfitLabel(false), 3000)
+    setLastSpinWin(winAmount)
 
     if (hasWin) {
       createCoinParticles(winAmount)
@@ -999,7 +996,7 @@ function App() {
     <div className="min-h-screen bg-background p-4 md:p-8">
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
-      <AchievementNotification achievement={achievementNotification} />
+      <AchievementNotification achievement={achievementNotification} onClose={() => setAchievementNotification(null)} />
       
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
@@ -1124,29 +1121,20 @@ function App() {
           </motion.div>
           
           <AnimatePresence>
-            {showProfitLabel && lastSpinProfit !== null && (
+            {lastSpinWin !== null && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.5, y: -20 }}
                 transition={{ type: "spring", duration: 0.6 }}
                 className="mb-4"
               >
                 <Badge 
-                  className={`text-xl md:text-2xl px-6 py-3 font-black orbitron shadow-2xl ${
-                    lastSpinProfit > 0 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 shadow-green-500/50' 
-                      : 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-400 shadow-red-500/50'
-                  }`}
+                  className="text-xl md:text-2xl px-6 py-3 font-black orbitron shadow-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 shadow-green-500/50"
                   style={{
-                    filter: lastSpinProfit > 0 
-                      ? 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))' 
-                      : 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.8))'
+                    filter: 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))'
                   }}
                 >
-                  {lastSpinProfit > 0 ? '🎉 +' : '💸 '}
-                  {lastSpinProfit.toLocaleString()}
-                  {lastSpinProfit > 0 ? ' PROFIT!' : ' LOSS'}
+                  🎉 WIN {lastSpinWin.toLocaleString()} COINS!
                 </Badge>
               </motion.div>
             )}
