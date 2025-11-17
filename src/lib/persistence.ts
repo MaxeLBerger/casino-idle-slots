@@ -8,16 +8,40 @@ export interface UserInfo {
   isOwner: boolean
 }
 
+let userCache: UserInfo | null | undefined = undefined
+let userPromise: Promise<UserInfo | null> | null = null
+
 export async function getCurrentUser(): Promise<UserInfo | null> {
-  try {
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1000))
-    const userPromise = window.spark.user()
-    const user = await Promise.race([userPromise, timeoutPromise])
-    return user || null
-  } catch (error) {
-    console.error('[Persistence] Error getting user:', error)
-    return null
+  if (userCache !== undefined) {
+    return userCache
   }
+  
+  if (userPromise) {
+    return userPromise
+  }
+  
+  userPromise = (async () => {
+    try {
+      if (!window.spark || !window.spark.user) {
+        console.warn('[Persistence] Spark user API not available')
+        userCache = null
+        return null
+      }
+      
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+      const user = await Promise.race([window.spark.user(), timeoutPromise])
+      userCache = user || null
+      return userCache
+    } catch (error) {
+      console.error('[Persistence] Error getting user:', error)
+      userCache = null
+      return null
+    } finally {
+      userPromise = null
+    }
+  })()
+  
+  return userPromise
 }
 
 export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
@@ -27,11 +51,14 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
   const isInitializedRef = useRef(false)
   const userIdRef = useRef<string | null>(null)
   const defaultValueRef = useRef(defaultValue)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     let mounted = true
     
     const initialize = async () => {
+      if (isInitializedRef.current) return
+      
       try {
         const user = await getCurrentUser()
         if (!mounted) return
@@ -41,27 +68,32 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
         userIdRef.current = userIdStr
         
         const storageKey = userIdStr ? `${baseKey}-user-${userIdStr}` : `${baseKey}-local`
-        console.log(`[Persistence] Loading from key: ${storageKey}`)
         
         try {
           const storedValue = await window.spark.kv.get<T>(storageKey)
           
           if (storedValue !== undefined && storedValue !== null) {
-            console.log(`[Persistence] Loaded data from ${storageKey}:`, storedValue)
-            setValue(storedValue)
+            if (mounted) {
+              setValue(storedValue)
+            }
           } else {
-            console.log(`[Persistence] No data found at ${storageKey}, using default`)
-            setValue(defaultValueRef.current)
+            if (mounted) {
+              setValue(defaultValueRef.current)
+            }
           }
         } catch (kvError) {
           console.error('[Persistence] Error loading from KV:', kvError)
-          setValue(defaultValueRef.current)
+          if (mounted) {
+            setValue(defaultValueRef.current)
+          }
         }
         
         isInitializedRef.current = true
       } catch (error) {
         console.error('[Persistence] Error during initialization:', error)
-        setValue(defaultValueRef.current)
+        if (mounted) {
+          setValue(defaultValueRef.current)
+        }
         isInitializedRef.current = true
       } finally {
         if (mounted) {
@@ -74,6 +106,9 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
 
     return () => {
       mounted = false
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
     }
   }, [baseKey])
 
@@ -84,11 +119,16 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
         : newValue
       
       if (isInitializedRef.current) {
-        const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
-        console.log(`[Persistence] Saving to ${storageKey}:`, valueToSet)
-        window.spark.kv.set(storageKey, valueToSet).catch(err => {
-          console.error('Failed to persist game state:', err)
-        })
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current)
+        }
+        
+        saveTimeoutRef.current = setTimeout(() => {
+          const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
+          window.spark.kv.set(storageKey, valueToSet).catch(err => {
+            console.error('[Persistence] Failed to persist:', err)
+          })
+        }, 500)
       }
       
       return valueToSet

@@ -140,15 +140,19 @@ function App() {
   const getTodayString = () => new Date().toISOString().split('T')[0]
   const dailyChallenge = useMemo(() => generateDailyChallenge(getTodayString()), [])
 
+  const hasInitializedUser = useRef(false)
+
   useEffect(() => {
     let mounted = true
 
     const initializeUser = async () => {
+      if (hasInitializedUser.current) return
+      hasInitializedUser.current = true
+      
       try {
         const user = await getCurrentUser()
         if (mounted) {
           setCurrentUser(user)
-          console.log('[App] User initialized:', user?.login || 'guest')
         }
       } catch (error) {
         console.error('[App] Error initializing user:', error)
@@ -168,22 +172,16 @@ function App() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isLoadingGameState) {
-        console.warn('[App] Loading timeout reached, forcing app to load')
         setLoadingTimeout(true)
       }
-    }, 2000)
+    }, 3000)
 
     return () => clearTimeout(timeout)
   }, [isLoadingGameState])
 
   useEffect(() => {
     if (!isLoadingGameState && gameState) {
-      console.log('Game state loaded:', {
-        coins: gameState.coins,
-        level: gameState.level,
-        userId: gameStateUserId,
-        currentUser: currentUser?.login
-      })
+      // Game state loaded successfully
     }
   }, [isLoadingGameState, gameState, gameStateUserId, currentUser])
 
@@ -763,51 +761,17 @@ function App() {
   }
 
   const handleLogin = async () => {
-    try {
-      setIsSyncing(true)
-      const user = await window.spark.user()
-      if (!user) {
-        toast.error('Login failed. Please try again.')
-        setIsSyncing(false)
-        return
-      }
-      
-      const localKey = 'casino-game-state-local'
-      const userKey = `casino-game-state-user-${user.id}`
-      
-      const localData = await window.spark.kv.get(localKey)
-      const userData = await window.spark.kv.get(userKey)
-      
-      if (localData && !userData) {
-        await window.spark.kv.set(userKey, localData)
-        toast.success(`Welcome back, ${user.login}! Your progress has been restored.`)
-        setShowDataMigrationDialog(true)
-      } else if (userData) {
-        toast.success(`Welcome back, ${user.login}!`)
-      } else {
-        toast.success(`Welcome, ${user.login}! Your progress is now saved to your GitHub account.`)
-      }
-      
-      setCurrentUser(user)
-      setIsSyncing(false)
-      
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
-    } catch (error) {
-      console.error('Login error:', error)
-      toast.error('Login failed. Please try again.')
-      setIsSyncing(false)
-    }
+    toast.info('Reloading to authenticate...')
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
   }
 
   const handleLogout = () => {
-    setCurrentUser(null)
-    toast.success('Logged out successfully. Your progress is saved!')
-    
+    toast.info('Logging out...')
     setTimeout(() => {
       window.location.reload()
-    }, 1000)
+    }, 500)
   }
 
   const claimDailyChallenge = () => {
