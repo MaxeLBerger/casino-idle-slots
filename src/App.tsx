@@ -10,6 +10,16 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { Confetti, WinBanner } from '@/components/Confetti'
+import { 
+  playSpinSound, 
+  playReelStopSound, 
+  playSmallWinSound, 
+  playBigWinSound, 
+  playMegaWinSound, 
+  playUpgradeSound,
+  playPrestigeSound 
+} from '@/lib/sounds'
 
 const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔'],
@@ -68,6 +78,11 @@ function App() {
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState(0)
   const coinParticleContainer = useRef<HTMLDivElement>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega'>('medium')
+  const [showWinBanner, setShowWinBanner] = useState(false)
+  const [winBannerAmount, setWinBannerAmount] = useState(0)
+  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega'>('small')
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -155,6 +170,8 @@ function App() {
     const machine = SLOT_MACHINE_CONFIGS[gameState.currentSlotMachine]
     setIsSpinning(true)
     
+    playSpinSound()
+    
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
       return {
@@ -187,6 +204,7 @@ function App() {
     for (let i = 0; i < machine.reels; i++) {
       await new Promise(resolve => setTimeout(resolve, reelStopTimes[i] - (i > 0 ? reelStopTimes[i - 1] : 0)))
       stoppedReels[i] = true
+      playReelStopSound()
       setReelStates(prev => 
         prev.map(row => row.map((val, idx) => idx === i ? true : val))
       )
@@ -224,9 +242,51 @@ function App() {
 
     if (hasWin) {
       createCoinParticles(winAmount)
-      toast.success(`🎰 WIN! +${winAmount} coins!`, {
-        duration: 3000,
-      })
+      
+      const spinCost = SPIN_COST
+      if (winAmount >= spinCost * 50) {
+        playMegaWinSound()
+        setConfettiIntensity('mega')
+        setShowConfetti(true)
+        setWinBannerType('mega')
+        setWinBannerAmount(winAmount)
+        setShowWinBanner(true)
+        toast.success(`👑 MEGA WIN! +${winAmount} coins!`, { duration: 4000 })
+        setTimeout(() => {
+          setShowConfetti(false)
+          setShowWinBanner(false)
+        }, 3000)
+      } else if (winAmount >= spinCost * 20) {
+        playBigWinSound()
+        setConfettiIntensity('high')
+        setShowConfetti(true)
+        setWinBannerType('big')
+        setWinBannerAmount(winAmount)
+        setShowWinBanner(true)
+        toast.success(`💎 BIG WIN! +${winAmount} coins!`, { duration: 3500 })
+        setTimeout(() => {
+          setShowConfetti(false)
+          setShowWinBanner(false)
+        }, 2500)
+      } else if (winAmount >= spinCost * 5) {
+        playSmallWinSound()
+        setConfettiIntensity('medium')
+        setShowConfetti(true)
+        setWinBannerType('small')
+        setWinBannerAmount(winAmount)
+        setShowWinBanner(true)
+        toast.success(`🎰 WIN! +${winAmount} coins!`, { duration: 3000 })
+        setTimeout(() => {
+          setShowConfetti(false)
+          setShowWinBanner(false)
+        }, 2000)
+      } else {
+        playSmallWinSound()
+        setConfettiIntensity('low')
+        setShowConfetti(true)
+        toast.success(`🎰 WIN! +${winAmount} coins!`, { duration: 2500 })
+        setTimeout(() => setShowConfetti(false), 1500)
+      }
     }
 
     setGameState(prev => {
@@ -266,6 +326,7 @@ function App() {
       }
     })
 
+    playUpgradeSound()
     toast.success('Spin Power upgraded!')
   }
 
@@ -288,6 +349,7 @@ function App() {
       }
     })
 
+    playUpgradeSound()
     toast.success('Idle Income upgraded!')
   }
 
@@ -314,6 +376,7 @@ function App() {
       }
     })
 
+    playUpgradeSound()
     toast.success(`${machine.name} Slot Machine unlocked!`)
   }
 
@@ -368,7 +431,11 @@ function App() {
     setReels(newReels)
     setReelStates(Array(machine.rows).fill(0).map(() => Array(machine.reels).fill(false)))
 
+    playPrestigeSound()
+    setConfettiIntensity('mega')
+    setShowConfetti(true)
     toast.success('🌟 Prestige! +1 Prestige Point!')
+    setTimeout(() => setShowConfetti(false), 4000)
   }
 
   if (!gameState) return null
@@ -379,6 +446,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:p-6">
+      <Confetti active={showConfetti} intensity={confettiIntensity} />
+      <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
+      
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

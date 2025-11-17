@@ -13,11 +13,11 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 ## Essential Features
 
 ### Manual Slot Spinning
-- **Functionality**: Players click a spin button to trigger the slot machine, which randomly generates three symbols and awards coins based on matching patterns
-- **Purpose**: Provides active engagement and immediate gratification through visual feedback
+- **Functionality**: Players click a spin button to trigger the slot machine, which randomly generates symbols and awards coins based on matching patterns. Multiple slot machines with different configurations can be unlocked.
+- **Purpose**: Provides active engagement and immediate gratification through visual and audio feedback
 - **Trigger**: Click on "SPIN" button (costs coins per spin)
-- **Progression**: Click spin button → Symbols animate/blur → Symbols land one by one → Win calculated → Coins added with animation → Stats updated
-- **Success criteria**: Symbols display randomly, matching symbols award appropriate multipliers, coin balance updates correctly
+- **Progression**: Click spin button → Spin sound plays → Symbols animate → Symbols land one by one with stop sounds → Win calculated → Sound effects play based on win size → Coins added with animation → Confetti and win banner for big wins → Stats updated
+- **Success criteria**: Symbols display randomly, matching symbols award appropriate multipliers, coin balance updates correctly, sound effects and animations trigger appropriately
 
 ### Idle Coin Generation
 - **Functionality**: Automatically generates coins over time even when the player is away, based on upgrade level
@@ -27,11 +27,25 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Success criteria**: Coins generate accurately based on time elapsed, offline earnings are calculated and displayed on return
 
 ### Upgrade System
-- **Functionality**: Players spend coins to purchase upgrades that increase spin win multipliers and passive income generation
+- **Functionality**: Players spend coins to purchase upgrades that increase spin win multipliers and passive income generation. Sound effects play on successful upgrades.
 - **Purpose**: Provides long-term progression goals and strategic depth
 - **Trigger**: Click upgrade buttons in the upgrades panel
-- **Progression**: View upgrade cost and benefit → Spend coins → Upgrade level increases → Stats improve → New upgrade tier unlocked
-- **Success criteria**: Upgrades persist across sessions, costs scale appropriately, benefits apply correctly to gameplay
+- **Progression**: View upgrade cost and benefit → Spend coins → Upgrade sound plays → Upgrade level increases → Stats improve → New upgrade tier unlocked
+- **Success criteria**: Upgrades persist across sessions, costs scale appropriately, benefits apply correctly to gameplay, audio feedback confirms purchases
+
+### Sound Effects System
+- **Functionality**: Web Audio API-generated sound effects play during key game events including spins, reel stops, wins, upgrades, and prestige
+- **Purpose**: Enhances feedback and creates an immersive casino atmosphere without external audio files
+- **Trigger**: Automatically triggered by game events
+- **Progression**: Game event occurs → Appropriate sound synthesized and played → User receives immediate audio feedback
+- **Success criteria**: Sounds are pleasant, non-intrusive, contextually appropriate, and work across all browsers
+
+### Win Celebration System
+- **Functionality**: Tiered celebration effects based on win size including confetti particles, full-screen win banners, and escalating sound effects
+- **Purpose**: Makes wins feel rewarding and creates memorable moments
+- **Trigger**: Triggered automatically when a spin results in a win
+- **Progression**: Win detected → Win tier calculated (small/big/mega) → Confetti particles spawn → Win banner displays with animation → Sound plays → Effects dismiss after duration
+- **Success criteria**: Small wins (5x+ bet) show confetti and simple sound, big wins (20x+ bet) show more confetti and banner, mega wins (50x+ bet) show maximum effects
 
 ### Statistics Dashboard
 - **Functionality**: Tracks and displays key metrics like total spins, biggest win, total earnings, and current income rate
@@ -41,11 +55,11 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Success criteria**: All stats are accurate, persistent, and update immediately
 
 ### Prestige/Reset System
-- **Functionality**: Players can reset progress for permanent multiplier bonuses
+- **Functionality**: Players can reset progress for permanent prestige points that unlock new slot machines with different configurations (more rows, reels, and symbols)
 - **Purpose**: Extends endgame and adds strategic depth for long-term players
-- **Trigger**: Unlock after reaching certain thresholds, activate via button
-- **Progression**: Reach milestone → Prestige option appears → Confirm reset → Keep multiplier → Start fresh with bonus
-- **Success criteria**: Prestige multipliers persist, game state resets appropriately, progression feels rewarding
+- **Trigger**: Unlock after 100 total spins, activate via button
+- **Progression**: Reach 100 spins → Prestige option appears → Confirm reset → Epic sound and confetti play → Keep prestige points → Unlock new slot machines → Start fresh with new machines available
+- **Success criteria**: Prestige points persist, game state resets appropriately, new slot machines unlock at correct thresholds, celebration effects play
 
 ## Edge Case Handling
 
@@ -93,12 +107,20 @@ Typography should feel bold, modern, and energetic with strong visual hierarchy 
 
 Animations should be energetic and celebratory, balancing frequent micro-interactions with explosive moments of delight during big wins - motion reinforces the excitement of gambling and rewards.
 
-- **Purposeful Meaning**: Slot reel spins create anticipation, coin counter animations emphasize earnings, particle effects celebrate wins, and smooth transitions maintain energy
+- **Purposeful Meaning**: 
+  - Slot reel spins create anticipation with sequential stopping animations
+  - Coin counter animations emphasize earnings with spring physics
+  - Confetti particle effects celebrate wins with varying intensity
+  - Win banners with scale and shake animations for big wins
+  - Sound effects synchronized with visual feedback
+  - Smooth transitions maintain energy throughout
+  
 - **Hierarchy of Movement**:
-  1. Slot machine reels (primary focus) - Fast blur animation with sequential reveal
-  2. Coin animations - Numbers count up with spring physics, particle bursts on big wins
-  3. Upgrade purchases - Satisfying scale and glow effects on button press
-  4. Background ambient effects - Subtle pulsing glows and floating particles for atmosphere
+  1. Slot machine reels (primary focus) - Fast animation with sequential reveal and stop sounds
+  2. Win celebrations - Full-screen confetti and animated banners for big wins
+  3. Coin animations - Numbers count up with spring physics, particle bursts on wins
+  4. Upgrade purchases - Satisfying scale effects and sound on button press
+  5. Background ambient effects - Subtle pulsing glows for enhanced reels
 
 ## Component Selection
 
@@ -113,10 +135,12 @@ Animations should be energetic and celebratory, balancing frequent micro-interac
   - Sonner Toast: Quick feedback for purchases, insufficient funds, achievements
 
 - **Customizations**:
-  - Slot Machine Component: Custom 3-reel display with symbol emojis (🍒🍋🔔💎⭐🍀🎰) and blur animation
+  - Slot Machine Component: Custom multi-reel display with symbol emojis (🍒🍋🔔💎⭐🍀🎰💰🎁👑🔥) and smooth animation
   - Coin Counter: Animated number display with particle effects using framer-motion
   - Upgrade Card: Progress bar showing current level, cost, and benefit with glow on hover
   - Stat Display: Large numbers with labels in grid layout
+  - Confetti System: Dynamic particle effects with varying intensity (low/medium/high/mega)
+  - Win Banner: Full-screen animated banner showing win amount and type with emoji and gradients
 
 - **States**:
   - Spin Button: Default (glowing gold), Hover (lifted with stronger glow), Active (pressed down), Disabled (grayed out with locked icon), Spinning (animated with progress)
