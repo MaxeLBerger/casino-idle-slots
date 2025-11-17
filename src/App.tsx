@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock, Calendar, Medal } from '@phosphor-icons/react'
+import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock, Calendar, Medal, CloudArrowUp } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,6 +24,7 @@ import {
   playPrestigeSound 
 } from '@/lib/sounds'
 import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
+import { useUserLinkedKV, getCurrentUser, migrateLocalDataToUser, type UserInfo } from '@/lib/persistence'
 
 const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔'],
@@ -103,8 +104,13 @@ const DEFAULT_STATE: GameState = {
 }
 
 function App() {
-  const [gameState, setGameState] = useKV<GameState>('casino-game-state', DEFAULT_STATE)
-  const [userProfile, setUserProfile] = useKV<{ username: string; avatarUrl: string; isLoggedIn: boolean } | null>('casino-user-profile', null)
+  const [gameState, setGameState, , isLoadingGameState, gameStateUserId] = useUserLinkedKV<GameState>('casino-game-state', DEFAULT_STATE)
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
+  const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
+  const [hasMigratedData, setHasMigratedData] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState<number>(Date.now())
+  const [isSyncing, setIsSyncing] = useState(false)
   const [isSpinning, setIsSpinning] = useState(false)
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState(0)
@@ -133,6 +139,51 @@ function App() {
 
   const getTodayString = () => new Date().toISOString().split('T')[0]
   const dailyChallenge = useMemo(() => generateDailyChallenge(getTodayString()), [])
+
+  useEffect(() => {
+    let mounted = true
+
+    const initializeUser = async () => {
+      const user = await getCurrentUser()
+      if (mounted) {
+        setCurrentUser(user)
+        setIsInitializing(false)
+      }
+    }
+
+    initializeUser()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isInitializing || isLoadingGameState) return
+
+    const checkDataMigration = async () => {
+      if (currentUser && !hasMigratedData && gameStateUserId) {
+        const migrated = await migrateLocalDataToUser('casino-game-state', currentUser.id.toString())
+        if (migrated) {
+          setShowDataMigrationDialog(true)
+          setHasMigratedData(true)
+          toast.success('Your progress has been linked to your GitHub account!')
+        }
+      }
+    }
+
+    checkDataMigration()
+  }, [currentUser, isInitializing, isLoadingGameState, hasMigratedData, gameStateUserId])
+
+  useEffect(() => {
+    const syncInterval = setInterval(() => {
+      if (currentUser && gameState) {
+        setLastSyncTime(Date.now())
+      }
+    }, 30000)
+
+    return () => clearInterval(syncInterval)
+  }, [currentUser, gameState])
   
   const getTimeUntilReset = () => {
     const now = new Date()
@@ -684,25 +735,43 @@ function App() {
 
   const handleLogin = async () => {
     try {
+      setIsSyncing(true)
       const user = await window.spark.user()
       if (!user) {
         toast.error('Login failed. Please try again.')
+        setIsSyncing(false)
         return
       }
-      setUserProfile({
-        username: user.login,
-        avatarUrl: user.avatarUrl,
-        isLoggedIn: true
-      })
-      toast.success(`Welcome, ${user.login}!`)
+      
+      setCurrentUser(user)
+      
+      const migrated = await migrateLocalDataToUser('casino-game-state', user.id.toString())
+      if (migrated) {
+        setShowDataMigrationDialog(true)
+        setHasMigratedData(true)
+        toast.success(`Welcome back, ${user.login}! Your progress has been restored.`)
+      } else {
+        toast.success(`Welcome, ${user.login}! Your progress is now saved to your GitHub account.`)
+      }
+      
+      setIsSyncing(false)
+      
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
     } catch (error) {
       toast.error('Login failed. Please try again.')
+      setIsSyncing(false)
     }
   }
 
   const handleLogout = () => {
-    setUserProfile(null)
-    toast.success('Logged out successfully')
+    setCurrentUser(null)
+    toast.success('Logged out successfully. Your progress is saved!')
+    
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
   }
 
   const claimDailyChallenge = () => {
@@ -748,6 +817,26 @@ function App() {
     }
     
     unlockAchievement(achievementId)
+  }
+
+  if (isInitializing || isLoadingGameState) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="inline-block mb-4"
+          >
+            <Sparkle size={48} weight="fill" className="text-primary" />
+          </motion.div>
+          <h2 className="text-2xl font-bold orbitron mb-2">Loading Casino...</h2>
+          <p className="text-muted-foreground">
+            {currentUser ? `Loading your progress, ${currentUser.login}...` : 'Initializing game...'}
+          </p>
+        </Card>
+      </div>
+    )
   }
 
   if (!gameState) return null
@@ -803,9 +892,9 @@ function App() {
               <Trophy size={20} weight="fill" />
             </Button>
             <UserProfile
-              isLoggedIn={userProfile?.isLoggedIn || false}
-              username={userProfile?.username || ''}
-              avatarUrl={userProfile?.avatarUrl}
+              isLoggedIn={currentUser !== null}
+              username={currentUser?.login || ''}
+              avatarUrl={currentUser?.avatarUrl}
               level={gameState.level || 1}
               experience={gameState.experience || 0}
               experienceToNextLevel={calculateLevelProgress(gameState.level || 1)}
@@ -833,9 +922,21 @@ function App() {
             >
               {gameState.coins.toLocaleString()}
             </motion.span>
+            {currentUser && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="ml-2"
+              >
+                <Badge variant="outline" className="text-xs bg-accent/20 border-accent">
+                  <CloudArrowUp size={14} weight="fill" className="mr-1" />
+                  Synced
+                </Badge>
+              </motion.div>
+            )}
           </div>
           
-          {userProfile?.isLoggedIn && (
+          {currentUser && (
             <div className="max-w-md mx-auto mt-3">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span className="font-semibold">Level {gameState.level || 1}</span>
@@ -1166,6 +1267,38 @@ function App() {
           </DialogHeader>
           <Button onClick={() => setShowOfflineEarnings(false)} className="w-full">
             Collect Earnings
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDataMigrationDialog} onOpenChange={setShowDataMigrationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <CloudArrowUp size={32} weight="fill" className="text-accent" />
+              Progress Linked to GitHub!
+            </DialogTitle>
+            <DialogDescription className="text-center py-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', duration: 0.5 }}
+                className="mb-4"
+              >
+                <div className="text-6xl mb-4">✅</div>
+              </motion.div>
+              <p className="text-lg mb-3">
+                Your local progress has been successfully linked to your GitHub account!
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Your coins, level, achievements, and all progress are now saved to the cloud. 
+                You can access your game from any device by logging in with GitHub.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setShowDataMigrationDialog(false)} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Sparkle size={20} weight="fill" className="mr-2" />
+            Continue Playing
           </Button>
         </DialogContent>
       </Dialog>

@@ -12,6 +12,13 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 
 ## Essential Features
 
+### GitHub Account-Linked Progress Saving
+- **Functionality**: Player progress (coins, level, achievements, all game state) is automatically saved to their GitHub account when logged in, enabling cross-device play and secure cloud storage
+- **Purpose**: Protects player investment by ensuring progress is never lost and accessible from any device
+- **Trigger**: Automatic sync on login and continuous background saving during gameplay
+- **Progression**: Player clicks "Login with GitHub" → GitHub authentication → Local data migrated to cloud → "Synced" badge appears → All progress automatically saved → Player can log in from any device to continue
+- **Success criteria**: Data persists across sessions and devices, local progress migrates to account on first login, sync status visible to player, no progress lost on logout
+
 ### Manual Slot Spinning
 - **Functionality**: Players click a spin button to trigger the slot machine, which randomly generates symbols and awards coins based on matching patterns. Multiple slot machines with different configurations can be unlocked.
 - **Purpose**: Provides active engagement and immediate gratification through visual and audio feedback
@@ -69,6 +76,10 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **First Time Player**: Start with enough coins for several spins to let players learn mechanics
 - **Negative Balance Protection**: Never allow coin balance to go negative through validation
 - **Save State Corruption**: Implement fallback to default state if saved data is invalid
+- **Local to Cloud Migration**: When logging in for the first time, local progress automatically migrates to GitHub account with confirmation dialog
+- **Multiple Device Sync**: Progress syncs automatically when logging in from different devices, always using the cloud version as source of truth
+- **Logout Protection**: Progress is saved before logout, with confirmation that data is safe in the cloud
+- **Login Failure**: Graceful error handling with retry option if GitHub authentication fails
 
 ## Design Direction
 
@@ -128,11 +139,12 @@ Animations should be energetic and celebratory, balancing frequent micro-interac
   - Card: Central slot machine display and upgrade panels with gradient backgrounds and glowing borders
   - Button: Large, prominent spin button with hover lift and active press states; upgrade buttons with disabled states
   - Progress: Visual bars showing upgrade levels and prestige progress
-  - Badge: Display multipliers, level indicators, and status effects
+  - Badge: Display multipliers, level indicators, status effects, and sync status
   - Separator: Divide sections between stats, slots, and upgrades
   - Tabs: Organize upgrades into categories (spin power, idle income, prestige)
-  - Dialog: Display offline earnings, prestige confirmation, and game instructions
-  - Sonner Toast: Quick feedback for purchases, insufficient funds, achievements
+  - Dialog: Display offline earnings, prestige confirmation, data migration success, and game instructions
+  - Sonner Toast: Quick feedback for purchases, insufficient funds, achievements, login/logout confirmations
+  - Avatar: Display GitHub profile picture in user profile button
 
 - **Customizations**:
   - Slot Machine Component: Custom multi-reel display with symbol emojis (🍒🍋🔔💎⭐🍀🎰💰🎁👑🔥) and smooth animation
@@ -155,6 +167,8 @@ Animations should be energetic and celebratory, balancing frequent micro-interac
   - Gauge: Statistics and metrics
   - Sparkle: Big wins and jackpots
   - Lock/LockOpen: Locked vs unlocked upgrades
+  - CloudArrowUp: Cloud sync status and data migration
+  - User/SignOut: Login and logout actions
 
 - **Spacing**:
   - Page padding: p-6 (24px)
