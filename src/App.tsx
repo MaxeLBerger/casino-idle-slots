@@ -25,7 +25,7 @@ import {
   playJackpotSound
 } from '@/lib/sounds'
 import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
-import { useSupabaseGameState, getCurrentUser, type UserInfo } from '@/lib/persistence'
+import { useSupabaseGameState, getCurrentUser, type UserInfo, migrateLocalDataToUser } from '@/lib/persistence'
 import { signInWithGitHub, signOut, onAuthStateChange } from '@/lib/auth'
 import { submitScore, getPlayerRank } from '@/lib/leaderboard'
 
@@ -132,6 +132,8 @@ function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [topRank, setTopRank] = useState<number | null>(null)
   const [lastSpinWin, setLastSpinWin] = useState<number | null>(null)
+  const [hasMigratedData, setHasMigratedData] = useState(false)
+  const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
