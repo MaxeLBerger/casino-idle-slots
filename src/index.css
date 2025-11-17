@@ -172,3 +172,16 @@ h1, h2, h3, .orbitron {
   background-size: 200% 200%;
   animation: ultra-shimmer 2s ease-in-out infinite;
 }
+
+@keyframes coin-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+  }
+}
+
+.coin-glow {
+  animation: coin-glow 2s ease-in-out infinite;
+}

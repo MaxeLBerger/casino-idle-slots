@@ -133,6 +133,10 @@ function App() {
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [topRank, setTopRank] = useState<number | null>(null)
+  const [lastSpinProfit, setLastSpinProfit] = useState<number | null>(null)
+  const [showProfitLabel, setShowProfitLabel] = useState(false)
+  const [coinChange, setCoinChange] = useState<{amount: number, isPositive: boolean} | null>(null)
+  const prevCoinsRef = useRef<number>(STARTING_COINS)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -194,6 +198,18 @@ function App() {
       // Game state loaded successfully
     }
   }, [isLoadingGameState, gameState, gameStateUserId, currentUser])
+
+  useEffect(() => {
+    const currentCoins = gameState?.coins || 0
+    if (currentCoins !== prevCoinsRef.current) {
+      const change = currentCoins - prevCoinsRef.current
+      if (Math.abs(change) >= 1 && prevCoinsRef.current > 0) {
+        setCoinChange({ amount: Math.abs(change), isPositive: change > 0 })
+        setTimeout(() => setCoinChange(null), 2000)
+      }
+      prevCoinsRef.current = currentCoins
+    }
+  }, [gameState?.coins])
 
   useEffect(() => {
     if (isLoadingGameState) return
@@ -609,6 +625,11 @@ function App() {
         }
       }
     }
+
+    const profit = winAmount - SPIN_COST
+    setLastSpinProfit(profit)
+    setShowProfitLabel(true)
+    setTimeout(() => setShowProfitLabel(false), 3000)
 
     if (hasWin) {
       createCoinParticles(winAmount)
@@ -1047,46 +1068,160 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <div className="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold orbitron">
-            <Coins size={32} weight="fill" className="text-primary" />
-            <motion.span
-              key={effectiveGameState.coins}
-              initial={{ scale: 1.2 }}
-              animate={{ scale: 1 }}
-              className="tabular-nums"
-            >
-              {effectiveGameState.coins.toLocaleString()}
-            </motion.span>
-            {currentUser && !isLoadingGameState && (
+          <motion.div 
+            className="relative inline-block mb-4"
+            animate={{ 
+              scale: [1, 1.02, 1],
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-2xl blur-xl opacity-40 animate-pulse" />
+            <Card className="relative bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 border-2 border-primary/50 shadow-2xl shadow-primary/30 px-8 py-6 backdrop-blur-sm overflow-visible">
+              <div className="flex items-center justify-center gap-3 text-4xl md:text-5xl font-black orbitron relative">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 360],
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+                    scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                  }}
+                >
+                  <Coins size={48} weight="fill" className="text-primary drop-shadow-[0_0_12px_rgba(255,215,0,0.8)]" />
+                </motion.div>
+                <motion.span
+                  key={effectiveGameState.coins}
+                  initial={{ scale: 1.3, color: "rgb(255, 215, 0)" }}
+                  animate={{ scale: 1, color: "inherit" }}
+                  transition={{ duration: 0.3 }}
+                  className="tabular-nums bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-2xl"
+                  style={{
+                    textShadow: "0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.3)"
+                  }}
+                >
+                  {effectiveGameState.coins.toLocaleString()}
+                </motion.span>
+                <AnimatePresence>
+                  {coinChange && (
+                    <motion.span
+                      initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, y: -40, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 0.5 }}
+                      className={`absolute right-0 top-0 font-bold text-2xl tabular-nums ${
+                        coinChange.isPositive ? 'text-green-400' : 'text-red-400'
+                      }`}
+                      style={{
+                        textShadow: coinChange.isPositive 
+                          ? "0 0 20px rgba(34, 197, 94, 0.8)" 
+                          : "0 0 20px rgba(239, 68, 68, 0.8)"
+                      }}
+                    >
+                      {coinChange.isPositive ? '+' : '-'}{coinChange.amount.toLocaleString()}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+              {currentUser && !isLoadingGameState && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-2 flex justify-center"
+                >
+                  <Badge variant="outline" className="text-xs bg-accent/30 border-accent shadow-lg shadow-accent/20">
+                    <CloudArrowUp size={14} weight="fill" className="mr-1" />
+                    Cloud Synced
+                  </Badge>
+                </motion.div>
+              )}
+            </Card>
+          </motion.div>
+          
+          <AnimatePresence>
+            {showProfitLabel && lastSpinProfit !== null && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="ml-2"
+                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5, y: -20 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="mb-4"
               >
-                <Badge variant="outline" className="text-xs bg-accent/20 border-accent">
-                  <CloudArrowUp size={14} weight="fill" className="mr-1" />
-                  Synced
+                <Badge 
+                  className={`text-xl md:text-2xl px-6 py-3 font-black orbitron shadow-2xl ${
+                    lastSpinProfit > 0 
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 shadow-green-500/50' 
+                      : 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-400 shadow-red-500/50'
+                  }`}
+                  style={{
+                    filter: lastSpinProfit > 0 
+                      ? 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))' 
+                      : 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.8))'
+                  }}
+                >
+                  {lastSpinProfit > 0 ? '🎉 +' : '💸 '}
+                  {lastSpinProfit.toLocaleString()}
+                  {lastSpinProfit > 0 ? ' PROFIT!' : ' LOSS'}
                 </Badge>
               </motion.div>
             )}
-          </div>
+          </AnimatePresence>
           
           {currentUser && (
-            <div className="max-w-md mx-auto mt-3">
-              <div className="flex items-center justify-between text-sm mb-1">
-                <span className="font-semibold">Level {effectiveGameState.level || 1}</span>
-                <span className="text-muted-foreground text-xs">
-                  {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
-                </span>
+            <motion.div 
+              className="max-w-md mx-auto mb-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 rounded-xl blur-md" />
+                <Card className="relative bg-gradient-to-br from-card/80 to-secondary/30 border border-primary/30 p-4 backdrop-blur-sm shadow-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      >
+                        <Sparkle size={20} weight="fill" className="text-primary" />
+                      </motion.div>
+                      <span className="font-bold text-lg orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        LEVEL {effectiveGameState.level || 1}
+                      </span>
+                    </div>
+                    <span className="text-sm text-muted-foreground font-semibold tabular-nums">
+                      {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
+                    </span>
+                  </div>
+                  <div className="relative h-3 bg-muted/50 rounded-full overflow-hidden border border-primary/20">
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ 
+                        width: `${((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100}%`,
+                        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
+                      }}
+                      transition={{ 
+                        width: { duration: 0.5 },
+                        backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" }
+                      }}
+                      style={{
+                        backgroundSize: "200% 200%",
+                        boxShadow: "0 0 20px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent rounded-full" />
+                  </div>
+                </Card>
               </div>
-              <Progress 
-                value={((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100} 
-                className="h-2"
-              />
-            </div>
+            </motion.div>
           )}
 
-          <div className="flex items-center justify-center gap-4 mt-2">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             {effectiveGameState.prestigePoints > 0 && (
               <Badge className="bg-accent text-accent-foreground">
                 <Trophy size={16} weight="fill" className="mr-1" />
