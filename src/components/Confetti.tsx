@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 
 interface ConfettiProps {
   active: boolean
-  intensity?: 'low' | 'medium' | 'high' | 'mega'
+  intensity?: 'low' | 'medium' | 'high' | 'mega' | 'jackpot'
 }
 
 export function Confetti({ active, intensity = 'medium' }: ConfettiProps) {
@@ -20,6 +20,7 @@ export function Confetti({ active, intensity = 'medium' }: ConfettiProps) {
       intensity === 'low' ? 20 :
       intensity === 'medium' ? 40 :
       intensity === 'high' ? 60 :
+      intensity === 'jackpot' ? 150 :
       100
 
     const particles: HTMLDivElement[] = []
@@ -90,7 +91,7 @@ export function Confetti({ active, intensity = 'medium' }: ConfettiProps) {
 interface WinBannerProps {
   show: boolean
   amount: number
-  type: 'small' | 'big' | 'mega'
+  type: 'small' | 'big' | 'mega' | 'jackpot'
 }
 
 export function WinBanner({ show, amount, type }: WinBannerProps) {
@@ -121,6 +122,14 @@ export function WinBanner({ show, amount, type }: WinBannerProps) {
           textColor: 'text-white',
           scale: 1.4,
           emoji: '👑'
+        }
+      case 'jackpot':
+        return {
+          text: 'JACKPOT!!!',
+          bgColor: 'from-pink-500/90 via-purple-500/90 to-yellow-500/90',
+          textColor: 'text-white',
+          scale: 1.6,
+          emoji: '💰'
         }
     }
   }

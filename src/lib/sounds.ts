@@ -402,3 +402,68 @@ export const playPrestigeSound = () => {
   pad.start(now)
   pad.stop(now + 2)
 }
+
+export const playJackpotSound = () => {
+  const ctx = getAudioContext()
+  if (!ctx) return
+  
+  const now = ctx.currentTime
+  const reverb = createReverb(ctx, 4, 5)
+  
+  const jackpotChord = [
+    130.81, 164.81, 196.00, 261.63,
+    329.63, 392.00, 523.25, 659.25,
+    783.99, 1046.50, 1318.51, 1568.00
+  ]
+  
+  jackpotChord.forEach((freq, i) => {
+    createRichOscillator(ctx, freq, now + i * 0.06, 2, 0.35, reverb)
+    
+    setTimeout(() => {
+      createRichOscillator(ctx, freq * 1.5, now + i * 0.06 + 0.03, 1.5, 0.15, reverb)
+    }, 0)
+  })
+  
+  for (let i = 0; i < 8; i++) {
+    const bass = ctx.createOscillator()
+    const bassGain = ctx.createGain()
+    bass.type = 'sine'
+    bass.frequency.setValueAtTime(32.70, now + i * 0.2)
+    bassGain.gain.setValueAtTime(0.5, now + i * 0.2)
+    bassGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 1.2)
+    bass.connect(bassGain)
+    bassGain.connect(reverb)
+    reverb.connect(ctx.destination)
+    bass.start(now + i * 0.2)
+    bass.stop(now + i * 0.2 + 1.2)
+  }
+  
+  for (let i = 0; i < 50; i++) {
+    const sparkle = ctx.createOscillator()
+    const sparkleGain = ctx.createGain()
+    sparkle.type = 'sine'
+    sparkle.frequency.setValueAtTime(2000 + Math.random() * 4000, now + i * 0.04)
+    sparkleGain.gain.setValueAtTime(0.12, now + i * 0.04)
+    sparkleGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.04 + 0.6)
+    sparkle.connect(sparkleGain)
+    sparkleGain.connect(reverb)
+    reverb.connect(ctx.destination)
+    sparkle.start(now + i * 0.04)
+    sparkle.stop(now + i * 0.04 + 0.6)
+  }
+  
+  for (let i = 0; i < 3; i++) {
+    const sweep = ctx.createOscillator()
+    const sweepGain = ctx.createGain()
+    sweep.type = 'sawtooth'
+    sweep.frequency.setValueAtTime(80, now + i * 0.5)
+    sweep.frequency.exponentialRampToValueAtTime(3000, now + i * 0.5 + 1.5)
+    sweepGain.gain.setValueAtTime(0.2, now + i * 0.5)
+    sweepGain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.5 + 1.5)
+    sweep.connect(sweepGain)
+    sweepGain.connect(reverb)
+    reverb.connect(ctx.destination)
+    sweep.start(now + i * 0.5)
+    sweep.stop(now + i * 0.5 + 1.5)
+  }
+}

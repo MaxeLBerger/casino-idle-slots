@@ -22,7 +22,8 @@ import {
   playBigWinSound, 
   playMegaWinSound, 
   playUpgradeSound,
-  playPrestigeSound 
+  playPrestigeSound,
+  playJackpotSound
 } from '@/lib/sounds'
 import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
 import { useUserLinkedKV, getCurrentUser, migrateLocalDataToUser, type UserInfo } from '@/lib/persistence'
@@ -35,6 +36,9 @@ const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔', '💎', '⭐', '🍀', '🎰', '💰', '🎁'],
   ['🍒', '🍋', '🔔', '💎', '⭐', '🍀', '🎰', '💰', '🎁', '👑', '🔥']
 ]
+
+const JACKPOT_SYMBOLS = ['💰', '💎', '👑', '⭐', '🔥']
+const JACKPOT_CHANCE = 0.03
 
 const SLOT_MACHINE_CONFIGS = [
   { name: 'Classic', rows: 1, reels: 3, prestigeCost: 0, symbols: SYMBOL_SETS[0] },
@@ -118,10 +122,10 @@ function App() {
   const [loadingTimeout, setLoadingTimeout] = useState(false)
   const coinParticleContainer = useRef<HTMLDivElement>(null)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega'>('medium')
+  const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega' | 'jackpot'>('medium')
   const [showWinBanner, setShowWinBanner] = useState(false)
   const [winBannerAmount, setWinBannerAmount] = useState(0)
-  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega'>('small')
+  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot'>('small')
   const [showAchievements, setShowAchievements] = useState(false)
   const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
@@ -492,9 +496,14 @@ function App() {
     const reelStopTimes = Array(machine.reels).fill(0).map((_, i) => 1500 + (i * 500))
     const stoppedReels = Array(machine.reels).fill(false)
     const finalReels = Array(machine.rows).fill(0).map(() =>
-      Array(machine.reels).fill(0).map(() => 
-        machine.symbols[Math.floor(Math.random() * machine.symbols.length)]
-      )
+      Array(machine.reels).fill(0).map(() => {
+        const shouldBeJackpot = Math.random() < JACKPOT_CHANCE
+        if (shouldBeJackpot && JACKPOT_SYMBOLS.some(s => machine.symbols.includes(s))) {
+          const availableJackpots = JACKPOT_SYMBOLS.filter(s => machine.symbols.includes(s))
+          return availableJackpots[Math.floor(Math.random() * availableJackpots.length)]
+        }
+        return machine.symbols[Math.floor(Math.random() * machine.symbols.length)]
+      })
     )
 
     setReelStates(Array(machine.rows).fill(0).map(() => Array(machine.reels).fill(false)))
@@ -527,6 +536,7 @@ function App() {
 
     let winAmount = 0
     let hasWin = false
+    let isJackpot = false
 
     for (let row = 0; row < machine.rows; row++) {
       const rowSymbols = finalReels[row]
@@ -534,17 +544,35 @@ function App() {
       
       if (allMatch) {
         hasWin = true
-        const symbolMultiplier = 
-          rowSymbols[0] === '💎' ? 100 :
-          rowSymbols[0] === '⭐' ? 50 :
-          rowSymbols[0] === '👑' ? 150 :
-          rowSymbols[0] === '🔥' ? 200 :
-          20
+        const symbol = rowSymbols[0]
+        const isJackpotSymbol = JACKPOT_SYMBOLS.includes(symbol)
+        
+        let symbolMultiplier = 20
+        if (symbol === '💎') symbolMultiplier = 100
+        else if (symbol === '⭐') symbolMultiplier = 50
+        else if (symbol === '👑') symbolMultiplier = 150
+        else if (symbol === '🔥') symbolMultiplier = 200
+        else if (symbol === '💰') {
+          symbolMultiplier = 300
+          isJackpot = true
+        }
+        
+        if (isJackpotSymbol && allMatch) {
+          symbolMultiplier *= 2
+        }
+        
         winAmount += Math.floor(symbolMultiplier * gameState.spinMultiplier * machine.reels)
       } else {
         const uniqueSymbols = new Set(rowSymbols)
         if (uniqueSymbols.size === rowSymbols.length - 1) {
           winAmount += Math.floor(5 * gameState.spinMultiplier)
+        }
+        
+        const jackpotCount = rowSymbols.filter(s => JACKPOT_SYMBOLS.includes(s)).length
+        if (jackpotCount >= 2) {
+          const jackpotBonus = Math.floor(50 * jackpotCount * gameState.spinMultiplier)
+          winAmount += jackpotBonus
+          hasWin = true
         }
       }
     }
@@ -553,7 +581,19 @@ function App() {
       createCoinParticles(winAmount)
       
       const spinCost = SPIN_COST
-      if (winAmount >= spinCost * 50) {
+      if (isJackpot || winAmount >= spinCost * 100) {
+        playJackpotSound()
+        setConfettiIntensity('jackpot')
+        setShowConfetti(true)
+        setWinBannerType('jackpot')
+        setWinBannerAmount(winAmount)
+        setShowWinBanner(true)
+        toast.success(`💰 JACKPOT!!! +${winAmount} coins!`, { duration: 5000 })
+        setTimeout(() => {
+          setShowConfetti(false)
+          setShowWinBanner(false)
+        }, 4000)
+      } else if (winAmount >= spinCost * 50) {
         playMegaWinSound()
         setConfettiIntensity('mega')
         setShowConfetti(true)
@@ -600,6 +640,11 @@ function App() {
       updateDailyChallengeProgress('wins', 1)
       checkAchievement('big-winner', winAmount)
       checkAchievement('mega-winner', winAmount)
+      checkAchievement('jackpot-legend', winAmount)
+      
+      if (isJackpot) {
+        checkAchievement('jackpot-hunter', 1)
+      }
     }
 
     const newTotalSpins = (gameState?.totalSpins || 0) + 1
@@ -1012,6 +1057,9 @@ function App() {
               <Sparkle size={16} weight="fill" className="mr-1" />
               {currentMachine.name} ({currentMachine.rows}x{currentMachine.reels})
             </Badge>
+            <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/50 text-yellow-200">
+              💰 Jackpot symbols give 2x multiplier!
+            </Badge>
           </div>
         </motion.div>
 
@@ -1055,11 +1103,23 @@ function App() {
                         className={`bg-muted rounded-xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center border-4 shadow-lg relative overflow-hidden ${
                           reelStates[rowIndex][colIndex] && isSpinning
                             ? 'border-primary glow-pulse'
+                            : JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            ? 'border-yellow-500 shadow-yellow-500/50'
                             : 'border-primary/30'
                         }`}
                       >
+                        {JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex] && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0.3, 0.6, 0.3] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-orange-400/20 to-pink-400/20 rounded-xl"
+                          />
+                        )}
                         <motion.span 
-                          className="text-3xl md:text-5xl relative z-10"
+                          className={`text-3xl md:text-5xl relative z-10 ${
+                            JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]' : ''
+                          }`}
                           animate={reelStates[rowIndex][colIndex] && isSpinning ? {
                             scale: [1, 1.2, 1],
                             rotate: [0, -5, 5, 0]

@@ -20,11 +20,11 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Success criteria**: Data persists across sessions and devices, local progress migrates to account on first login, sync status visible to player, no progress lost on logout
 
 ### Manual Slot Spinning
-- **Functionality**: Players click a spin button to trigger the slot machine, which randomly generates symbols and awards coins based on matching patterns. Multiple slot machines with different configurations can be unlocked.
-- **Purpose**: Provides active engagement and immediate gratification through visual and audio feedback
+- **Functionality**: Players click a spin button to trigger the slot machine, which randomly generates symbols and awards coins based on matching patterns. Multiple slot machines with different configurations can be unlocked. Special jackpot symbols (💰, 💎, 👑, ⭐, 🔥) have a 3% chance to appear and offer massive multipliers and bonus rewards.
+- **Purpose**: Provides active engagement and immediate gratification through visual and audio feedback, with rare exciting jackpot moments
 - **Trigger**: Click on "SPIN" button (costs coins per spin)
-- **Progression**: Click spin button → Spin sound plays → Symbols animate → Symbols land one by one with stop sounds → Win calculated → Sound effects play based on win size → Coins added with animation → Confetti and win banner for big wins → Stats updated
-- **Success criteria**: Symbols display randomly, matching symbols award appropriate multipliers, coin balance updates correctly, sound effects and animations trigger appropriately
+- **Progression**: Click spin button → Spin sound plays → Symbols animate (jackpot symbols glow golden) → Symbols land one by one with stop sounds → Win calculated → Jackpot symbols provide 2x multiplier and bonus coins → Sound effects play based on win size (special jackpot sound for ultimate wins) → Coins added with animation → Confetti and win banner (jackpot banner with rainbow gradient for jackpots) → Stats updated
+- **Success criteria**: Symbols display randomly with 3% jackpot chance, matching jackpot symbols award massive multipliers (300x+ for 💰), jackpot symbols glow and pulse with special effects, coin balance updates correctly, escalating sound effects and animations trigger appropriately including special jackpot celebration
 
 ### Idle Coin Generation
 - **Functionality**: Automatically generates coins over time even when the player is away, based on upgrade level
@@ -48,11 +48,11 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Success criteria**: Sounds are pleasant, non-intrusive, contextually appropriate, and work across all browsers
 
 ### Win Celebration System
-- **Functionality**: Tiered celebration effects based on win size including confetti particles, full-screen win banners, and escalating sound effects
-- **Purpose**: Makes wins feel rewarding and creates memorable moments
+- **Functionality**: Tiered celebration effects based on win size including confetti particles, full-screen win banners, and escalating sound effects. Jackpot wins (100x+ bet or matching special symbols) trigger the ultimate celebration with rainbow gradient banners, 150+ confetti particles, and an epic synthesized sound effect.
+- **Purpose**: Makes wins feel rewarding and creates memorable moments, with jackpots being truly spectacular
 - **Trigger**: Triggered automatically when a spin results in a win
-- **Progression**: Win detected → Win tier calculated (small/big/mega) → Confetti particles spawn → Win banner displays with animation → Sound plays → Effects dismiss after duration
-- **Success criteria**: Small wins (5x+ bet) show confetti and simple sound, big wins (20x+ bet) show more confetti and banner, mega wins (50x+ bet) show maximum effects
+- **Progression**: Win detected → Win tier calculated (small/big/mega/jackpot) → Confetti particles spawn (up to 150 for jackpots) → Win banner displays with animation and appropriate styling → Sound plays (jackpot sound with deep bass, sweeps, and 50 sparkle effects) → Effects dismiss after duration
+- **Success criteria**: Small wins (5x+ bet) show confetti and simple sound, big wins (20x+ bet) show more confetti and banner, mega wins (50x+ bet) show maximum effects, jackpot wins (100x+ bet or special symbols) show rainbow banner with "JACKPOT!!!" text and ultimate particle/sound effects
 
 ### Statistics Dashboard
 - **Functionality**: Tracks and displays key metrics like total spins, biggest win, total earnings, and current income rate
@@ -81,7 +81,8 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Offline Earnings Cap**: Limit maximum offline earnings to prevent exploitation (e.g., 4 hours max)
 - **Upgrade Affordability**: Show upgrade costs clearly and disable purchase buttons when unaffordable
 - **First Time Player**: Start with enough coins for several spins to let players learn mechanics
-- **Negative Balance Protection**: Never allow coin balance to go negative through validation
+- **Jackpot Protection**: Prevent jackpot symbol manipulation by using cryptographically random generation and capping jackpot frequency
+- **Maximum Win Cap**: Extremely rare edge cases capped at reasonable maximum to prevent economy breaking
 - **Save State Corruption**: Implement fallback to default state if saved data is invalid
 - **Local to Cloud Migration**: When logging in for the first time, local progress automatically migrates to GitHub account with confirmation dialog
 - **Multiple Device Sync**: Progress syncs automatically when logging in from different devices, always using the cloud version as source of truth

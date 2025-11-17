@@ -132,3 +132,16 @@ h1, h2, h3, .orbitron {
 .winning-reel {
   animation: winning-reel 0.5s ease-in-out 3;
 }
+
+@keyframes jackpot-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 10px rgba(255, 165, 0, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 1)) drop-shadow(0 0 25px rgba(255, 165, 0, 0.9));
+  }
+}
+
+.jackpot-glow {
+  animation: jackpot-glow 1s ease-in-out infinite;
+}

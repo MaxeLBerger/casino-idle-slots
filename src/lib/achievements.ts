@@ -67,6 +67,26 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'wins'
   },
   {
+    id: 'jackpot-hunter',
+    title: 'Jackpot Hunter',
+    description: 'Hit a jackpot with matching special symbols',
+    icon: '💰',
+    requirement: 1,
+    rewardCoins: 5000,
+    rewardPrestige: 2,
+    category: 'wins'
+  },
+  {
+    id: 'jackpot-legend',
+    title: 'Jackpot Legend',
+    description: 'Win 10000 coins in a single spin',
+    icon: '👑',
+    requirement: 10000,
+    rewardCoins: 10000,
+    rewardPrestige: 3,
+    category: 'wins'
+  },
+  {
     id: 'millionaire',
     title: 'Millionaire',
     description: 'Earn a total of 1,000,000 coins',
