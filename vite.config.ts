@@ -10,6 +10,9 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Base URL für Deployment auf https://maximilianhaak.de/CasinoIdleSlots/
+  base: process.env.NODE_ENV === 'production' ? '/CasinoIdleSlots/' : '/',
+  
   plugins: [
     react(),
     tailwindcss(),
@@ -17,9 +20,26 @@ export default defineConfig({
     createIconImportProxy() as PluginOption,
     sparkPlugin() as PluginOption,
   ],
+  
   resolve: {
     alias: {
       '@': resolve(projectRoot, 'src')
+    }
+  },
+  
+  build: {
+    // Optimierungen für Production
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-tabs'],
+          'phosphor-icons': ['@phosphor-icons/react'],
+        }
+      }
     }
   },
 });
