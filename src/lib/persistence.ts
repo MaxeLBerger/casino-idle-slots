@@ -10,7 +10,7 @@ export interface UserInfo {
 
 export async function getCurrentUser(): Promise<UserInfo | null> {
   try {
-    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000))
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1000))
     const userPromise = window.spark.user()
     const user = await Promise.race([userPromise, timeoutPromise])
     return user || null

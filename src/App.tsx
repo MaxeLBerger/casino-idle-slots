@@ -113,6 +113,7 @@ function App() {
   const [isSpinning, setIsSpinning] = useState(false)
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState(0)
+  const [loadingTimeout, setLoadingTimeout] = useState(false)
   const coinParticleContainer = useRef<HTMLDivElement>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega'>('medium')
@@ -143,9 +144,17 @@ function App() {
     let mounted = true
 
     const initializeUser = async () => {
-      const user = await getCurrentUser()
-      if (mounted) {
-        setCurrentUser(user)
+      try {
+        const user = await getCurrentUser()
+        if (mounted) {
+          setCurrentUser(user)
+          console.log('[App] User initialized:', user?.login || 'guest')
+        }
+      } catch (error) {
+        console.error('[App] Error initializing user:', error)
+        if (mounted) {
+          setCurrentUser(null)
+        }
       }
     }
 
@@ -155,6 +164,17 @@ function App() {
       mounted = false
     }
   }, [])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoadingGameState) {
+        console.warn('[App] Loading timeout reached, forcing app to load')
+        setLoadingTimeout(true)
+      }
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+  }, [isLoadingGameState])
 
   useEffect(() => {
     if (!isLoadingGameState && gameState) {
@@ -835,7 +855,7 @@ function App() {
     unlockAchievement(achievementId)
   }
 
-  if (isLoadingGameState) {
+  if (isLoadingGameState && !loadingTimeout) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -855,11 +875,12 @@ function App() {
     )
   }
 
-  if (!gameState) return null
+  if (!gameState && !loadingTimeout) return null
 
-  const spinPowerCost = calculateUpgradeCost(gameState.spinPowerLevel, 50)
-  const idleIncomeCost = calculateUpgradeCost(gameState.idleIncomeLevel, 100)
-  const canPrestige = gameState.totalSpins >= PRESTIGE_SPIN_REQUIREMENT
+  const effectiveGameState = gameState || DEFAULT_STATE
+  const spinPowerCost = calculateUpgradeCost(effectiveGameState.spinPowerLevel, 50)
+  const idleIncomeCost = calculateUpgradeCost(effectiveGameState.idleIncomeLevel, 100)
+  const canPrestige = effectiveGameState.totalSpins >= PRESTIGE_SPIN_REQUIREMENT
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:p-6">
@@ -911,12 +932,12 @@ function App() {
               isLoggedIn={currentUser !== null}
               username={currentUser?.login || ''}
               avatarUrl={currentUser?.avatarUrl}
-              level={gameState.level || 1}
-              experience={gameState.experience || 0}
-              experienceToNextLevel={calculateLevelProgress(gameState.level || 1)}
-              coins={gameState.coins}
-              prestigePoints={gameState.prestigePoints}
-              totalSpins={gameState.totalSpins}
+              level={effectiveGameState.level || 1}
+              experience={effectiveGameState.experience || 0}
+              experienceToNextLevel={calculateLevelProgress(effectiveGameState.level || 1)}
+              coins={effectiveGameState.coins}
+              prestigePoints={effectiveGameState.prestigePoints}
+              totalSpins={effectiveGameState.totalSpins}
               onLogin={handleLogin}
               onLogout={handleLogout}
             />
@@ -931,12 +952,12 @@ function App() {
           <div className="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold orbitron">
             <Coins size={32} weight="fill" className="text-primary" />
             <motion.span
-              key={gameState.coins}
+              key={effectiveGameState.coins}
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               className="tabular-nums"
             >
-              {gameState.coins.toLocaleString()}
+              {effectiveGameState.coins.toLocaleString()}
             </motion.span>
             {currentUser && !isLoadingGameState && (
               <motion.div
@@ -955,23 +976,23 @@ function App() {
           {currentUser && (
             <div className="max-w-md mx-auto mt-3">
               <div className="flex items-center justify-between text-sm mb-1">
-                <span className="font-semibold">Level {gameState.level || 1}</span>
+                <span className="font-semibold">Level {effectiveGameState.level || 1}</span>
                 <span className="text-muted-foreground text-xs">
-                  {gameState.experience || 0} / {calculateLevelProgress(gameState.level || 1)} XP
+                  {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
                 </span>
               </div>
               <Progress 
-                value={((gameState.experience || 0) / calculateLevelProgress(gameState.level || 1)) * 100} 
+                value={((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100} 
                 className="h-2"
               />
             </div>
           )}
 
           <div className="flex items-center justify-center gap-4 mt-2">
-            {gameState.prestigePoints > 0 && (
+            {effectiveGameState.prestigePoints > 0 && (
               <Badge className="bg-accent text-accent-foreground">
                 <Trophy size={16} weight="fill" className="mr-1" />
-                {gameState.prestigePoints} Prestige Points
+                {effectiveGameState.prestigePoints} Prestige Points
               </Badge>
             )}
             <Badge className="bg-secondary text-secondary-foreground">
@@ -1043,7 +1064,7 @@ function App() {
               <Button
                 size="lg"
                 onClick={spin}
-                disabled={isSpinning || gameState.coins < SPIN_COST}
+                disabled={isSpinning || effectiveGameState.coins < SPIN_COST}
                 className="w-full py-6 md:py-8 text-xl md:text-2xl font-bold uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 disabled:opacity-50"
               >
                 {isSpinning ? (
@@ -1070,25 +1091,25 @@ function App() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {gameState.totalSpins}
+                    {effectiveGameState.totalSpins}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Spins</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {gameState.biggestWin}
+                    {effectiveGameState.biggestWin}
                   </div>
                   <div className="text-sm text-muted-foreground">Biggest Win</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {gameState.totalEarnings.toLocaleString()}
+                    {effectiveGameState.totalEarnings.toLocaleString()}
                   </div>
                   <div className="text-sm text-muted-foreground">Total Earned</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold orbitron text-accent tabular-nums">
-                    {gameState.idleIncomePerSecond.toFixed(1)}
+                    {effectiveGameState.idleIncomePerSecond.toFixed(1)}
                   </div>
                   <div className="text-sm text-muted-foreground">Coins/Second</div>
                 </div>
@@ -1112,16 +1133,16 @@ function App() {
                 <TabsContent value="spin" className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold">Level {gameState.spinPowerLevel}</span>
-                      <Badge variant="secondary">{gameState.spinMultiplier}x Multiplier</Badge>
+                      <span className="font-semibold">Level {effectiveGameState.spinPowerLevel}</span>
+                      <Badge variant="secondary">{effectiveGameState.spinMultiplier}x Multiplier</Badge>
                     </div>
-                    <Progress value={(gameState.spinPowerLevel % 10) * 10} className="h-2" />
+                    <Progress value={(effectiveGameState.spinPowerLevel % 10) * 10} className="h-2" />
                     <p className="text-sm text-muted-foreground">
                       Increases winnings from spins by 0.5x
                     </p>
                     <Button
                       onClick={upgradeSpinPower}
-                      disabled={gameState.coins < spinPowerCost}
+                      disabled={effectiveGameState.coins < spinPowerCost}
                       className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
                     >
                       <Coins size={20} className="mr-2" />
@@ -1133,19 +1154,19 @@ function App() {
                 <TabsContent value="idle" className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold">Level {gameState.idleIncomeLevel}</span>
+                      <span className="font-semibold">Level {effectiveGameState.idleIncomeLevel}</span>
                       <Badge variant="secondary">
                         <Lightning size={16} weight="fill" className="mr-1" />
-                        {gameState.idleIncomePerSecond.toFixed(1)}/s
+                        {effectiveGameState.idleIncomePerSecond.toFixed(1)}/s
                       </Badge>
                     </div>
-                    <Progress value={(gameState.idleIncomeLevel % 10) * 10} className="h-2" />
+                    <Progress value={(effectiveGameState.idleIncomeLevel % 10) * 10} className="h-2" />
                     <p className="text-sm text-muted-foreground">
                       Earn coins passively, even when offline
                     </p>
                     <Button
                       onClick={upgradeIdleIncome}
-                      disabled={gameState.coins < idleIncomeCost}
+                      disabled={effectiveGameState.coins < idleIncomeCost}
                       className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
                     >
                       <Coins size={20} className="mr-2" />
@@ -1179,7 +1200,7 @@ function App() {
                   ) : (
                     <>
                       <Lock size={20} className="mr-2" />
-                      Locked ({gameState.totalSpins}/{PRESTIGE_SPIN_REQUIREMENT} spins)
+                      Locked ({effectiveGameState.totalSpins}/{PRESTIGE_SPIN_REQUIREMENT} spins)
                     </>
                   )}
                 </Button>
@@ -1193,8 +1214,8 @@ function App() {
               </div>
               <DailyChallengeCard
                 dailyChallenge={dailyChallenge}
-                challengeProgress={gameState.dailyChallengeProgress || 0}
-                challengeCompleted={gameState.dailyChallengeCompleted || false}
+                challengeProgress={effectiveGameState.dailyChallengeProgress || 0}
+                challengeCompleted={effectiveGameState.dailyChallengeCompleted || false}
                 onClick={() => setShowDailyChallenge(true)}
               />
             </Card>
@@ -1206,9 +1227,9 @@ function App() {
               </div>
               <div className="space-y-3">
                 {SLOT_MACHINE_CONFIGS.map((machine, index) => {
-                  const isUnlocked = gameState?.unlockedSlotMachines?.includes(index) ?? false
-                  const isCurrent = gameState?.currentSlotMachine === index
-                  const canAfford = (gameState?.prestigePoints ?? 0) >= machine.prestigeCost
+                  const isUnlocked = effectiveGameState?.unlockedSlotMachines?.includes(index) ?? false
+                  const isCurrent = effectiveGameState?.currentSlotMachine === index
+                  const canAfford = (effectiveGameState?.prestigePoints ?? 0) >= machine.prestigeCost
                   
                   return (
                     <Card key={index} className={`p-4 ${isCurrent ? 'border-primary border-2' : ''}`}>
@@ -1322,8 +1343,8 @@ function App() {
       <Achievements
         open={showAchievements}
         onOpenChange={setShowAchievements}
-        unlockedAchievements={gameState.unlockedAchievements || []}
-        achievementProgress={gameState.achievementProgress || {}}
+        unlockedAchievements={effectiveGameState.unlockedAchievements || []}
+        achievementProgress={effectiveGameState.achievementProgress || {}}
         onClaim={claimAchievement}
       />
 
@@ -1331,8 +1352,8 @@ function App() {
         open={showDailyChallenge}
         onOpenChange={setShowDailyChallenge}
         dailyChallenge={dailyChallenge}
-        challengeProgress={gameState.dailyChallengeProgress || 0}
-        challengeCompleted={gameState.dailyChallengeCompleted || false}
+        challengeProgress={effectiveGameState.dailyChallengeProgress || 0}
+        challengeCompleted={effectiveGameState.dailyChallengeCompleted || false}
         onClaim={claimDailyChallenge}
         timeUntilReset={getTimeUntilReset()}
       />
