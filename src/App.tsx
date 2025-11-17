@@ -621,7 +621,6 @@ function App() {
         setWinBannerType('ultra')
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
-        setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
         }, 5000)
@@ -633,7 +632,6 @@ function App() {
         setWinBannerAmount(winAmount)
         setShowWinBanner(true)
         setTimeout(() => {
-          setShowConfetti(false)
           setShowWinBanner(false)
         }, 4000)
       } else if (winAmount >= spinCost * 50) {
@@ -645,7 +643,6 @@ function App() {
         setShowWinBanner(true)
         setTimeout(() => {
           setShowConfetti(false)
-          setShowWinBanner(false)
         }, 3000)
       } else if (winAmount >= spinCost * 20) {
         playBigWinSound()
@@ -657,7 +654,6 @@ function App() {
         setTimeout(() => {
           setShowConfetti(false)
           setShowWinBanner(false)
-        }, 2500)
       } else if (winAmount >= spinCost * 5) {
         playSmallWinSound()
         setConfettiIntensity('medium')
@@ -669,7 +665,6 @@ function App() {
           setShowConfetti(false)
           setShowWinBanner(false)
         }, 2000)
-      } else {
         playSmallWinSound()
         setConfettiIntensity('low')
         setShowConfetti(true)
@@ -678,7 +673,6 @@ function App() {
       
       updateDailyChallengeProgress('wins', 1)
       checkAchievement('big-winner', winAmount)
-      checkAchievement('mega-winner', winAmount)
       checkAchievement('jackpot-legend', winAmount)
       checkAchievement('ultra-jackpot-master', winAmount)
       checkAchievement('cosmic-fortune', winAmount)
