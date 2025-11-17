@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock } from '@phosphor-icons/react'
@@ -48,6 +48,7 @@ function App() {
   const [gameState, setGameState] = useKV<GameState>('casino-game-state', DEFAULT_STATE)
   const [isSpinning, setIsSpinning] = useState(false)
   const [reels, setReels] = useState<string[]>([SYMBOLS[0], SYMBOLS[1], SYMBOLS[2]])
+  const [reelStates, setReelStates] = useState<boolean[]>([false, false, false])
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState(0)
   const coinParticleContainer = useRef<HTMLDivElement>(null)
@@ -132,30 +133,31 @@ function App() {
       }
     })
 
-    const spinDuration = 2000
+    const reelStopTimes = [1500, 2000, 2500]
     const blurInterval = 50
-    let elapsed = 0
-
-    const blurTimer = setInterval(() => {
-      setReels([
-        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-      ])
-      elapsed += blurInterval
-      if (elapsed >= spinDuration) {
-        clearInterval(blurTimer)
-      }
-    }, blurInterval)
-
-    await new Promise(resolve => setTimeout(resolve, spinDuration))
-
+    const stoppedReels = [false, false, false]
     const finalReels = [
       SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
       SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
       SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
     ]
 
+    setReelStates([false, false, false])
+
+    const blurTimer = setInterval(() => {
+      setReels(prev => prev.map((symbol, index) => 
+        stoppedReels[index] ? symbol : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
+      ))
+    }, blurInterval)
+
+    for (let i = 0; i < 3; i++) {
+      await new Promise(resolve => setTimeout(resolve, reelStopTimes[i] - (i > 0 ? reelStopTimes[i - 1] : 0)))
+      stoppedReels[i] = true
+      setReelStates(prev => prev.map((val, idx) => idx === i ? true : val))
+      setReels(prev => prev.map((symbol, index) => index === i ? finalReels[i] : symbol))
+    }
+
+    clearInterval(blurTimer)
     setReels(finalReels)
 
     let winAmount = 0
@@ -300,11 +302,61 @@ function App() {
                 {reels.map((symbol, index) => (
                   <motion.div
                     key={index}
-                    animate={isSpinning ? { filter: 'blur(8px)', scale: 0.95 } : { filter: 'blur(0px)', scale: 1 }}
-                    transition={{ duration: 0.1 }}
-                    className="bg-muted rounded-xl w-24 h-24 md:w-32 md:h-32 flex items-center justify-center border-4 border-primary/30 shadow-lg"
+                    animate={
+                      reelStates[index] 
+                        ? { 
+                            filter: 'blur(0px)', 
+                            scale: 1,
+                            y: 0,
+                          }
+                        : { 
+                            filter: 'blur(8px)', 
+                            scale: 0.95,
+                            y: [0, -10, 0],
+                          }
+                    }
+                    transition={
+                      reelStates[index]
+                        ? { 
+                            duration: 0.4,
+                            ease: [0.34, 1.56, 0.64, 1],
+                          }
+                        : {
+                            duration: 0.1,
+                            y: {
+                              duration: 0.3,
+                              repeat: Infinity,
+                              ease: 'linear'
+                            }
+                          }
+                    }
+                    className={`bg-muted rounded-xl w-24 h-24 md:w-32 md:h-32 flex items-center justify-center border-4 shadow-lg relative overflow-hidden ${
+                      reelStates[index] && isSpinning
+                        ? 'border-primary glow-pulse'
+                        : 'border-primary/30'
+                    }`}
                   >
-                    <span className="slot-symbol">{symbol}</span>
+                    {!reelStates[index] && isSpinning && (
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent"
+                        animate={{ y: ['100%', '-100%'] }}
+                        transition={{
+                          duration: 0.6,
+                          repeat: Infinity,
+                          ease: 'linear'
+                        }}
+                      />
+                    )}
+                    <motion.span 
+                      className="slot-symbol relative z-10"
+                      animate={reelStates[index] && isSpinning ? {
+                        scale: [1, 1.2, 1],
+                        rotate: [0, -5, 5, 0]
+                      } : {}}
+                      transition={{ duration: 0.4, ease: 'easeOut' }}
+                    >
+                      {symbol}
+                    </motion.span>
                   </motion.div>
                 ))}
               </div>

@@ -101,6 +101,19 @@ h1, h2, h3, .orbitron {
   }
 }
 
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+  }
+}
+
 .float-animation {
   animation: float-up 1.5s ease-out forwards;
+}
+
+.glow-pulse {
+  animation: glow-pulse 0.6s ease-in-out;
 }
