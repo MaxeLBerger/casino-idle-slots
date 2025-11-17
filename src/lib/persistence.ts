@@ -1,5 +1,4 @@
-import { useKV } from '@github/spark/hooks'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 export interface UserInfo {
   id: number
@@ -21,30 +20,68 @@ export async function getCurrentUser(): Promise<UserInfo | null> {
 export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  
-  const userSpecificKey = userId ? `${baseKey}-user-${userId}` : `${baseKey}-local`
-  const [value, setValue, deleteValue] = useKV<T>(userSpecificKey, defaultValue)
+  const [value, setValue] = useState<T>(defaultValue)
+  const isInitializedRef = useRef(false)
+  const userIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     let mounted = true
     
-    getCurrentUser().then(user => {
+    const initialize = async () => {
+      const user = await getCurrentUser()
       if (!mounted) return
       
-      if (user) {
-        setUserId(user.id.toString())
+      const userIdStr = user ? user.id.toString() : null
+      setUserId(userIdStr)
+      userIdRef.current = userIdStr
+      
+      const storageKey = userIdStr ? `${baseKey}-user-${userIdStr}` : `${baseKey}-local`
+      console.log(`[Persistence] Loading from key: ${storageKey}`)
+      const storedValue = await window.spark.kv.get<T>(storageKey)
+      
+      if (storedValue !== undefined && storedValue !== null) {
+        console.log(`[Persistence] Loaded data from ${storageKey}:`, storedValue)
+        setValue(storedValue)
       } else {
-        setUserId(null)
+        console.log(`[Persistence] No data found at ${storageKey}, using default`)
       }
+      
+      isInitializedRef.current = true
       setIsLoading(false)
-    })
+    }
+    
+    initialize()
 
     return () => {
       mounted = false
     }
-  }, [])
+  }, [baseKey])
 
-  return [value, setValue, deleteValue, isLoading, userId] as const
+  const setValueAndPersist = (newValue: T | ((prev: T) => T)) => {
+    setValue((prev) => {
+      const valueToSet = typeof newValue === 'function' 
+        ? (newValue as (prev: T) => T)(prev) 
+        : newValue
+      
+      if (isInitializedRef.current) {
+        const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
+        console.log(`[Persistence] Saving to ${storageKey}:`, valueToSet)
+        window.spark.kv.set(storageKey, valueToSet).catch(err => {
+          console.error('Failed to persist game state:', err)
+        })
+      }
+      
+      return valueToSet
+    })
+  }
+
+  const deleteValue = async () => {
+    const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
+    await window.spark.kv.delete(storageKey)
+    setValue(defaultValue)
+  }
+
+  return [value, setValueAndPersist, deleteValue, isLoading, userId] as const
 }
 
 export async function migrateLocalDataToUser(baseKey: string, userId: string) {
