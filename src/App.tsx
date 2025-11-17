@@ -134,8 +134,6 @@ function App() {
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [topRank, setTopRank] = useState<number | null>(null)
   const [lastSpinWin, setLastSpinWin] = useState<number | null>(null)
-  const [coinChange, setCoinChange] = useState<{amount: number, isPositive: boolean} | null>(null)
-  const prevCoinsRef = useRef<number>(STARTING_COINS)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -197,18 +195,6 @@ function App() {
       // Game state loaded successfully
     }
   }, [isLoadingGameState, gameState, gameStateUserId, currentUser])
-
-  useEffect(() => {
-    const currentCoins = gameState?.coins || 0
-    if (currentCoins !== prevCoinsRef.current) {
-      const change = currentCoins - prevCoinsRef.current
-      if (Math.abs(change) >= 1 && prevCoinsRef.current > 0) {
-        setCoinChange({ amount: Math.abs(change), isPositive: change > 0 })
-        setTimeout(() => setCoinChange(null), 2000)
-      }
-      prevCoinsRef.current = currentCoins
-    }
-  }, [gameState?.coins])
 
   useEffect(() => {
     if (isLoadingGameState) return
@@ -1058,117 +1044,136 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <motion.div 
-            className="relative inline-block mb-4"
-            animate={{ 
-              scale: [1, 1.02, 1],
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-2xl blur-xl opacity-40 animate-pulse" />
-            <Card className="relative bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 border-2 border-primary/50 shadow-2xl shadow-primary/30 px-8 py-6 backdrop-blur-sm overflow-visible">
-              <div className="flex items-center justify-center gap-3 text-4xl md:text-5xl font-black orbitron relative">
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 360],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={{ 
-                    rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                    scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                  }}
-                >
-                  <Coins size={48} weight="fill" className="text-primary drop-shadow-[0_0_12px_rgba(255,215,0,0.8)]" />
-                </motion.div>
-                <motion.span
-                  key={effectiveGameState.coins}
-                  initial={{ scale: 1.3, color: "rgb(255, 215, 0)" }}
-                  animate={{ scale: 1, color: "inherit" }}
-                  transition={{ duration: 0.3 }}
-                  className="tabular-nums bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-2xl"
-                  style={{
-                    textShadow: "0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.3)"
-                  }}
-                >
-                  {effectiveGameState.coins.toLocaleString()}
-                </motion.span>
-                <AnimatePresence>
-                  {coinChange && (
-                    <motion.span
-                      initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, y: -40, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.5 }}
-                      transition={{ duration: 0.5 }}
-                      className={`absolute right-0 top-0 font-bold text-2xl tabular-nums ${
-                        coinChange.isPositive ? 'text-green-400' : 'text-red-400'
-                      }`}
-                      style={{
-                        textShadow: coinChange.isPositive 
-                          ? "0 0 20px rgba(34, 197, 94, 0.8)" 
-                          : "0 0 20px rgba(239, 68, 68, 0.8)"
-                      }}
-                    >
-                      {coinChange.isPositive ? '+' : '-'}{coinChange.amount.toLocaleString()}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
-            </Card>
-          </motion.div>
-          
-          <AnimatePresence>
-            {lastSpinWin !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ type: "spring", duration: 0.6 }}
-                className="mb-4"
-              >
-                <Badge 
-                  className="text-xl md:text-2xl px-6 py-3 font-black orbitron shadow-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400 shadow-green-500/50"
-                  style={{
-                    filter: 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))'
-                  }}
-                >
-                  🎉 WIN {lastSpinWin.toLocaleString()} COINS!
-                </Badge>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          {currentUser && (
-            <motion.div 
-              className="max-w-md mx-auto mb-4"
-              initial={{ opacity: 0, y: 10 }}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-primary/40 shadow-xl backdrop-blur-sm p-6 hover:border-primary/60 transition-all">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
+                  <Coins size={14} weight="fill" className="text-primary/70" />
+                  Balance
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <motion.div
+                    animate={{ 
+                      rotate: [0, 360],
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{ 
+                      rotate: { duration: 4, repeat: Infinity, ease: "linear" },
+                      scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                  >
+                    <Coins size={32} weight="fill" className="text-primary drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
+                  </motion.div>
+                  <motion.span
+                    key={effectiveGameState.coins}
+                    initial={{ scale: 1.2, filter: "brightness(1.5)" }}
+                    animate={{ scale: 1, filter: "brightness(1)" }}
+                    transition={{ duration: 0.3 }}
+                    className="text-3xl md:text-4xl font-black orbitron tabular-nums bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+                    style={{
+                      textShadow: "0 0 20px rgba(255,215,0,0.3)"
+                    }}
+                  >
+                    {effectiveGameState.coins.toLocaleString()}
+                  </motion.span>
+                </div>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              className="relative group"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 rounded-xl blur-md" />
-                <Card className="relative bg-gradient-to-br from-card/80 to-secondary/30 border border-primary/30 p-4 backdrop-blur-sm shadow-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-green-600/20 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+              <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-green-500/40 shadow-xl backdrop-blur-sm p-6 hover:border-green-500/60 transition-all">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
+                  <Sparkle size={14} weight="fill" className="text-green-500/70" />
+                  Last Spin
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <AnimatePresence mode="wait">
+                    {lastSpinWin !== null ? (
                       <motion.div
-                        animate={{ rotate: [0, 360] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                        key="win-display"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        className="flex items-center gap-2"
                       >
-                        <Sparkle size={20} weight="fill" className="text-primary" />
+                        <motion.span
+                          animate={{ 
+                            rotate: [0, 15, -15, 0],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ 
+                            duration: 0.5,
+                            repeat: Infinity,
+                            repeatDelay: 2
+                          }}
+                          className="text-2xl"
+                        >
+                          🎉
+                        </motion.span>
+                        <span className="text-3xl md:text-4xl font-black orbitron tabular-nums text-green-400 drop-shadow-[0_0_12px_rgba(34,197,94,0.6)]">
+                          {lastSpinWin.toLocaleString()}
+                        </span>
                       </motion.div>
-                      <span className="font-bold text-lg orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                        LEVEL {effectiveGameState.level || 1}
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground font-semibold tabular-nums">
-                      {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
+                    ) : (
+                      <motion.div
+                        key="no-win"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-3xl md:text-4xl font-black orbitron text-muted-foreground/30"
+                      >
+                        ---
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </Card>
+            </motion.div>
+
+            {currentUser && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-primary/20 to-accent/30 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
+                <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-accent/40 shadow-xl backdrop-blur-sm p-6 hover:border-accent/60 transition-all">
+                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
+                    <Trophy size={14} weight="fill" className="text-accent/70" />
+                    Player Level
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <motion.div
+                      animate={{ 
+                        rotate: [0, 360],
+                        scale: [1, 1.05, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 5, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+                      }}
+                    >
+                      <Sparkle size={28} weight="fill" className="text-accent drop-shadow-[0_0_8px_rgba(147,197,253,0.6)]" />
+                    </motion.div>
+                    <span className="text-3xl md:text-4xl font-black orbitron tabular-nums bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
+                      {effectiveGameState.level || 1}
                     </span>
                   </div>
-                  <div className="relative h-3 bg-muted/50 rounded-full overflow-hidden border border-primary/20">
+                  <div className="relative h-2 bg-muted/50 rounded-full overflow-hidden border border-accent/20">
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary rounded-full"
+                      className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent rounded-full"
                       initial={{ width: 0 }}
                       animate={{ 
                         width: `${((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100}%`,
@@ -1180,32 +1185,38 @@ function App() {
                       }}
                       style={{
                         backgroundSize: "200% 200%",
-                        boxShadow: "0 0 20px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
+                        boxShadow: "0 0 12px rgba(147, 197, 253, 0.5)"
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/20 to-transparent rounded-full" />
+                  </div>
+                  <div className="text-[10px] text-center text-muted-foreground/60 mt-1 font-semibold tabular-nums">
+                    {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
                   </div>
                 </Card>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </div>
 
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center justify-center gap-3 flex-wrap px-4">
             {effectiveGameState.prestigePoints > 0 && (
-              <Badge className="bg-accent text-accent-foreground">
-                <Trophy size={16} weight="fill" className="mr-1" />
-                {effectiveGameState.prestigePoints} Prestige Points
+              <Badge className="bg-gradient-to-r from-accent/80 to-primary/80 text-white border-accent/50 shadow-lg shadow-accent/30 px-3 py-1.5">
+                <Trophy size={16} weight="fill" className="mr-1.5" />
+                <span className="font-bold">{effectiveGameState.prestigePoints}</span>
+                <span className="ml-1 text-xs opacity-90">Prestige</span>
               </Badge>
             )}
-            <Badge className="bg-secondary text-secondary-foreground">
-              <Sparkle size={16} weight="fill" className="mr-1" />
-              {currentMachine.name} ({currentMachine.rows}x{currentMachine.reels})
+            <Badge className="bg-gradient-to-r from-secondary/80 to-muted/80 text-foreground border-primary/30 shadow-md px-3 py-1.5">
+              <Sparkle size={16} weight="fill" className="mr-1.5 text-primary" />
+              <span className="font-bold">{currentMachine.name}</span>
+              <span className="ml-1.5 text-xs opacity-70">({currentMachine.rows}x{currentMachine.reels})</span>
             </Badge>
-            <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/50 text-yellow-200">
-              💰 Jackpot symbols give 2x multiplier!
+            <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/40 text-yellow-100 shadow-md px-3 py-1.5">
+              <span className="text-sm">💰</span>
+              <span className="ml-1.5 text-xs font-semibold">Jackpot 2x</span>
             </Badge>
-            <Badge className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border-cyan-400/50 text-cyan-200">
-              ✨ Ultra-Jackpot symbols give 3x multiplier!
+            <Badge className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border-cyan-400/40 text-cyan-100 shadow-md px-3 py-1.5">
+              <span className="text-sm">✨</span>
+              <span className="ml-1.5 text-xs font-semibold">Ultra 3x</span>
             </Badge>
           </div>
         </motion.div>
@@ -1314,35 +1325,57 @@ function App() {
               </Button>
             </Card>
 
-            <Card className="p-6 bg-card/50 border-border">
-              <div className="flex items-center gap-2 mb-4">
+            <Card className="p-6 bg-gradient-to-br from-card/80 to-secondary/30 border border-primary/20 shadow-lg">
+              <div className="flex items-center gap-2 mb-6">
                 <Gauge size={24} weight="fill" className="text-accent" />
-                <h2 className="text-2xl font-bold">Statistics</h2>
+                <h2 className="text-2xl font-bold orbitron">Statistics</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {effectiveGameState.totalSpins}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-primary/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      Total Spins
+                    </div>
+                    <div className="text-3xl font-black orbitron text-primary tabular-nums">
+                      {effectiveGameState.totalSpins}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Total Spins</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {effectiveGameState.biggestWin}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-green-500/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      Biggest Win
+                    </div>
+                    <div className="text-3xl font-black orbitron text-green-400 tabular-nums">
+                      {effectiveGameState.biggestWin}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Biggest Win</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold orbitron text-primary tabular-nums">
-                    {effectiveGameState.totalEarnings.toLocaleString()}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-accent/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      Total Earned
+                    </div>
+                    <div className="text-3xl font-black orbitron text-accent tabular-nums">
+                      {effectiveGameState.totalEarnings.toLocaleString()}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Total Earned</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold orbitron text-accent tabular-nums">
-                    {effectiveGameState.idleIncomePerSecond.toFixed(1)}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-yellow-500/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-1">
+                      <Lightning size={12} weight="fill" className="text-yellow-500" />
+                      Idle Income
+                    </div>
+                    <div className="text-3xl font-black orbitron text-yellow-400 tabular-nums">
+                      {effectiveGameState.idleIncomePerSecond.toFixed(1)}
+                      <span className="text-sm text-muted-foreground ml-1">/s</span>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Coins/Second</div>
                 </div>
               </div>
             </Card>
