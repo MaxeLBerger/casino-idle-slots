@@ -68,6 +68,13 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Progression**: Reach 100 spins → Prestige option appears → Confirm reset → Epic sound and confetti play → Keep prestige points → Unlock new slot machines → Start fresh with new machines available
 - **Success criteria**: Prestige points persist, game state resets appropriately, new slot machines unlock at correct thresholds, celebration effects play
 
+### Global Leaderboards
+- **Functionality**: Real-time competitive rankings across multiple categories (Total Coins, Total Spins, Biggest Win, Total Earnings, Highest Level, Prestige Points) displaying top 100 players globally with GitHub profiles
+- **Purpose**: Adds competitive motivation, showcases top performers, and encourages continued engagement through social comparison
+- **Trigger**: Accessible via Leaderboard button in header; scores automatically submitted when game state changes
+- **Progression**: Player logs in with GitHub → Scores automatically submitted to global rankings → Player clicks Leaderboard button → Select category tab → View rankings with player avatars, usernames, levels, and scores → See own rank highlighted → Refresh to update rankings
+- **Success criteria**: Rankings update in real-time, player's rank displayed prominently if in top 10, all 6 categories tracked independently, only logged-in users can submit scores, leaderboard shows player avatar and GitHub username, current user's entry highlighted in list
+
 ## Edge Case Handling
 
 - **Insufficient Funds**: Spin button becomes disabled when player lacks coins, with clear visual indication
@@ -80,6 +87,9 @@ A browser-based idle casino slots game where players spin slot machines, accumul
 - **Multiple Device Sync**: Progress syncs automatically when logging in from different devices, always using the cloud version as source of truth
 - **Logout Protection**: Progress is saved before logout, with confirmation that data is safe in the cloud
 - **Login Failure**: Graceful error handling with retry option if GitHub authentication fails
+- **Leaderboard Access**: Only logged-in GitHub users can view and appear on leaderboards; anonymous players see prompt to log in
+- **Leaderboard Refresh**: Manual refresh button to update rankings on demand; automatic caching prevents excessive API calls
+- **Empty Leaderboard**: Clear message when no rankings exist yet, encouraging users to be first
 
 ## Design Direction
 
@@ -139,12 +149,13 @@ Animations should be energetic and celebratory, balancing frequent micro-interac
   - Card: Central slot machine display and upgrade panels with gradient backgrounds and glowing borders
   - Button: Large, prominent spin button with hover lift and active press states; upgrade buttons with disabled states
   - Progress: Visual bars showing upgrade levels and prestige progress
-  - Badge: Display multipliers, level indicators, status effects, and sync status
+  - Badge: Display multipliers, level indicators, status effects, sync status, and player ranks
   - Separator: Divide sections between stats, slots, and upgrades
-  - Tabs: Organize upgrades into categories (spin power, idle income, prestige)
-  - Dialog: Display offline earnings, prestige confirmation, data migration success, and game instructions
+  - Tabs: Organize upgrades into categories (spin power, idle income, prestige) and leaderboard categories
+  - Dialog: Display offline earnings, prestige confirmation, data migration success, game instructions, and leaderboards
   - Sonner Toast: Quick feedback for purchases, insufficient funds, achievements, login/logout confirmations
-  - Avatar: Display GitHub profile picture in user profile button
+  - Avatar: Display GitHub profile picture in user profile button and leaderboard entries
+  - ScrollArea: Smooth scrolling for leaderboard rankings list
 
 - **Customizations**:
   - Slot Machine Component: Custom multi-reel display with symbol emojis (🍒🍋🔔💎⭐🍀🎰💰🎁👑🔥) and smooth animation
@@ -153,17 +164,22 @@ Animations should be energetic and celebratory, balancing frequent micro-interac
   - Stat Display: Large numbers with labels in grid layout
   - Confetti System: Dynamic particle effects with varying intensity (low/medium/high/mega)
   - Win Banner: Full-screen animated banner showing win amount and type with emoji and gradients
+  - Leaderboard Entry Card: Player rank badge, avatar, username, level, and score with special styling for top 3 and current user
+  - Leaderboard Button: Shows player's best rank as badge if in top 10
 
 - **States**:
   - Spin Button: Default (glowing gold), Hover (lifted with stronger glow), Active (pressed down), Disabled (grayed out with locked icon), Spinning (animated with progress)
   - Upgrade Buttons: Affordable (cyan glow), Unaffordable (muted/disabled), Hover (scale up), Active (scale down with purchase animation)
   - Slot Reels: Idle (static symbols), Spinning (heavy blur), Landing (scale bounce effect)
+  - Leaderboard Entries: Top 3 (special gradient backgrounds with gold/silver/bronze), Current User (accent border and highlight), Others (standard card)
 
 - **Icon Selection**:
   - Coins: Use from phosphor-icons for currency displays throughout
-  - ArrowUp: Upgrade level increases
+  - ArrowUp: Upgrade level increases and leaderboard refresh
   - Lightning: Idle income and passive generation
-  - Trophy: Achievements and biggest wins
+  - Trophy: Achievements, leaderboards, and biggest wins
+  - Crown: First place rank on leaderboard
+  - Medal: Second and third place ranks on leaderboard
   - Gauge: Statistics and metrics
   - Sparkle: Big wins and jackpots
   - Lock/LockOpen: Locked vs unlocked upgrades

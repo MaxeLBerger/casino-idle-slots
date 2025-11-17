@@ -14,6 +14,7 @@ import { Confetti, WinBanner } from '@/components/Confetti'
 import { UserProfile } from '@/components/UserProfile'
 import { Achievements, AchievementNotification } from '@/components/Achievements'
 import { DailyChallenges, DailyChallengeCard } from '@/components/DailyChallenges'
+import { Leaderboard, LeaderboardButton } from '@/components/Leaderboard'
 import { 
   playSpinSound, 
   playReelStopSound, 
@@ -25,6 +26,7 @@ import {
 } from '@/lib/sounds'
 import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
 import { useUserLinkedKV, getCurrentUser, migrateLocalDataToUser, type UserInfo } from '@/lib/persistence'
+import { submitScore, getPlayerRank } from '@/lib/leaderboard'
 
 const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔'],
@@ -123,6 +125,8 @@ function App() {
   const [showAchievements, setShowAchievements] = useState(false)
   const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [topRank, setTopRank] = useState<number | null>(null)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -211,6 +215,41 @@ function App() {
 
     return () => clearInterval(syncInterval)
   }, [currentUser, gameState])
+
+  useEffect(() => {
+    const updateLeaderboards = async () => {
+      if (!currentUser || !gameState || isLoadingGameState) return
+      
+      try {
+        await Promise.all([
+          submitScore('coins', gameState.coins, gameState.level),
+          submitScore('totalSpins', gameState.totalSpins, gameState.level),
+          submitScore('biggestWin', gameState.biggestWin, gameState.level),
+          submitScore('totalEarnings', gameState.totalEarnings, gameState.level),
+          submitScore('level', gameState.level, gameState.level),
+          submitScore('prestigePoints', gameState.prestigePoints, gameState.level)
+        ])
+        
+        const ranks = await Promise.all([
+          getPlayerRank('coins', currentUser.id.toString()),
+          getPlayerRank('totalSpins', currentUser.id.toString()),
+          getPlayerRank('biggestWin', currentUser.id.toString()),
+          getPlayerRank('totalEarnings', currentUser.id.toString()),
+          getPlayerRank('level', currentUser.id.toString()),
+          getPlayerRank('prestigePoints', currentUser.id.toString())
+        ])
+        
+        const validRanks = ranks.filter((r): r is number => r !== null)
+        if (validRanks.length > 0) {
+          setTopRank(Math.min(...validRanks))
+        }
+      } catch (error) {
+        console.error('[App] Error updating leaderboards:', error)
+      }
+    }
+    
+    updateLeaderboards()
+  }, [currentUser, gameState?.coins, gameState?.totalSpins, gameState?.biggestWin, gameState?.totalEarnings, gameState?.level, gameState?.prestigePoints, isLoadingGameState])
   
   const getTimeUntilReset = () => {
     const now = new Date()
@@ -875,6 +914,10 @@ function App() {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2"
           >
+            <LeaderboardButton
+              onClick={() => setShowLeaderboard(true)}
+              playerRank={topRank}
+            />
             <Button
               onClick={() => setShowAchievements(true)}
               variant="outline"
@@ -1320,6 +1363,13 @@ function App() {
         challengeCompleted={effectiveGameState.dailyChallengeCompleted || false}
         onClaim={claimDailyChallenge}
         timeUntilReset={getTimeUntilReset()}
+      />
+
+      <Leaderboard
+        open={showLeaderboard}
+        onOpenChange={setShowLeaderboard}
+        currentUserId={currentUser?.id.toString() || null}
+        userLevel={effectiveGameState.level || 1}
       />
     </div>
   )
