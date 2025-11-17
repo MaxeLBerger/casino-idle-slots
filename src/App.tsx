@@ -305,12 +305,10 @@ function App() {
                     animate={
                       reelStates[index] 
                         ? { 
-                            filter: 'blur(0px)', 
                             scale: 1,
                             y: 0,
                           }
                         : { 
-                            filter: 'blur(8px)', 
                             scale: 0.95,
                             y: [0, -10, 0],
                           }
