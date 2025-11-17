@@ -211,15 +211,15 @@ function App() {
       if (currentUser && gameState) {
         setLastSyncTime(Date.now())
       }
-    }, 30000)
+    }, 60000)
 
     return () => clearInterval(syncInterval)
   }, [currentUser, gameState])
 
   useEffect(() => {
+    if (!currentUser || !gameState || isLoadingGameState) return
+    
     const updateLeaderboards = async () => {
-      if (!currentUser || !gameState || isLoadingGameState) return
-      
       try {
         await Promise.all([
           submitScore('coins', gameState.coins, gameState.level),
@@ -248,7 +248,11 @@ function App() {
       }
     }
     
-    updateLeaderboards()
+    const debounceTimer = setTimeout(() => {
+      updateLeaderboards()
+    }, 2000)
+    
+    return () => clearTimeout(debounceTimer)
   }, [currentUser, gameState?.coins, gameState?.totalSpins, gameState?.biggestWin, gameState?.totalEarnings, gameState?.level, gameState?.prestigePoints, isLoadingGameState])
   
   const getTimeUntilReset = () => {

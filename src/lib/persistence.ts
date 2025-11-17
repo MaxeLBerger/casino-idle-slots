@@ -128,7 +128,7 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
           window.spark.kv.set(storageKey, valueToSet).catch(err => {
             console.error('[Persistence] Failed to persist:', err)
           })
-        }, 500)
+        }, 2000)
       }
       
       return valueToSet

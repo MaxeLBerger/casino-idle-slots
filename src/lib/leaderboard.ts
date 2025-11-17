@@ -27,8 +27,10 @@ const LEADERBOARD_KEYS: Record<LeaderboardCategory, string> = {
 
 const MAX_LEADERBOARD_SIZE = 100
 const CACHE_DURATION = 30000
+const SUBMIT_COOLDOWN = 10000
 
 const leaderboardCache: Record<string, { data: LeaderboardData; timestamp: number }> = {}
+const lastSubmitTime: Record<string, number> = {}
 
 export async function getLeaderboard(category: LeaderboardCategory): Promise<LeaderboardEntry[]> {
   const key = LEADERBOARD_KEYS[category]
@@ -61,6 +63,13 @@ export async function submitScore(category: LeaderboardCategory, score: number, 
     }
     
     const key = LEADERBOARD_KEYS[category]
+    const now = Date.now()
+    const cacheKey = `${key}-${user.id}`
+    
+    if (lastSubmitTime[cacheKey] && (now - lastSubmitTime[cacheKey]) < SUBMIT_COOLDOWN) {
+      return false
+    }
+    
     const data = await window.spark.kv.get<LeaderboardData>(key)
     
     const entries = data?.entries || []
@@ -95,6 +104,7 @@ export async function submitScore(category: LeaderboardCategory, score: number, 
     
     await window.spark.kv.set(key, newData)
     
+    lastSubmitTime[cacheKey] = now
     delete leaderboardCache[key]
     
     return true
