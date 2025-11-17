@@ -1,19 +1,21 @@
 ﻿#  Deployment Guide
 
-Dieses Dokument beschreibt den Deployment-Prozess für Casino Idle Slots auf \https://maximilianhaak.de/CasinoIdleSlots/\.
+Dieses Projekt wird **automatisch** über das Portfolio-Repository deployed: [MaxeLBerger.github.io](https://github.com/MaxeLBerger/MaxeLBerger.github.io)
+
+>  **WICHTIG**: Dieses Projekt deployed **NICHT direkt** zu GitHub Pages!  
+> Es ist ein **Git Submodule** im Portfolio und wird dort gebaut und deployed.
 
 ##  Voraussetzungen
 
-### 1. Repository Setup
-- Repository muss öffentlich sein oder GitHub Pages aktiviert haben
-- Schreibrechte für das Repository
+### 1. Portfolio Integration Setup
+Siehe **[PORTFOLIO_INTEGRATION.md](./PORTFOLIO_INTEGRATION.md)** für die vollständige Anleitung!
 
-### 2. GitHub Pages Konfiguration
-1. Gehe zu **Settings**  **Pages**
-2. Unter **Source** wähle **GitHub Actions**
-3. Das war's! Die Workflow-Datei übernimmt den Rest
+**Kurzfassung:**
+1. Personal Access Token (PAT) erstellen mit `repo` scope
+2. Secret `PORTFOLIO_UPDATE_TOKEN` in diesem Repo hinzufügen
+3. Push auf `main` triggert automatisch Portfolio-Update
 
-##  Konfiguration
+##  Build-Konfiguration
 
 ### Base URL in vite.config.ts
 
@@ -25,224 +27,177 @@ base: process.env.NODE_ENV === 'production' ? '/CasinoIdleSlots/' : '/'
 
 ### GitHub Actions Workflow
 
-Die Deployment-Pipeline ist in \.github/workflows/deploy.yml\ definiert:
+Die Deployment-Pipeline ist in `.github/workflows/update-portfolio.yml` definiert:
 
-- **Trigger:** Push auf \main\ Branch oder manuell
-- **Build:** \
-pm ci && npm run build\
-- **Deploy:** Automatisches Deployment auf GitHub Pages
+- **Trigger**: Push auf `main` Branch
+- **Action**: Sendet `repository_dispatch` Event an Portfolio
+- **Portfolio**: Updated Submodule, baut Projekt, deployed zu GitHub Pages
 
 ##  Deployment-Prozess
 
-### Automatisches Deployment
+### So funktioniert das Deployment:
 
-Jeder Push auf den \main\ Branch triggert automatisch:
+\\\
+1. Du pushst zu casino-idle-slots/main
+         
+2. update-portfolio.yml triggert
+         
+3. Repository Dispatch Event  MaxeLBerger.github.io
+         
+4. Portfolio updated CasinoIdleSlots Submodule
+         
+5. Portfolio workflow baut ALLE Projekte (inkl. CasinoIdleSlots)
+         
+6. Deployment zu GitHub Pages
+         
+7. Live auf maximilianhaak.de/CasinoIdleSlots/ (~3 Minuten)
+\\\
+
+### Push und Deploy
 
 \\\ash
 git add .
-git commit -m "feat: neue Features"
+git commit -m \"feat: neue Features\"
 git push origin main
 \\\
 
-Der Workflow wird automatisch ausgeführt und deployed nach ~2-3 Minuten.
-
-### Manuelles Deployment
-
-1. Gehe zu **Actions** Tab im Repository
-2. Wähle **Deploy to GitHub Pages** Workflow
-3. Klicke **Run workflow**  **Run workflow**
+**Das war's!** Der Rest passiert automatisch.
 
 ##  Custom Domain Setup (maximilianhaak.de)
 
-Da die App auf einer Custom Domain läuft, sind zusätzliche DNS-Konfigurationen nötig:
+Die App läuft auf einer Custom Domain mit Path-basiertem Routing:
 
-### DNS Records
+### Reverse Proxy Konfiguration
 
-In deinem DNS-Provider (z.B. Cloudflare, Namecheap):
+Auf deinem Server (maximilianhaak.de) muss ein Reverse Proxy konfiguriert sein:
 
-#### Option A: Subdomain Redirect
-
+**Nginx Beispiel:**
 \\\
-Type: CNAME
-Name: casinoidleslots (oder beliebiger Subdomain)
-Value: maximilianhaak.github.io
-\\\
-
-#### Option B: Path-basiertes Routing
-
-Wenn \maximilianhaak.de\ bereits existiert und du \/CasinoIdleSlots/\ als Path nutzen willst:
-
-1. Deploye auf GitHub Pages wie üblich
-2. Setze einen Reverse Proxy oder Rewrite-Rule auf deinem Haupt-Server
-3. Leite \/CasinoIdleSlots/*\ zu GitHub Pages um
-
-### CNAME Datei
-
-Wenn du eine Custom Domain direkt nutzen willst:
-
-\\\ash
-echo "maximilianhaak.de" > public/CNAME
-\\\
-
-Dann in \ite.config.ts\ die base URL anpassen:
-\\\	ypescript
-base: '/'  // Statt '/CasinoIdleSlots/'
-\\\
-
-##  Deployment Verification
-
-Nach erfolgreichem Deployment:
-
-1. **Check Workflow Status**
-   - Gehe zu Actions Tab
-   - Stelle sicher, dass der Workflow grün ist 
-
-2. **Test Production URL**
-   - Öffne: \https://maximilianhaak.de/CasinoIdleSlots/\
-   - Verifiziere alle Features funktionieren
-
-3. **Test GitHub Login**
-   - Login mit GitHub Account
-   - Verifiziere Cloud-Sync funktioniert
-
-4. **Check Console**
-   - Öffne Browser Dev Tools
-   - Prüfe auf JavaScript-Fehler
-   - Prüfe auf 404-Fehler bei Assets
-
-##  Troubleshooting
-
-### Problem: 404 bei Assets
-
-**Ursache:** Base URL falsch konfiguriert
-
-**Lösung:**
-\\\	ypescript
-// vite.config.ts
-base: '/CasinoIdleSlots/'  // Mit trailing slash!
-\\\
-
-### Problem: Blank Page nach Deployment
-
-**Ursache:** JavaScript nicht geladen
-
-**Lösung:**
-1. Check Browser Console für Fehler
-2. Verifiziere \ase\ in vite.config.ts
-3. Hard-Refresh mit Ctrl+Shift+R
-
-### Problem: GitHub Login funktioniert nicht
-
-**Ursache:** Callback URL nicht konfiguriert
-
-**Lösung:**
-1. Gehe zu GitHub App Settings
-2. Füge Production URL zu allowed callbacks hinzu
-3. Spark sollte dies automatisch handhaben
-
-### Problem: Workflow schlägt fehl
-
-**Ursache:** Build-Fehler oder fehlende Permissions
-
-**Lösung:**
-1. Check Workflow-Logs in Actions Tab
-2. Stelle sicher Pages Permissions gesetzt sind
-3. Verifiziere \package.json\ scripts
-
-##  Monitoring & Analytics
-
-### Performance Monitoring
-
-Nutze Browser Dev Tools für Performance-Analyse:
-
-\\\ash
-npm run build
-npm run preview
-# Dann Lighthouse-Report in Chrome ausführen
-\\\
-
-### Error Tracking (Optional)
-
-Für Production Error Tracking können Services wie Sentry integriert werden:
-
-\\\	ypescript
-// main.tsx
-import * as Sentry from "@sentry/react";
-
-if (import.meta.env.PROD) {
-  Sentry.init({
-    dsn: "YOUR_SENTRY_DSN",
-    environment: "production",
-  });
+ginx
+location /CasinoIdleSlots/ {
+    proxy_pass https://maxeleberger.github.io/CasinoIdleSlots/;
+    proxy_set_header Host maxeleberger.github.io;
+    proxy_set_header X-Real-IP \;
 }
 \\\
 
-##  Rollback-Strategie
+**Apache Beispiel:**
+\\\pache
+<Location /CasinoIdleSlots/>
+    ProxyPass https://maxeleberger.github.io/CasinoIdleSlots/
+    ProxyPassReverse https://maxeleberger.github.io/CasinoIdleSlots/
+</Location>
+\\\
 
-Falls ein Deployment Probleme verursacht:
+### Direct Access URLs
 
-### Option 1: Git Revert
+- **Via Custom Domain**: https://maximilianhaak.de/CasinoIdleSlots/
+- **Direct GitHub Pages**: https://maxeleberger.github.io/CasinoIdleSlots/
+
+##  Deployment Verification
+
+Nach erfolgreichem Push:
+
+### 1. Check This Repo's Actions
+- Gehe zu: https://github.com/MaxeLBerger/casino-idle-slots/actions
+- Workflow **Update Portfolio on Push** sollte grün sein 
+- Dauer: ~10 Sekunden
+
+### 2. Check Portfolio Actions
+- Gehe zu: https://github.com/MaxeLBerger/MaxeLBerger.github.io/actions
+- Workflow **Auto Update Submodules** sollte laufen
+- Danach: **Deploy Portfolio** sollte laufen
+- Gesamtdauer: ~3 Minuten
+
+### 3. Verify Deployment
+\\\ash
+# Check if site is live
+curl -I https://maxeleberger.github.io/CasinoIdleSlots/
+
+# Should return: HTTP/2 200
+\\\
+
+### 4. Test in Browser
+- Clear cache: Ctrl+Shift+R (Windows) / Cmd+Shift+R (Mac)
+- Visit: https://maximilianhaak.de/CasinoIdleSlots/
+- Changes should be live in ~3 minutes
+
+##  Troubleshooting
+
+### Problem: Workflow fails with \"Resource not accessible\"
+**Lösung**: Füge das `PORTFOLIO_UPDATE_TOKEN` Secret hinzu (siehe PORTFOLIO_INTEGRATION.md)
+
+### Problem: Portfolio updated nicht
+**Check:**
+1. Ist der Token noch gültig?
+2. Hat der Token `repo` scope?
+3. Läuft der Workflow?  Check Actions Tab
+
+### Problem: Build fails im Portfolio
+**Check:**
+1. Läuft `npm run build` lokal?
+2. Sind alle Dependencies in `package.json`?
+3. Check Portfolio Actions für Details
+
+### Problem: Änderungen nicht sichtbar
+**Lösungen:**
+1. Hard Refresh: Ctrl+Shift+R
+2. Clear Browser Cache
+3. Check ob Submodule im Portfolio updated ist:
+   \\\ash
+   cd /path/to/MaxeLBerger.github.io
+   git submodule status CasinoIdleSlots
+   \\\
+4. Check Reverse Proxy Logs auf deinem Server
+
+### Problem: 404 Error auf Subdirectory
+**Check:**
+1. Ist `base: '/CasinoIdleSlots/'` in `vite.config.ts` gesetzt?
+2. Buildet Vite mit korrekter base URL?
+3. Sind Assets mit korrektem Pfad referenziert?
+
+##  Monitoring
+
+### GitHub Actions Status Badges
+
+Portfolio Deployment:
+\\\markdown
+![Deploy Status](https://github.com/MaxeLBerger/MaxeLBerger.github.io/actions/workflows/deploy.yml/badge.svg)
+\\\
+
+### Deployment Logs
+
+- **This Repo**: https://github.com/MaxeLBerger/casino-idle-slots/actions
+- **Portfolio**: https://github.com/MaxeLBerger/MaxeLBerger.github.io/actions
+
+##  Manual Update (Falls nötig)
+
+Falls automatisches Update nicht funktioniert:
 
 \\\ash
-git revert HEAD
+# Im Portfolio Repo
+cd /path/to/MaxeLBerger.github.io
+
+# Update Submodule
+git submodule update --remote --merge CasinoIdleSlots
+
+# Commit & Push
+git add CasinoIdleSlots
+git commit -m \"chore: manually update CasinoIdleSlots\"
 git push origin main
 \\\
 
-### Option 2: Manueller Rollback
+##  Related Documentation
 
-1. Gehe zu vorheriger Commit
-2. Erstelle neuen Branch
-3. Force-push zu main (nicht empfohlen für Teams)
-
-### Option 3: Actions Re-run
-
-1. Gehe zu Actions Tab
-2. Finde letzten erfolgreichen Workflow
-3. Re-run den Workflow
-
-##  Pre-Deployment Checklist
-
-Vor jedem Production Deployment:
-
-- [ ] Alle Tests lokal ausgeführt
-- [ ] \
-pm run build\ erfolgreich
-- [ ] \
-pm run preview\ getestet
-- [ ] Keine Console Errors
-- [ ] GitHub Login funktioniert lokal
-- [ ] Performance akzeptabel (Lighthouse Score >90)
-- [ ] Mobile Responsiveness geprüft
-- [ ] Changelog aktualisiert
-- [ ] Version in package.json erhöht
-
-##  Deployment Environments
-
-### Development
-- **URL:** \http://localhost:5173\
-- **Command:** \
-pm run dev\
-- **Features:** Hot Module Replacement, Source Maps
-
-### Preview
-- **URL:** \http://localhost:4173\
-- **Command:** \
-pm run preview\
-- **Features:** Production Build lokal testen
-
-### Production
-- **URL:** \https://maximilianhaak.de/CasinoIdleSlots/\
-- **Command:** Automatisch via GitHub Actions
-- **Features:** Minifiziert, Tree-shaken, Optimiert
-
-##  Best Practices
-
-1. **Semantic Versioning** - Nutze Semantic Versioning für Releases
-2. **Branch Protection** - Schütze main Branch, require Pull Requests
-3. **Review Process** - Code-Review vor Merge zu main
-4. **Staging Environment** - Teste auf Staging vor Production
-5. **Monitoring** - Monitor Production für Fehler und Performance
+- **[PORTFOLIO_INTEGRATION.md](./PORTFOLIO_INTEGRATION.md)** - Setup-Anleitung
+- **[README.md](./README.md)** - Projekt-Übersicht
+- **[CODE_REVIEW.md](./CODE_REVIEW.md)** - Code-Review Ergebnisse
+- [Portfolio Setup Guide](https://github.com/MaxeLBerger/MaxeLBerger.github.io/blob/main/COMPLETE_SETUP_GUIDE.md)
+- [Automation Overview](https://github.com/MaxeLBerger/MaxeLBerger.github.io/blob/main/AUTOMATION_OVERVIEW.md)
 
 ---
 
-Bei Fragen oder Problemen öffne ein Issue im Repository! 
+**Current Status**:  **Setup Required**  
+Add `PORTFOLIO_UPDATE_TOKEN` secret to enable automatic deployment!
+
+See: [PORTFOLIO_INTEGRATION.md](./PORTFOLIO_INTEGRATION.md) for setup instructions.
