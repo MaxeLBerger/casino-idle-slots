@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, SignOut, Trophy, Sparkle, Coins, Lightning } from '@phosphor-icons/react'
+import { User, SignOut, Trophy, Sparkle, Coins, Lightning, FloppyDisk, Check } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from 'sonner'
 
 interface UserProfileProps {
   isLoggedIn: boolean
@@ -18,8 +19,10 @@ interface UserProfileProps {
   coins: number
   prestigePoints: number
   totalSpins: number
+  lastSaveTime?: number
   onLogin: () => void
   onLogout: () => void
+  onManualSave?: () => Promise<boolean>
 }
 
 export function UserProfile({
@@ -32,10 +35,42 @@ export function UserProfile({
   coins,
   prestigePoints,
   totalSpins,
+  lastSaveTime,
   onLogin,
-  onLogout
+  onLogout,
+  onManualSave
 }: UserProfileProps) {
   const [showProfile, setShowProfile] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
+
+  const handleManualSave = async () => {
+    if (!onManualSave) return
+    
+    setIsSaving(true)
+    const success = await onManualSave()
+    setIsSaving(false)
+    
+    if (success) {
+      setJustSaved(true)
+      toast.success('Progress saved successfully!', {
+        icon: '💾'
+      })
+      setTimeout(() => setJustSaved(false), 2000)
+    } else {
+      toast.error('Failed to save progress')
+    }
+  }
+
+  const getTimeSinceLastSave = () => {
+    if (!lastSaveTime) return 'Never'
+    const seconds = Math.floor((Date.now() - lastSaveTime) / 1000)
+    if (seconds < 60) return `${seconds}s ago`
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    return `${hours}h ago`
+  }
 
   if (!isLoggedIn) {
     return (
@@ -137,6 +172,48 @@ export function UserProfile({
                 </div>
               </Card>
             </div>
+
+            {onManualSave && (
+              <Card className="p-4 bg-muted/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <div className="text-sm font-semibold mb-1">Game Progress</div>
+                    <div className="text-xs text-muted-foreground">
+                      Last saved: {getTimeSinceLastSave()}
+                    </div>
+                  </div>
+                  {justSaved && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-green-500"
+                    >
+                      <Check size={24} weight="bold" />
+                    </motion.div>
+                  )}
+                </div>
+                <Button
+                  onClick={handleManualSave}
+                  disabled={isSaving}
+                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                >
+                  {isSaving ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
+                      <FloppyDisk size={20} weight="fill" className="mr-2" />
+                    </motion.div>
+                  ) : (
+                    <FloppyDisk size={20} weight="fill" className="mr-2" />
+                  )}
+                  {isSaving ? 'Saving...' : 'Save Progress'}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Auto-saves on every action & page close
+                </p>
+              </Card>
+            )}
 
             <Button
               onClick={onLogout}

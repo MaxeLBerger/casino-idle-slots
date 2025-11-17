@@ -52,6 +52,8 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
   const userIdRef = useRef<string | null>(null)
   const defaultValueRef = useRef(defaultValue)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const currentValueRef = useRef<T>(defaultValue)
+  const [lastSaveTime, setLastSaveTime] = useState<number>(Date.now())
 
   useEffect(() => {
     let mounted = true
@@ -75,16 +77,19 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
           if (storedValue !== undefined && storedValue !== null) {
             if (mounted) {
               setValue(storedValue)
+              currentValueRef.current = storedValue
             }
           } else {
             if (mounted) {
               setValue(defaultValueRef.current)
+              currentValueRef.current = defaultValueRef.current
             }
           }
         } catch (kvError) {
           console.error('[Persistence] Error loading from KV:', kvError)
           if (mounted) {
             setValue(defaultValueRef.current)
+            currentValueRef.current = defaultValueRef.current
           }
         }
         
@@ -93,6 +98,7 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
         console.error('[Persistence] Error during initialization:', error)
         if (mounted) {
           setValue(defaultValueRef.current)
+          currentValueRef.current = defaultValueRef.current
         }
         isInitializedRef.current = true
       } finally {
@@ -112,11 +118,45 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
     }
   }, [baseKey])
 
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isInitializedRef.current && currentValueRef.current) {
+        const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
+        window.spark.kv.set(storageKey, currentValueRef.current).catch(err => {
+          console.error('[Persistence] Failed to persist on unload:', err)
+        })
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [baseKey])
+
+  const persistImmediately = async () => {
+    if (isInitializedRef.current && currentValueRef.current) {
+      const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
+      try {
+        await window.spark.kv.set(storageKey, currentValueRef.current)
+        setLastSaveTime(Date.now())
+        return true
+      } catch (err) {
+        console.error('[Persistence] Failed to persist immediately:', err)
+        return false
+      }
+    }
+    return false
+  }
+
   const setValueAndPersist = (newValue: T | ((prev: T) => T)) => {
     setValue((prev) => {
       const valueToSet = typeof newValue === 'function' 
         ? (newValue as (prev: T) => T)(prev) 
         : newValue
+      
+      currentValueRef.current = valueToSet
       
       if (isInitializedRef.current) {
         if (saveTimeoutRef.current) {
@@ -125,10 +165,12 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
         
         saveTimeoutRef.current = setTimeout(() => {
           const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
-          window.spark.kv.set(storageKey, valueToSet).catch(err => {
+          window.spark.kv.set(storageKey, valueToSet).then(() => {
+            setLastSaveTime(Date.now())
+          }).catch(err => {
             console.error('[Persistence] Failed to persist:', err)
           })
-        }, 2000)
+        }, 500)
       }
       
       return valueToSet
@@ -139,9 +181,10 @@ export function useUserLinkedKV<T>(baseKey: string, defaultValue: T) {
     const storageKey = userIdRef.current ? `${baseKey}-user-${userIdRef.current}` : `${baseKey}-local`
     await window.spark.kv.delete(storageKey)
     setValue(defaultValueRef.current)
+    currentValueRef.current = defaultValueRef.current
   }
 
-  return [value, setValueAndPersist, deleteValue, isLoading, userId] as const
+  return [value, setValueAndPersist, deleteValue, isLoading, userId, persistImmediately, lastSaveTime] as const
 }
 
 export async function migrateLocalDataToUser(baseKey: string, userId: string) {

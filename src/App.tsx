@@ -106,7 +106,7 @@ const DEFAULT_STATE: GameState = {
 }
 
 function App() {
-  const [gameState, setGameState, , isLoadingGameState, gameStateUserId] = useUserLinkedKV<GameState>('casino-game-state', DEFAULT_STATE)
+  const [gameState, setGameState, , isLoadingGameState, gameStateUserId, saveGameStateImmediately, lastSaveTime] = useUserLinkedKV<GameState>('casino-game-state', DEFAULT_STATE)
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null)
   const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
   const [hasMigratedData, setHasMigratedData] = useState(false)
@@ -949,8 +949,10 @@ function App() {
               coins={effectiveGameState.coins}
               prestigePoints={effectiveGameState.prestigePoints}
               totalSpins={effectiveGameState.totalSpins}
+              lastSaveTime={lastSaveTime}
               onLogin={handleLogin}
               onLogout={handleLogout}
+              onManualSave={saveGameStateImmediately}
             />
           </motion.div>
         </div>
