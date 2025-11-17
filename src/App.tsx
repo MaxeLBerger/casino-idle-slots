@@ -53,7 +53,7 @@ const SLOT_MACHINE_CONFIGS = [
 const SPIN_COST = 10
 const STARTING_COINS = 200
 const MAX_OFFLINE_HOURS = 4
-const PRESTIGE_SPIN_REQUIREMENT = 100
+const PRESTIGE_EARNINGS_REQUIREMENT = 10000
 
 interface GameState {
   coins: number
@@ -843,8 +843,8 @@ function App() {
   }
 
   const prestige = () => {
-    if (!gameState || gameState.totalSpins < PRESTIGE_SPIN_REQUIREMENT) {
-      toast.error(`Need at least ${PRESTIGE_SPIN_REQUIREMENT} total spins to prestige!`)
+    if (!gameState || gameState.totalEarnings < PRESTIGE_EARNINGS_REQUIREMENT) {
+      toast.error(`Need at least ${PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} total earnings to prestige!`)
       return
     }
 
@@ -972,7 +972,7 @@ function App() {
   const effectiveGameState = gameState || DEFAULT_STATE
   const spinPowerCost = calculateUpgradeCost(effectiveGameState.spinPowerLevel, 50)
   const idleIncomeCost = calculateUpgradeCost(effectiveGameState.idleIncomeLevel, 100)
-  const canPrestige = effectiveGameState.totalSpins >= PRESTIGE_SPIN_REQUIREMENT
+  const canPrestige = effectiveGameState.totalEarnings >= PRESTIGE_EARNINGS_REQUIREMENT
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 md:p-6">
@@ -1322,12 +1322,12 @@ function App() {
                   {canPrestige ? (
                     <>
                       <Sparkle size={20} weight="fill" className="mr-2" />
-                      Prestige ({PRESTIGE_SPIN_REQUIREMENT} spins)
+                      Prestige ({PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
                     </>
                   ) : (
                     <>
                       <Lock size={20} className="mr-2" />
-                      Locked ({effectiveGameState.totalSpins}/{PRESTIGE_SPIN_REQUIREMENT} spins)
+                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
                     </>
                   )}
                 </Button>
