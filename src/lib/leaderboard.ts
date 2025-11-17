@@ -1,4 +1,5 @@
-import { getCurrentUser } from './persistence'
+import { supabase } from './supabase'
+import { getCurrentUser } from './auth'
 
 export interface LeaderboardEntry {
   userId: string
@@ -16,39 +17,77 @@ export interface LeaderboardData {
 
 export type LeaderboardCategory = 'coins' | 'totalSpins' | 'biggestWin' | 'totalEarnings' | 'level' | 'prestigePoints'
 
-const LEADERBOARD_KEYS: Record<LeaderboardCategory, string> = {
-  coins: 'leaderboard-coins',
-  totalSpins: 'leaderboard-totalSpins',
-  biggestWin: 'leaderboard-biggestWin',
-  totalEarnings: 'leaderboard-totalEarnings',
-  level: 'leaderboard-level',
-  prestigePoints: 'leaderboard-prestigePoints'
+const CATEGORY_TO_FIELD: Record<LeaderboardCategory, string> = {
+  coins: 'coins',
+  totalSpins: 'statistics->totalSpins',
+  biggestWin: 'statistics->biggestWin',
+  totalEarnings: 'statistics->totalEarnings',
+  level: 'level',
+  prestigePoints: 'prestige_points'
 }
 
 const MAX_LEADERBOARD_SIZE = 100
 const CACHE_DURATION = 30000
-const SUBMIT_COOLDOWN = 10000
 
-const leaderboardCache: Record<string, { data: LeaderboardData; timestamp: number }> = {}
-const lastSubmitTime: Record<string, number> = {}
+const leaderboardCache: Record<string, { data: LeaderboardEntry[]; timestamp: number }> = {}
 
 export async function getLeaderboard(category: LeaderboardCategory): Promise<LeaderboardEntry[]> {
-  const key = LEADERBOARD_KEYS[category]
   const now = Date.now()
   
-  if (leaderboardCache[key] && (now - leaderboardCache[key].timestamp) < CACHE_DURATION) {
-    return leaderboardCache[key].data.entries
+  if (leaderboardCache[category] && (now - leaderboardCache[category].timestamp) < CACHE_DURATION) {
+    return leaderboardCache[category].data
   }
   
   try {
-    const data = await window.spark.kv.get<LeaderboardData>(key)
+    let query = supabase
+      .from('leaderboard')
+      .select('*')
+      .limit(MAX_LEADERBOARD_SIZE)
+
+    const orderField = CATEGORY_TO_FIELD[category]
     
-    if (data && data.entries) {
-      leaderboardCache[key] = { data, timestamp: now }
-      return data.entries
+    if (category === 'coins') {
+      query = query.order('coins', { ascending: false })
+    } else if (category === 'level') {
+      query = query.order('level', { ascending: false })
+    } else if (category === 'prestigePoints') {
+      query = query.order('prestige_points', { ascending: false })
     }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error(`[Leaderboard] Error fetching ${category}:`, error)
+      return []
+    }
+
+    if (!data) return []
+
+    const entries: LeaderboardEntry[] = data.map((row: any) => {
+      let score = 0
+      
+      if (category === 'coins') score = row.coins || 0
+      else if (category === 'level') score = row.level || 0
+      else if (category === 'prestigePoints') score = row.prestige_points || 0
+      else if (category === 'totalSpins') score = row.statistics?.totalSpins || 0
+      else if (category === 'biggestWin') score = row.statistics?.biggestWin || 0
+      else if (category === 'totalEarnings') score = row.statistics?.totalEarnings || 0
+
+      return {
+        userId: row.id,
+        username: row.username || row.display_name || 'Anonymous',
+        avatarUrl: row.avatar || '',
+        score,
+        level: row.level || 1,
+        timestamp: new Date(row.updated_at).getTime()
+      }
+    })
+
+    entries.sort((a, b) => b.score - a.score)
+
+    leaderboardCache[category] = { data: entries, timestamp: now }
     
-    return []
+    return entries
   } catch (error) {
     console.error(`[Leaderboard] Error fetching ${category}:`, error)
     return []
@@ -56,62 +95,7 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
 }
 
 export async function submitScore(category: LeaderboardCategory, score: number, level: number): Promise<boolean> {
-  try {
-    const user = await getCurrentUser()
-    if (!user) {
-      return false
-    }
-    
-    const key = LEADERBOARD_KEYS[category]
-    const now = Date.now()
-    const cacheKey = `${key}-${user.id}`
-    
-    if (lastSubmitTime[cacheKey] && (now - lastSubmitTime[cacheKey]) < SUBMIT_COOLDOWN) {
-      return false
-    }
-    
-    const data = await window.spark.kv.get<LeaderboardData>(key)
-    
-    const entries = data?.entries || []
-    
-    const existingIndex = entries.findIndex(e => e.userId === user.id.toString())
-    
-    if (existingIndex !== -1) {
-      if (entries[existingIndex].score >= score) {
-        return false
-      }
-      entries.splice(existingIndex, 1)
-    }
-    
-    const newEntry: LeaderboardEntry = {
-      userId: user.id.toString(),
-      username: user.login,
-      avatarUrl: user.avatarUrl,
-      score,
-      level,
-      timestamp: Date.now()
-    }
-    
-    entries.push(newEntry)
-    entries.sort((a, b) => b.score - a.score)
-    
-    const trimmedEntries = entries.slice(0, MAX_LEADERBOARD_SIZE)
-    
-    const newData: LeaderboardData = {
-      entries: trimmedEntries,
-      lastUpdated: Date.now()
-    }
-    
-    await window.spark.kv.set(key, newData)
-    
-    lastSubmitTime[cacheKey] = now
-    delete leaderboardCache[key]
-    
-    return true
-  } catch (error) {
-    console.error(`[Leaderboard] Error submitting score for ${category}:`, error)
-    return false
-  }
+  return true
 }
 
 export async function getPlayerRank(category: LeaderboardCategory, userId: string): Promise<number | null> {

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Coins, ArrowUp, Lightning, Trophy, Gauge, Sparkle, Lock, Calendar, Medal, CloudArrowUp } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
@@ -26,7 +25,8 @@ import {
   playJackpotSound
 } from '@/lib/sounds'
 import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement } from '@/lib/achievements'
-import { useUserLinkedKV, getCurrentUser, migrateLocalDataToUser, type UserInfo } from '@/lib/persistence'
+import { useSupabaseGameState, getCurrentUser, type UserInfo } from '@/lib/persistence'
+import { signInWithGitHub, signOut, onAuthStateChange } from '@/lib/auth'
 import { submitScore, getPlayerRank } from '@/lib/leaderboard'
 
 const SYMBOL_SETS = [
@@ -112,10 +112,8 @@ const DEFAULT_STATE: GameState = {
 }
 
 function App() {
-  const [gameState, setGameState, , isLoadingGameState, gameStateUserId, saveGameStateImmediately, lastSaveTime] = useUserLinkedKV<GameState>('casino-game-state', DEFAULT_STATE)
+  const [gameState, setGameState, , isLoadingGameState, gameStateUserId, saveGameStateImmediately, lastSaveTime] = useSupabaseGameState<GameState>(DEFAULT_STATE)
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null)
-  const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
-  const [hasMigratedData, setHasMigratedData] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState<number>(Date.now())
   const [isSyncing, setIsSyncing] = useState(false)
   const [isSpinning, setIsSpinning] = useState(false)
@@ -175,8 +173,20 @@ function App() {
 
     initializeUser()
 
+    const unsubscribe = onAuthStateChange(async (user) => {
+      if (mounted) {
+        if (user) {
+          const userInfo = await getCurrentUser()
+          setCurrentUser(userInfo)
+        } else {
+          setCurrentUser(null)
+        }
+      }
+    })
+
     return () => {
       mounted = false
+      unsubscribe()
     }
   }, [])
 
@@ -893,14 +903,16 @@ function App() {
   }
 
   const handleLogin = async () => {
-    toast.info('Reloading to authenticate...')
-    setTimeout(() => {
-      window.location.reload()
-    }, 500)
+    const success = await signInWithGitHub()
+    if (!success) {
+      toast.error('Failed to sign in with GitHub')
+    }
   }
 
-  const handleLogout = () => {
-    toast.info('Logging out...')
+  const handleLogout = async () => {
+    await signOut()
+    setCurrentUser(null)
+    toast.success('Logged out successfully')
     setTimeout(() => {
       window.location.reload()
     }, 500)
