@@ -8,10 +8,7 @@ const enableDemoMode = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true'
 export const isDemoMode = !supabaseUrl || !supabaseAnonKey || enableDemoMode
 
 if (isDemoMode) {
-  console.log('🎮 Casino Idle Slots - DEMO MODE')
-  console.log('ℹ️ Running with localStorage only')
-  console.log('ℹ️ Cloud sync and leaderboard disabled')
-  console.log('ℹ️ To enable full features, configure Supabase environment variables')
+  console.warn('⚠️ Casino Idle Slots running in DEMO MODE (localStorage only)')
 }
 
 // Create Supabase client only if credentials are available
