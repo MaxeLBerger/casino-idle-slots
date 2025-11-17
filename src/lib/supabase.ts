@@ -1,10 +1,24 @@
 ﻿import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const enableDemoMode = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+// Check if running in demo mode (no Supabase configuration)
+export const isDemoMode = !supabaseUrl || !supabaseAnonKey || enableDemoMode
+
+if (isDemoMode) {
+  console.log('🎮 Casino Idle Slots - DEMO MODE')
+  console.log('ℹ️ Running with localStorage only')
+  console.log('ℹ️ Cloud sync and leaderboard disabled')
+  console.log('ℹ️ To enable full features, configure Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create Supabase client only if credentials are available
+// In demo mode, we create a dummy client that won't be used
+export const supabase = isDemoMode 
+  ? null as any
+  : createClient(supabaseUrl, supabaseAnonKey)
+
+// Helper to check if backend features are available
+export const hasBackendFeatures = !isDemoMode && supabase !== null

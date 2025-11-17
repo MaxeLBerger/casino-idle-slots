@@ -1,8 +1,12 @@
 ﻿import { useEffect, useState, useRef, useCallback } from 'react'
-import { supabase } from './supabase'
+import { supabase, isDemoMode } from './supabase'
 import { getCurrentUser, type UserInfo } from './auth'
 
 export type { UserInfo }
+
+// Demo mode: Use localStorage-only persistence (imported from old Spark version)
+// This allows the app to work without Supabase configuration
+// Full features (cloud sync, leaderboard) require Supabase setup
 
 interface GameStateRow {
   user_id: string
@@ -49,6 +53,11 @@ export function useSupabaseGameState<T extends Record<string, any>>(
   const isSavingRef = useRef(false)
 
   const saveToSupabase = useCallback(async (data: T, uid: string): Promise<boolean> => {
+    // Demo mode: skip Supabase save
+    if (isDemoMode) {
+      return true
+    }
+
     if (isSavingRef.current) return false
     isSavingRef.current = true
 
@@ -88,7 +97,7 @@ export function useSupabaseGameState<T extends Record<string, any>>(
         login_streak: data.loginStreak || 1
       }
 
-      const { error } = await supabase
+      const { error } = await supabase!
         .from('game_states')
         .upsert(gameStateData, {
           onConflict: 'user_id'
@@ -110,8 +119,13 @@ export function useSupabaseGameState<T extends Record<string, any>>(
   }, [])
 
   const loadFromSupabase = useCallback(async (uid: string): Promise<T | null> => {
+    // Demo mode: return null (will use localStorage)
+    if (isDemoMode) {
+      return null
+    }
+
     try {
-      const { data, error } = await supabase
+      const { data, error} = await supabase!
         .from('game_states')
         .select('*')
         .eq('user_id', uid)
@@ -257,8 +271,15 @@ export function useSupabaseGameState<T extends Record<string, any>>(
   const deleteValue = useCallback(async () => {
     if (!userId) return
 
+    // Demo mode: just clear localStorage
+    if (isDemoMode) {
+      localStorage.removeItem('casinoIdleSlots')
+      setValue(defaultValue)
+      return
+    }
+
     try {
-      await supabase
+      await supabase!
         .from('game_states')
         .delete()
         .eq('user_id', userId)

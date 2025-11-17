@@ -1,4 +1,4 @@
-﻿import { supabase } from './supabase'
+﻿import { supabase, isDemoMode } from './supabase'
 import type { User } from '@supabase/supabase-js'
 
 export interface UserInfo {
@@ -15,8 +15,19 @@ export async function getCurrentUser(): Promise<UserInfo | null> {
     return userCache
   }
 
+  // Demo mode: return guest user
+  if (isDemoMode) {
+    userCache = {
+      id: 'demo-user',
+      login: 'DemoPlayer',
+      avatarUrl: '',
+      email: 'demo@local'
+    }
+    return userCache
+  }
+
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase!.auth.getUser()
     
     if (error || !user) {
       userCache = null
@@ -39,8 +50,14 @@ export async function getCurrentUser(): Promise<UserInfo | null> {
 }
 
 export async function signInWithGitHub(): Promise<boolean> {
+  // Demo mode: no-op
+  if (isDemoMode) {
+    console.log('[Auth] Demo mode - sign in not available')
+    return false
+  }
+
   try {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase!.auth.signInWithOAuth({
       provider: 'github',
       options: {
         redirectTo: window.location.origin + window.location.pathname
@@ -60,8 +77,14 @@ export async function signInWithGitHub(): Promise<boolean> {
 }
 
 export async function signOut(): Promise<void> {
+  // Demo mode: no-op
+  if (isDemoMode) {
+    userCache = null
+    return
+  }
+
   try {
-    await supabase.auth.signOut()
+    await supabase!.auth.signOut()
     userCache = null
   } catch (error) {
     console.error('[Auth] Error signing out:', error)
@@ -69,7 +92,13 @@ export async function signOut(): Promise<void> {
 }
 
 export function onAuthStateChange(callback: (user: User | null) => void) {
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+  // Demo mode: immediate callback with demo user
+  if (isDemoMode) {
+    callback(null)
+    return () => {}
+  }
+
+  const { data: { subscription } } = supabase!.auth.onAuthStateChange((_event, session) => {
     userCache = undefined
     callback(session?.user || null)
   })

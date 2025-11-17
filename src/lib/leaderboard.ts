@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, isDemoMode } from './supabase'
 import { getCurrentUser } from './auth'
 
 export interface LeaderboardEntry {
@@ -9,6 +9,9 @@ export interface LeaderboardEntry {
   level: number
   timestamp: number
 }
+
+// Demo mode: Return empty leaderboard
+const DEMO_LEADERBOARD: LeaderboardEntry[] = []
 
 export interface LeaderboardData {
   entries: LeaderboardEntry[]
@@ -32,6 +35,12 @@ const CACHE_DURATION = 30000
 const leaderboardCache: Record<string, { data: LeaderboardEntry[]; timestamp: number }> = {}
 
 export async function getLeaderboard(category: LeaderboardCategory): Promise<LeaderboardEntry[]> {
+  // Demo mode: return empty leaderboard
+  if (isDemoMode) {
+    console.log('[Leaderboard] Demo mode - leaderboard unavailable')
+    return DEMO_LEADERBOARD
+  }
+
   const now = Date.now()
   
   if (leaderboardCache[category] && (now - leaderboardCache[category].timestamp) < CACHE_DURATION) {
@@ -39,7 +48,7 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
   }
   
   try {
-    let query = supabase
+    let query = supabase!
       .from('leaderboard')
       .select('*')
       .limit(MAX_LEADERBOARD_SIZE)
