@@ -27,6 +27,10 @@ export function Achievements({
     return ACHIEVEMENTS.filter(a => a.category === category)
   }
 
+  const getUnlockedCountByCategory = (category: Achievement['category']) => {
+    return ACHIEVEMENTS.filter(a => a.category === category && unlockedAchievements.includes(a.id)).length
+  }
+
   const isUnlocked = (achievementId: string) => unlockedAchievements.includes(achievementId)
   const getProgress = (achievementId: string) => achievementProgress[achievementId] || 0
 
@@ -43,7 +47,7 @@ export function Achievements({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
       >
-        <Card className={`p-4 relative overflow-hidden ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
+        <Card className={`p-4 relative overflow-hidden h-full flex flex-col ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
           {unlocked && (
             <div className="absolute top-2 right-2">
               <Badge className="bg-primary text-primary-foreground">
@@ -53,22 +57,22 @@ export function Achievements({
             </div>
           )}
           
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-1">
             <div className={`text-4xl flex-shrink-0 ${!unlocked && !canClaim ? 'grayscale opacity-50' : ''}`}>
               {achievement.icon}
             </div>
             
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-1">
                 <h3 className="font-bold text-lg leading-tight">{achievement.title}</h3>
               </div>
               
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-muted-foreground mb-3 flex-1">
                 {achievement.description}
               </p>
               
               {!unlocked && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-auto">
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Progress</span>
                     <span>{progress} / {achievement.requirement}</span>
@@ -133,22 +137,35 @@ export function Achievements({
 
         <Tabs defaultValue="spins" className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="grid grid-cols-6 mb-4">
-            {categories.map(cat => (
-              <TabsTrigger key={cat.value} value={cat.value} className="text-xs">
-                <span className="mr-1">{cat.icon}</span>
-                <span className="hidden sm:inline">{cat.label}</span>
-              </TabsTrigger>
-            ))}
+            {categories.map(cat => {
+              const count = getUnlockedCountByCategory(cat.value)
+              return (
+                <TabsTrigger key={cat.value} value={cat.value} className="text-xs relative">
+                  <span className="mr-1">{cat.icon}</span>
+                  <span className="hidden sm:inline">{cat.label}</span>
+                  {count > 0 && (
+                    <Badge 
+                      variant="secondary" 
+                      className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] border border-border bg-background shadow-sm"
+                    >
+                      {count}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              )
+            })}
           </TabsList>
 
           <div className="flex-1 overflow-y-auto pr-2">
             {categories.map(cat => (
-              <TabsContent key={cat.value} value={cat.value} className="mt-0 space-y-3">
-                <AnimatePresence mode="popLayout">
-                  {getAchievementsByCategory(cat.value).map(achievement => 
-                    renderAchievement(achievement)
-                  )}
-                </AnimatePresence>
+              <TabsContent key={cat.value} value={cat.value} className="mt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <AnimatePresence mode="popLayout">
+                    {getAchievementsByCategory(cat.value).map(achievement => 
+                      renderAchievement(achievement)
+                    )}
+                  </AnimatePresence>
+                </div>
               </TabsContent>
             ))}
           </div>
