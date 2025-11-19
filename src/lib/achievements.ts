@@ -154,6 +154,36 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'prestige'
   },
   {
+    id: 'prestige-champion',
+    title: 'Prestige Champion',
+    description: 'Reach 20 prestige points',
+    icon: '⭐',
+    requirement: 20,
+    rewardCoins: 10000,
+    rewardPrestige: 3,
+    category: 'prestige'
+  },
+  {
+    id: 'prestige-legend',
+    title: 'Prestige Legend',
+    description: 'Reach 50 prestige points',
+    icon: '🔱',
+    requirement: 50,
+    rewardCoins: 50000,
+    rewardPrestige: 10,
+    category: 'prestige'
+  },
+  {
+    id: 'prestige-god',
+    title: 'Prestige God',
+    description: 'Reach 100 prestige points',
+    icon: '✨',
+    requirement: 100,
+    rewardCoins: 100000,
+    rewardPrestige: 25,
+    category: 'prestige'
+  },
+  {
     id: 'lucky-streak',
     title: 'Lucky Streak',
     description: 'Win 5 times in a row',

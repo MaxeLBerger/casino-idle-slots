@@ -7,6 +7,7 @@ export interface GameState {
   // Currency & Resources
   coins: number;
   prestigePoints: number;
+  totalPrestigeEarned?: number; // Track lifetime prestige points for milestones
   
   // Player Progress
   level: number;
@@ -15,6 +16,7 @@ export interface GameState {
   totalWins: number;
   biggestWin: number;
   totalEarnings: number;
+  lifetimeEarnings?: number; // Track earnings across all prestiges
   
   // Streaks & Combos
   winStreak: number;

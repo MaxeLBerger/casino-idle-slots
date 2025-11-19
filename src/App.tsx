@@ -14,6 +14,7 @@ import { UserProfile } from '@/components/UserProfile'
 import { Achievements, AchievementNotification } from '@/components/Achievements'
 import { DailyChallenges, DailyChallengeCard } from '@/components/DailyChallenges'
 import { Leaderboard, LeaderboardButton } from '@/components/Leaderboard'
+import { PrestigeDialog } from '@/components/PrestigeDialog'
 import { 
   playSpinSound, 
   playReelStopSound, 
@@ -28,6 +29,12 @@ import { generateDailyChallenge, playAchievementSound, ACHIEVEMENTS, Achievement
 import { useSupabaseGameState, getCurrentUser, type UserInfo, migrateLocalDataToUser } from '@/lib/persistence'
 import { signInWithGitHub, signOut, onAuthStateChange } from '@/lib/auth'
 import { submitScore, getPlayerRank } from '@/lib/leaderboard'
+import { 
+  calculatePrestigeReward, 
+  calculatePrestigeMultiplier, 
+  calculatePrestigeStartingCoins,
+  formatPrestigeBonus 
+} from '@/lib/prestige'
 
 const SYMBOL_SETS = [
   ['🍒', '🍋', '🔔'],
@@ -88,11 +95,13 @@ const DEFAULT_STATE: GameState = {
   totalSpins: 0,
   biggestWin: 0,
   totalEarnings: 0,
+  lifetimeEarnings: 0,
   spinMultiplier: 1,
   idleIncomePerSecond: 1,
   spinPowerLevel: 0,
   idleIncomeLevel: 1,
   prestigePoints: 0,
+  totalPrestigeEarned: 0,
   currentSlotMachine: 0,
   unlockedSlotMachines: [0],
   lastTimestamp: Date.now(),
@@ -125,7 +134,7 @@ function App() {
   const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega' | 'jackpot' | 'ultra'>('medium')
   const [showWinBanner, setShowWinBanner] = useState(false)
   const [winBannerAmount, setWinBannerAmount] = useState(0)
-  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot' | 'ultra'>('small')
+  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot' | 'ultra' | 'prestige'>('small')
   const [showAchievements, setShowAchievements] = useState(false)
   const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
@@ -134,6 +143,7 @@ function App() {
   const [lastSpinWin, setLastSpinWin] = useState<number | null>(null)
   const [hasMigratedData, setHasMigratedData] = useState(false)
   const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
+  const [showPrestigeDialog, setShowPrestigeDialog] = useState(false)
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -433,7 +443,8 @@ function App() {
     if (elapsed > 60 && gameState.idleIncomePerSecond > 0) {
       const maxSeconds = MAX_OFFLINE_HOURS * 3600
       const actualElapsed = Math.min(elapsed, maxSeconds)
-      const earnings = Math.floor(actualElapsed * gameState.idleIncomePerSecond)
+      const prestigeMultiplier = calculatePrestigeMultiplier(gameState.prestigePoints || 0)
+      const earnings = Math.floor(actualElapsed * gameState.idleIncomePerSecond * prestigeMultiplier)
       
       if (earnings > 0) {
         setOfflineEarnings(earnings)
@@ -454,7 +465,8 @@ function App() {
       if (gameState.idleIncomePerSecond > 0) {
         setGameState(prev => {
           if (!prev) return DEFAULT_STATE
-          const earnings = Math.floor(prev.idleIncomePerSecond)
+          const prestigeMultiplier = calculatePrestigeMultiplier(prev.prestigePoints || 0)
+          const earnings = Math.floor(prev.idleIncomePerSecond * prestigeMultiplier)
           return {
             ...prev,
             coins: prev.coins + earnings,
@@ -462,7 +474,8 @@ function App() {
             lastTimestamp: Date.now(),
           }
         })
-        updateDailyChallengeProgress('earnings', Math.floor(gameState.idleIncomePerSecond))
+        const prestigeMultiplier = calculatePrestigeMultiplier(gameState.prestigePoints || 0)
+        updateDailyChallengeProgress('earnings', Math.floor(gameState.idleIncomePerSecond * prestigeMultiplier))
       }
     }, 1000)
 
@@ -622,6 +635,10 @@ function App() {
         }
       }
     }
+
+    // Apply prestige multiplier to all winnings
+    const prestigeMultiplier = calculatePrestigeMultiplier(gameState.prestigePoints || 0)
+    winAmount = Math.floor(winAmount * prestigeMultiplier)
 
     const profit = winAmount - SPIN_COST
     setLastSpinWin(winAmount)
@@ -858,19 +875,31 @@ function App() {
     toast.success(`Switched to ${machine.name}!`)
   }
 
-  const prestige = () => {
+  const openPrestigeDialog = () => {
     if (!gameState || gameState.totalEarnings < PRESTIGE_EARNINGS_REQUIREMENT) {
       toast.error(`Need at least ${PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} total earnings to prestige!`)
       return
     }
+    setShowPrestigeDialog(true)
+  }
 
-    const newPrestigePoints = (gameState.prestigePoints || 0) + 1
+  const confirmPrestige = () => {
+    if (!gameState) return
+
+    const prestigeReward = calculatePrestigeReward(gameState.totalEarnings)
+    const newPrestigePoints = (gameState.prestigePoints || 0) + prestigeReward
+    const newTotalPrestigeEarned = (gameState.totalPrestigeEarned || 0) + prestigeReward
+    const newStartingCoins = calculatePrestigeStartingCoins(newPrestigePoints, STARTING_COINS)
+    const newLifetimeEarnings = (gameState.lifetimeEarnings || 0) + gameState.totalEarnings
 
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
       return {
         ...DEFAULT_STATE,
+        coins: newStartingCoins,
         prestigePoints: newPrestigePoints,
+        totalPrestigeEarned: newTotalPrestigeEarned,
+        lifetimeEarnings: newLifetimeEarnings,
         currentSlotMachine: 0,
         unlockedSlotMachines: [0],
         lastTimestamp: Date.now(),
@@ -893,15 +922,33 @@ function App() {
     setReels(newReels)
     setReelStates(Array(machine.rows).fill(0).map(() => Array(machine.reels).fill(false)))
 
+    // Epic prestige celebration sequence
     playPrestigeSound()
-    setConfettiIntensity('mega')
+    setConfettiIntensity('ultra')
     setShowConfetti(true)
-    toast.success('🌟 Prestige! +1 Prestige Point!')
-    setTimeout(() => setShowConfetti(false), 4000)
+    
+    // Show prestige banner
+    setWinBannerAmount(prestigeReward)
+    setWinBannerType('prestige')
+    setShowWinBanner(true)
+    
+    const multiplier = calculatePrestigeMultiplier(newPrestigePoints)
+    toast.success(`🌟 Prestige! +${prestigeReward} Prestige Points!`, {
+      description: `${multiplier.toFixed(2)}x multiplier bonus activated!`,
+      duration: 6000,
+    })
+    
+    setTimeout(() => {
+      setShowConfetti(false)
+      setShowWinBanner(false)
+    }, 5000)
     
     addExperience(100)
     checkAchievement('prestige-first', newPrestigePoints)
     checkAchievement('prestige-veteran', newPrestigePoints)
+    checkAchievement('prestige-champion', newPrestigePoints)
+    checkAchievement('prestige-legend', newPrestigePoints)
+    checkAchievement('prestige-god', newPrestigePoints)
   }
 
   const handleLogin = async () => {
@@ -1386,11 +1433,28 @@ function App() {
                       Idle Income
                     </div>
                     <div className="text-3xl font-black orbitron text-yellow-400 tabular-nums">
-                      {effectiveGameState.idleIncomePerSecond.toFixed(1)}
+                      {(effectiveGameState.idleIncomePerSecond * calculatePrestigeMultiplier(effectiveGameState.prestigePoints || 0)).toFixed(1)}
                       <span className="text-sm text-muted-foreground ml-1">/s</span>
                     </div>
                   </div>
                 </div>
+                {effectiveGameState.prestigePoints > 0 && (
+                  <div className="relative group col-span-2 md:col-span-4 mt-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl p-4 border border-primary/40 text-center backdrop-blur-sm">
+                      <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-1">
+                        <Trophy size={12} weight="fill" className="text-primary" />
+                        Prestige Bonus
+                      </div>
+                      <div className="text-3xl font-black orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tabular-nums">
+                        {calculatePrestigeMultiplier(effectiveGameState.prestigePoints || 0).toFixed(2)}x
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        All earnings multiplied by prestige bonus
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
           </div>
@@ -1460,12 +1524,40 @@ function App() {
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy size={20} weight="fill" className="text-primary" />
                   <h3 className="font-bold">Prestige</h3>
+                  {canPrestige && (
+                    <Badge className="ml-auto bg-gradient-to-r from-primary to-accent text-white animate-pulse">
+                      Ready!
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Reset progress for +1 Prestige Point
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Reset progress for permanent bonuses
+                  </p>
+                  {canPrestige ? (
+                    <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg p-3 border border-primary/40">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold">Reward:</span>
+                        <span className="font-bold text-primary">
+                          +{calculatePrestigeReward(effectiveGameState.totalEarnings)} Prestige Points
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="font-semibold">New Multiplier:</span>
+                        <span className="font-bold text-accent">
+                          {calculatePrestigeMultiplier((effectiveGameState.prestigePoints || 0) + calculatePrestigeReward(effectiveGameState.totalEarnings)).toFixed(2)}x
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <Progress 
+                      value={(effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100} 
+                      className="h-2"
+                    />
+                  )}
+                </div>
                 <Button
-                  onClick={prestige}
+                  onClick={openPrestigeDialog}
                   disabled={!canPrestige}
                   variant="destructive"
                   className="w-full"
@@ -1473,12 +1565,12 @@ function App() {
                   {canPrestige ? (
                     <>
                       <Sparkle size={20} weight="fill" className="mr-2" />
-                      Prestige ({PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
+                      Prestige Now
                     </>
                   ) : (
                     <>
                       <Lock size={20} className="mr-2" />
-                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
+                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()})
                     </>
                   )}
                 </Button>
@@ -1641,6 +1733,16 @@ function App() {
         onOpenChange={setShowLeaderboard}
         currentUserId={currentUser?.id.toString() || null}
         userLevel={effectiveGameState.level || 1}
+      />
+
+      <PrestigeDialog
+        open={showPrestigeDialog}
+        onOpenChange={setShowPrestigeDialog}
+        currentPrestigePoints={effectiveGameState.prestigePoints || 0}
+        totalEarnings={effectiveGameState.totalEarnings || 0}
+        currentCoins={effectiveGameState.coins || 0}
+        level={effectiveGameState.level || 1}
+        onConfirm={confirmPrestige}
       />
     </div>
   )

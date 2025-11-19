@@ -26,6 +26,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   // Currency & Resources
   coins: GAME_CONFIG.STARTING_COINS,
   prestigePoints: 0,
+  totalPrestigeEarned: 0,
   
   // Player Progress
   level: 1,
@@ -34,6 +35,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   totalWins: 0,
   biggestWin: 0,
   totalEarnings: 0,
+  lifetimeEarnings: 0,
   
   // Streaks & Combos
   winStreak: 0,
@@ -90,6 +92,33 @@ export const XP_REWARDS = {
   ACHIEVEMENT: 50,
   PRESTIGE: 100,
   DAILY_CHALLENGE: 50,
+} as const;
+
+// ============================================================================
+// PRESTIGE CONFIGURATION
+// ============================================================================
+
+export const PRESTIGE_CONFIG = {
+  // Base multiplier per prestige point (1% per point)
+  MULTIPLIER_PER_POINT: 0.01,
+  // Starting coins bonus per prestige point
+  STARTING_COINS_BONUS: 100,
+  // Prestige point scaling based on earnings tiers
+  EARNINGS_TIERS: [
+    { threshold: 10000, points: 1 },
+    { threshold: 50000, points: 2 },
+    { threshold: 100000, points: 3 },
+    { threshold: 250000, points: 5 },
+    { threshold: 500000, points: 8 },
+    { threshold: 1000000, points: 12 },
+  ],
+  // Milestone bonuses
+  MILESTONES: [
+    { points: 5, bonus: 'Extra slot machine unlocked', multiplier: 0.05 },
+    { points: 10, bonus: 'Jackpot chance increased', multiplier: 0.10 },
+    { points: 20, bonus: 'Ultra rare symbols unlocked', multiplier: 0.15 },
+    { points: 50, bonus: 'Master prestige benefits', multiplier: 0.25 },
+  ],
 } as const;
 
 // ============================================================================
