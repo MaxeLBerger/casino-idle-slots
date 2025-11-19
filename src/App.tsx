@@ -33,7 +33,8 @@ import {
   calculatePrestigeReward, 
   calculatePrestigeMultiplier, 
   calculatePrestigeStartingCoins,
-  formatPrestigeBonus 
+  formatPrestigeBonus,
+  getPrestigeRank
 } from '@/lib/prestige'
 
 const SYMBOL_SETS = [
@@ -1531,9 +1532,12 @@ function App() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Reset progress for permanent bonuses
-                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Current Rank:</span>
+                    <span className={`font-bold ${getPrestigeRank(effectiveGameState.prestigePoints || 0).color}`}>
+                      {getPrestigeRank(effectiveGameState.prestigePoints || 0).name} ({effectiveGameState.prestigePoints || 0} PP)
+                    </span>
+                  </div>
                   {canPrestige ? (
                     <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg p-3 border border-primary/40">
                       <div className="flex items-center justify-between text-sm">

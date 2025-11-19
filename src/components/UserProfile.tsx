@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, SignOut, Trophy, Sparkle, Coins, Lightning, FloppyDisk, Check } from '@phosphor-icons/react'
+import { User, SignOut, Trophy, Sparkle, Coins, Lightning, FloppyDisk, Check, Crown } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
+import { getPrestigeRank } from '@/lib/prestige'
 
 interface UserProfileProps {
   isLoggedIn: boolean
@@ -85,6 +86,7 @@ export function UserProfile({
   }
 
   const progressPercent = (experience / experienceToNextLevel) * 100
+  const prestigeRank = getPrestigeRank(prestigePoints)
 
   return (
     <>
@@ -98,8 +100,8 @@ export function UserProfile({
           <AvatarFallback>{username[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="hidden md:flex flex-col items-start">
-          <span className="text-sm font-semibold">{username}</span>
-          <span className="text-xs text-muted-foreground">Level {level}</span>
+          <span className="text-sm font-bold">{username}</span>
+          <span className={`text-xs ${prestigeRank.color}`}>{prestigeRank.name}</span>
         </div>
       </Button>
 
@@ -114,18 +116,16 @@ export function UserProfile({
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="w-20 h-20 border-4 border-primary">
+            <div className="flex flex-col items-center py-4">
+              <Avatar className="w-24 h-24 mb-4 border-4 border-primary/20">
                 <AvatarImage src={avatarUrl} alt={username} />
                 <AvatarFallback className="text-2xl">{username[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold orbitron">{username}</h3>
-                <Badge className="mt-1 bg-primary text-primary-foreground">
-                  <Sparkle size={14} weight="fill" className="mr-1" />
-                  Level {level}
-                </Badge>
-              </div>
+              <h2 className="text-2xl font-bold mb-1">{username}</h2>
+              <Badge variant="outline" className={`mb-6 ${prestigeRank.color} border-current`}>
+                <Crown size={14} weight="fill" className="mr-1" />
+                {prestigeRank.name} Rank
+              </Badge>
             </div>
 
             <Card className="p-4 bg-muted/50">

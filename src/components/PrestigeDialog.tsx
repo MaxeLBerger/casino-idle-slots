@@ -14,6 +14,7 @@ import {
   getNextMilestone,
   getUnlockedMilestones,
   formatPrestigeBonus,
+  getPrestigeRank,
 } from '@/lib/prestige'
 
 interface PrestigeDialogProps {
@@ -48,6 +49,9 @@ export function PrestigeDialog({
   const newlyUnlockedMilestones = unlockedMilestones.filter(
     m => m.points > currentPrestigePoints && m.points <= newPrestigeTotal
   )
+  
+  const currentRank = getPrestigeRank(currentPrestigePoints)
+  const newRank = getPrestigeRank(newPrestigeTotal)
 
   const handleConfirm = () => {
     if (!confirming) {
@@ -99,10 +103,16 @@ export function PrestigeDialog({
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Total Prestige Points:</span>
-              <span className="font-bold">{currentPrestigePoints}</span>
+              <span className={`font-bold ${currentRank.color}`}>{currentPrestigePoints}</span>
               <ArrowRight size={16} weight="bold" />
-              <span className="font-bold text-primary">{newPrestigeTotal}</span>
+              <span className={`font-bold ${newRank.color}`}>{newPrestigeTotal}</span>
             </div>
+            {newRank.name !== currentRank.name && (
+              <div className="mt-2 p-2 bg-background/50 rounded flex items-center justify-center gap-2">
+                <Crown size={16} weight="fill" className={newRank.color} />
+                <span className="text-sm font-bold">Rank Up: <span className={newRank.color}>{newRank.name}</span></span>
+              </div>
+            )}
           </Card>
 
           {/* Multiplier Boost & Starting Bonus */}

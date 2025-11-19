@@ -97,3 +97,30 @@ export function formatPrestigeBonus(prestigePoints: number): string {
   const bonusPercent = ((multiplier - 1) * 100).toFixed(0);
   return `+${bonusPercent}%`;
 }
+
+export type PrestigeRank = {
+  name: string;
+  color: string;
+  threshold: number;
+};
+
+export const PRESTIGE_RANKS: PrestigeRank[] = [
+  { name: 'Novice', color: 'text-gray-400', threshold: 0 },
+  { name: 'Bronze', color: 'text-orange-700', threshold: 10 },
+  { name: 'Silver', color: 'text-slate-400', threshold: 25 },
+  { name: 'Gold', color: 'text-yellow-400', threshold: 50 },
+  { name: 'Platinum', color: 'text-cyan-400', threshold: 100 },
+  { name: 'Diamond', color: 'text-blue-500', threshold: 250 },
+  { name: 'Master', color: 'text-purple-500', threshold: 500 },
+  { name: 'Grandmaster', color: 'text-rose-500', threshold: 1000 },
+  { name: 'Legend', color: 'text-amber-500', threshold: 2500 },
+];
+
+export function getPrestigeRank(points: number): PrestigeRank {
+  for (let i = PRESTIGE_RANKS.length - 1; i >= 0; i--) {
+    if (points >= PRESTIGE_RANKS[i].threshold) {
+      return PRESTIGE_RANKS[i];
+    }
+  }
+  return PRESTIGE_RANKS[0];
+}
