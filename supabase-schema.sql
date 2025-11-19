@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS game_states (
 );
 
 -- Leaderboard View
+DROP VIEW IF EXISTS leaderboard;
 CREATE OR REPLACE VIEW leaderboard AS
 SELECT 
   u.id,
@@ -56,6 +57,9 @@ SELECT
   gs.prestige_points,
   gs.prestige_level,
   gs.experience,
+  COALESCE(CAST(gs.statistics->>'totalSpins' AS BIGINT), 0) as total_spins,
+  COALESCE(CAST(gs.statistics->>'biggestWin' AS BIGINT), 0) as biggest_win,
+  COALESCE(CAST(gs.statistics->>'totalEarnings' AS BIGINT), 0) as total_earnings,
   gs.updated_at
 FROM auth.users u
 JOIN game_states gs ON u.id = gs.user_id
@@ -65,22 +69,26 @@ ORDER BY gs.coins DESC;
 ALTER TABLE game_states ENABLE ROW LEVEL SECURITY;
 
 -- Policies: Users can only access their own data
+DROP POLICY IF EXISTS "Users can read own game state" ON game_states;
 CREATE POLICY "Users can read own game state"
   ON game_states
   FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own game state" ON game_states;
 CREATE POLICY "Users can insert own game state"
   ON game_states
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own game state" ON game_states;
 CREATE POLICY "Users can update own game state"
   ON game_states
   FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own game state" ON game_states;
 CREATE POLICY "Users can delete own game state"
   ON game_states
   FOR DELETE
@@ -96,6 +104,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger to update updated_at on every update
+DROP TRIGGER IF EXISTS update_game_states_updated_at ON game_states;
 CREATE TRIGGER update_game_states_updated_at
   BEFORE UPDATE ON game_states
   FOR EACH ROW

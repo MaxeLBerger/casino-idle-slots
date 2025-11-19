@@ -22,9 +22,9 @@ export type LeaderboardCategory = 'coins' | 'totalSpins' | 'biggestWin' | 'total
 
 const CATEGORY_TO_FIELD: Record<LeaderboardCategory, string> = {
   coins: 'coins',
-  totalSpins: 'statistics->totalSpins',
-  biggestWin: 'statistics->biggestWin',
-  totalEarnings: 'statistics->totalEarnings',
+  totalSpins: 'total_spins',
+  biggestWin: 'biggest_win',
+  totalEarnings: 'total_earnings',
   level: 'level',
   prestigePoints: 'prestige_points'
 }
@@ -54,14 +54,7 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
       .limit(MAX_LEADERBOARD_SIZE)
 
     const orderField = CATEGORY_TO_FIELD[category]
-    
-    if (category === 'coins') {
-      query = query.order('coins', { ascending: false })
-    } else if (category === 'level') {
-      query = query.order('level', { ascending: false })
-    } else if (category === 'prestigePoints') {
-      query = query.order('prestige_points', { ascending: false })
-    }
+    query = query.order(orderField, { ascending: false })
 
     const { data, error } = await query
 
@@ -78,9 +71,9 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
       if (category === 'coins') score = row.coins || 0
       else if (category === 'level') score = row.level || 0
       else if (category === 'prestigePoints') score = row.prestige_points || 0
-      else if (category === 'totalSpins') score = row.statistics?.totalSpins || 0
-      else if (category === 'biggestWin') score = row.statistics?.biggestWin || 0
-      else if (category === 'totalEarnings') score = row.statistics?.totalEarnings || 0
+      else if (category === 'totalSpins') score = row.total_spins || 0
+      else if (category === 'biggestWin') score = row.biggest_win || 0
+      else if (category === 'totalEarnings') score = row.total_earnings || 0
 
       return {
         userId: row.id,

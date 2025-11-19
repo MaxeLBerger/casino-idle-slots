@@ -93,12 +93,16 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
         </DialogHeader>
 
         <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-6">
-          <TabsList className="grid grid-cols-3 lg:grid-cols-6 mb-4 bg-muted/50">
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 mb-4 bg-muted/50 p-1">
             {CATEGORIES.map(category => (
-              <TabsTrigger key={category} value={category} className="text-xs lg:text-sm">
-                <span className="mr-1">{getCategoryIcon(category)}</span>
-                <span className="hidden lg:inline">{getCategoryLabel(category)}</span>
-                <span className="lg:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
+              <TabsTrigger 
+                key={category} 
+                value={category} 
+                className="text-[10px] sm:text-xs md:text-sm px-1 py-2 h-full whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                <span className="mr-1 hidden md:inline">{getCategoryIcon(category)}</span>
+                <span className="hidden sm:inline">{getCategoryLabel(category)}</span>
+                <span className="sm:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
               </TabsTrigger>
             ))}
           </TabsList>

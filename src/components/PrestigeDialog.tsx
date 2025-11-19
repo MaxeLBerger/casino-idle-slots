@@ -105,48 +105,49 @@ export function PrestigeDialog({
             </div>
           </Card>
 
-          {/* Multiplier Boost */}
-          <Card className="p-6 bg-card/50 border-border">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Lightning size={20} weight="fill" className="text-accent" />
-              Multiplier Boost
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Current Multiplier:</span>
-                <span className="font-bold">{currentMultiplier.toFixed(2)}x</span>
+          {/* Multiplier Boost & Starting Bonus */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="p-4 bg-card/50 border-border">
+              <h3 className="text-base font-bold flex items-center gap-2 mb-2">
+                <Lightning size={18} weight="fill" className="text-accent" />
+                Multiplier Boost
+              </h3>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Current:</span>
+                  <span className="font-bold">{currentMultiplier.toFixed(2)}x</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">New:</span>
+                  <span className="font-bold text-accent">{newMultiplier.toFixed(2)}x</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Bonus:</span>
+                  <span className="font-bold text-green-500">
+                    +{((newMultiplier - currentMultiplier) * 100).toFixed(1)}%
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">New Multiplier:</span>
-                <span className="font-bold text-accent">{newMultiplier.toFixed(2)}x</span>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Bonus Increase:</span>
-                <span className="font-bold text-green-500">
-                  +{((newMultiplier - currentMultiplier) * 100).toFixed(1)}%
-                </span>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          {/* Starting Bonus */}
-          <Card className="p-6 bg-card/50 border-border">
-            <h3 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Coins size={20} weight="fill" className="text-primary" />
-              Fresh Start Bonus
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Starting Coins:</span>
-                <span className="font-bold text-primary">{newStartingCoins.toLocaleString()}</span>
+            <Card className="p-4 bg-card/50 border-border">
+              <h3 className="text-base font-bold flex items-center gap-2 mb-2">
+                <Coins size={18} weight="fill" className="text-primary" />
+                Fresh Start
+              </h3>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Coins:</span>
+                  <span className="font-bold text-primary">{newStartingCoins.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Multiplier:</span>
+                  <span className="font-bold text-accent">{formatPrestigeBonus(newPrestigeTotal)}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Prestige Multiplier:</span>
-                <span className="font-bold text-accent">{formatPrestigeBonus(newPrestigeTotal)}</span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
 
           {/* New Milestones */}
           {newlyUnlockedMilestones.length > 0 && (
