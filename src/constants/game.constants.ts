@@ -99,25 +99,26 @@ export const XP_REWARDS = {
 // ============================================================================
 
 export const PRESTIGE_CONFIG = {
-  // Base multiplier per prestige point (1% per point)
-  MULTIPLIER_PER_POINT: 0.01,
+  // Base multiplier per prestige point (25% per point - Massive Dopamine Boost!)
+  MULTIPLIER_PER_POINT: 0.25,
   // Starting coins bonus per prestige point
-  STARTING_COINS_BONUS: 100,
+  STARTING_COINS_BONUS: 500,
   // Prestige point scaling based on earnings tiers
   EARNINGS_TIERS: [
     { threshold: 10000, points: 1 },
-    { threshold: 50000, points: 2 },
-    { threshold: 100000, points: 3 },
-    { threshold: 250000, points: 5 },
-    { threshold: 500000, points: 8 },
-    { threshold: 1000000, points: 12 },
+    { threshold: 25000, points: 2 },
+    { threshold: 50000, points: 3 },
+    { threshold: 100000, points: 5 },
+    { threshold: 250000, points: 8 },
+    { threshold: 500000, points: 12 },
+    { threshold: 1000000, points: 20 },
   ],
   // Milestone bonuses
   MILESTONES: [
-    { points: 5, bonus: 'Extra slot machine unlocked', multiplier: 0.05 },
-    { points: 10, bonus: 'Jackpot chance increased', multiplier: 0.10 },
-    { points: 20, bonus: 'Ultra rare symbols unlocked', multiplier: 0.15 },
-    { points: 50, bonus: 'Master prestige benefits', multiplier: 0.25 },
+    { points: 5, bonus: 'Extra slot machine unlocked', multiplier: 0.50 },
+    { points: 10, bonus: 'Jackpot chance increased', multiplier: 1.00 },
+    { points: 25, bonus: 'Ultra rare symbols unlocked', multiplier: 2.50 },
+    { points: 50, bonus: 'Master prestige benefits', multiplier: 5.00 },
   ],
 } as const;
 

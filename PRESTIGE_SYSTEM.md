@@ -24,18 +24,18 @@ calculatePrestigeMultiplier(prestigePoints: number): number
 ```
 
 **Formula:**
-- Base: 1 + (prestigePoints × 0.01)
+- Base: 1 + (prestigePoints × 0.25)
 - Plus milestone bonuses:
-  - 5 PP: +5%
-  - 10 PP: +10%
-  - 20 PP: +15%
-  - 50 PP: +25%
+  - 5 PP: +50%
+  - 10 PP: +100%
+  - 25 PP: +250%
+  - 50 PP: +500%
 
 **Example:**
 - 0 PP = 1.00x (no bonus)
-- 10 PP = 1.10x base + 0.10 milestone = 1.20x total
-- 20 PP = 1.20x base + 0.15 milestone = 1.35x total
-- 50 PP = 1.50x base + 0.25 milestone = 1.75x total
+- 1 PP = 1.25x (25% bonus)
+- 10 PP = 3.50x base + 1.00 milestone = 4.50x total
+- 50 PP = 13.50x base + 5.00 milestone = 18.50x total
 
 **Application:**
 The multiplier is applied to:
@@ -56,11 +56,12 @@ Prestige points awarded are based on total earnings in current run:
 | Total Earnings | Prestige Points | Difficulty |
 |---------------|-----------------|------------|
 | 10,000        | 1               | Easy       |
-| 50,000        | 2               | Medium     |
-| 100,000       | 3               | Hard       |
-| 250,000       | 5               | Very Hard  |
-| 500,000       | 8               | Extreme    |
-| 1,000,000     | 12              | Legendary  |
+| 25,000        | 2               | Medium     |
+| 50,000        | 3               | Hard       |
+| 100,000       | 5               | Very Hard  |
+| 250,000       | 8               | Extreme    |
+| 500,000       | 12              | Legendary  |
+| 1,000,000     | 20              | Godlike    |
 
 **Benefits:**
 - Encourages players to push further before prestiging
@@ -73,12 +74,13 @@ Prestige points awarded are based on total earnings in current run:
 calculatePrestigeStartingCoins(prestigePoints, baseCoins): number
 ```
 
-**Formula:** baseCoins + (prestigePoints × 100)
+**Formula:** baseCoins + (prestigePoints × 500)
 
 **Examples:**
 - 0 PP: 200 coins
-- 10 PP: 1,200 coins
-- 50 PP: 5,200 coins
+- 1 PP: 700 coins
+- 10 PP: 5,200 coins
+- 50 PP: 25,200 coins
 
 **Purpose:** Allows players to skip the initial grind and jump straight into meaningful gameplay.
 
