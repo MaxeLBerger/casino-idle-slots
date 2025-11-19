@@ -32,7 +32,8 @@ import { submitScore, getPlayerRank } from '@/lib/leaderboard'
 import { 
   calculatePrestigeReward, 
   calculatePrestigeMultiplier, 
-  calculatePrestigeStartingCoins 
+  calculatePrestigeStartingCoins,
+  formatPrestigeBonus 
 } from '@/lib/prestige'
 
 const SYMBOL_SETS = [
@@ -133,7 +134,7 @@ function App() {
   const [confettiIntensity, setConfettiIntensity] = useState<'low' | 'medium' | 'high' | 'mega' | 'jackpot' | 'ultra'>('medium')
   const [showWinBanner, setShowWinBanner] = useState(false)
   const [winBannerAmount, setWinBannerAmount] = useState(0)
-  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot' | 'ultra'>('small')
+  const [winBannerType, setWinBannerType] = useState<'small' | 'big' | 'mega' | 'jackpot' | 'ultra' | 'prestige'>('small')
   const [showAchievements, setShowAchievements] = useState(false)
   const [showDailyChallenge, setShowDailyChallenge] = useState(false)
   const [achievementNotification, setAchievementNotification] = useState<Achievement | null>(null)
@@ -928,7 +929,7 @@ function App() {
     
     // Show prestige banner
     setWinBannerAmount(prestigeReward)
-    setWinBannerType('ultra')
+    setWinBannerType('prestige')
     setShowWinBanner(true)
     
     const multiplier = calculatePrestigeMultiplier(newPrestigePoints)
@@ -945,6 +946,9 @@ function App() {
     addExperience(100)
     checkAchievement('prestige-first', newPrestigePoints)
     checkAchievement('prestige-veteran', newPrestigePoints)
+    checkAchievement('prestige-champion', newPrestigePoints)
+    checkAchievement('prestige-legend', newPrestigePoints)
+    checkAchievement('prestige-god', newPrestigePoints)
   }
 
   const handleLogin = async () => {
@@ -1520,10 +1524,38 @@ function App() {
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy size={20} weight="fill" className="text-primary" />
                   <h3 className="font-bold">Prestige</h3>
+                  {canPrestige && (
+                    <Badge className="ml-auto bg-gradient-to-r from-primary to-accent text-white animate-pulse">
+                      Ready!
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Reset progress for +1 Prestige Point
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Reset progress for permanent bonuses
+                  </p>
+                  {canPrestige ? (
+                    <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg p-3 border border-primary/40">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold">Reward:</span>
+                        <span className="font-bold text-primary">
+                          +{calculatePrestigeReward(effectiveGameState.totalEarnings)} Prestige Points
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm mt-1">
+                        <span className="font-semibold">New Multiplier:</span>
+                        <span className="font-bold text-accent">
+                          {calculatePrestigeMultiplier((effectiveGameState.prestigePoints || 0) + calculatePrestigeReward(effectiveGameState.totalEarnings)).toFixed(2)}x
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <Progress 
+                      value={(effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100} 
+                      className="h-2"
+                    />
+                  )}
+                </div>
                 <Button
                   onClick={openPrestigeDialog}
                   disabled={!canPrestige}
@@ -1533,12 +1565,12 @@ function App() {
                   {canPrestige ? (
                     <>
                       <Sparkle size={20} weight="fill" className="mr-2" />
-                      Prestige ({PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
+                      Prestige Now
                     </>
                   ) : (
                     <>
                       <Lock size={20} className="mr-2" />
-                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} earned)
+                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()})
                     </>
                   )}
                 </Button>

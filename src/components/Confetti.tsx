@@ -92,7 +92,7 @@ export function Confetti({ active, intensity = 'medium' }: ConfettiProps) {
 interface WinBannerProps {
   show: boolean
   amount: number
-  type: 'small' | 'big' | 'mega' | 'jackpot' | 'ultra'
+  type: 'small' | 'big' | 'mega' | 'jackpot' | 'ultra' | 'prestige'
 }
 
 export function WinBanner({ show, amount, type }: WinBannerProps) {
@@ -139,6 +139,14 @@ export function WinBanner({ show, amount, type }: WinBannerProps) {
           textColor: 'text-white',
           scale: 1.8,
           emoji: '✨'
+        }
+      case 'prestige':
+        return {
+          text: 'PRESTIGE!',
+          bgColor: 'from-yellow-400/95 via-primary/95 via-accent/95 to-purple-500/95',
+          textColor: 'text-white',
+          scale: 1.8,
+          emoji: '👑'
         }
     }
   }
