@@ -123,7 +123,7 @@ export function Achievements({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Trophy size={28} weight="fill" className="text-primary" />
@@ -188,7 +188,7 @@ export function AchievementNotification({ achievement, onClose }: AchievementNot
       initial={{ opacity: 0, y: -100, scale: 0.8 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -100, scale: 0.8 }}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-full px-4"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100%-2rem)] sm:max-w-md w-full px-4"
     >
       <Card className="p-4 bg-gradient-to-br from-primary/90 to-accent/90 backdrop-blur-sm border-2 border-white/30 shadow-2xl">
         <div className="flex items-start gap-3">
