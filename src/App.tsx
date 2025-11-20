@@ -15,6 +15,8 @@ import { Achievements, AchievementNotification } from '@/components/Achievements
 import { DailyChallenges, DailyChallengeCard } from '@/components/DailyChallenges'
 import { Leaderboard, LeaderboardButton } from '@/components/Leaderboard'
 import { PrestigeDialog } from '@/components/PrestigeDialog'
+import { SpinHistory } from '@/components/SpinHistory'
+import { SpinResult, GameState } from '@/types/game.types'
 import { 
   playSpinSound, 
   playReelStopSound, 
@@ -63,33 +65,7 @@ const STARTING_COINS = 200
 const MAX_OFFLINE_HOURS = 4
 const PRESTIGE_EARNINGS_REQUIREMENT = 10000
 
-interface GameState {
-  coins: number
-  totalSpins: number
-  biggestWin: number
-  totalEarnings: number
-  spinMultiplier: number
-  idleIncomePerSecond: number
-  spinPowerLevel: number
-  idleIncomeLevel: number
-  prestigePoints: number
-  currentSlotMachine: number
-  unlockedSlotMachines: number[]
-  lastTimestamp: number
-  level: number
-  experience: number
-  totalWins: number
-  winStreak: number
-  maxWinStreak: number
-  totalUpgrades: number
-  unlockedAchievements: string[]
-  achievementProgress: Record<string, number>
-  dailyChallengeDate: string
-  dailyChallengeProgress: number
-  dailyChallengeCompleted: boolean
-  lastLoginDate: string
-  loginStreak: number
-}
+
 
 const DEFAULT_STATE: GameState = {
   coins: STARTING_COINS,
@@ -97,6 +73,7 @@ const DEFAULT_STATE: GameState = {
   biggestWin: 0,
   totalEarnings: 0,
   lifetimeEarnings: 0,
+  spinHistory: [],
   spinMultiplier: 1,
   idleIncomePerSecond: 1,
   spinPowerLevel: 0,
@@ -727,8 +704,20 @@ function App() {
     const newMaxWinStreak = Math.max(newWinStreak, gameState?.maxWinStreak || 0)
     const newTotalEarnings = (gameState?.totalEarnings || 0) + winAmount
 
+    const spinResult: SpinResult = {
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+      betAmount: SPIN_COST,
+      winAmount: winAmount,
+      isWin: hasWin,
+      symbols: finalReels.flat()
+    }
+
     setGameState(prev => {
       if (!prev) return DEFAULT_STATE
+      
+      const newHistory = [spinResult, ...(prev.spinHistory || [])].slice(0, 50)
+      
       return {
         ...prev,
         coins: prev.coins + winAmount,
@@ -738,6 +727,7 @@ function App() {
         totalWins: newTotalWins,
         winStreak: newWinStreak,
         maxWinStreak: newMaxWinStreak,
+        spinHistory: newHistory,
       }
     })
 
@@ -1458,6 +1448,17 @@ function App() {
                 )}
               </div>
             </Card>
+
+            <div className="mt-6">
+              <SpinHistory 
+                history={effectiveGameState.spinHistory || []}
+                totalSpins={effectiveGameState.totalSpins}
+                totalWins={effectiveGameState.totalWins}
+                biggestWin={effectiveGameState.biggestWin}
+                totalEarnings={effectiveGameState.totalEarnings}
+                rtp={effectiveGameState.totalSpins > 0 ? (effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100 : undefined}
+              />
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -1717,6 +1718,7 @@ function App() {
       <Achievements
         open={showAchievements}
         onOpenChange={setShowAchievements}
+       
         unlockedAchievements={effectiveGameState.unlockedAchievements || []}
         achievementProgress={effectiveGameState.achievementProgress || {}}
         onClaim={claimAchievement}

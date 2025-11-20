@@ -63,6 +63,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   // Timestamps
   lastTimestamp: Date.now(),
   lastLoginDate: '',
+  spinHistory: [],
 };
 
 // ============================================================================

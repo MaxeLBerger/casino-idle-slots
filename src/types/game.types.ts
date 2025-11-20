@@ -3,6 +3,17 @@
  * Zentrale TypeScript-Typen für den Game State
  */
 
+export interface SpinResult {
+  id: string;
+  timestamp: number;
+  betAmount: number;
+  winAmount: number;
+  isWin: boolean;
+  symbols: string[];
+  machineName?: string;
+  multiplier?: number;
+}
+
 export interface GameState {
   // Currency & Resources
   coins: number;
@@ -44,6 +55,7 @@ export interface GameState {
   // Timestamps
   lastTimestamp: number;
   lastLoginDate: string;
+  spinHistory: SpinResult[];
 }
 
 export interface GameConfig {
