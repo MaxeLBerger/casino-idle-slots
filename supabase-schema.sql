@@ -57,8 +57,10 @@ SELECT
   gs.prestige_points,
   gs.prestige_level,
   gs.experience,
-  COALESCE(CAST(gs.statistics->>'totalSpins' AS BIGINT), 0) as total_spins,
-  COALESCE(CAST(gs.statistics->>'biggestWin' AS BIGINT), 0) as biggest_win,
+  -- Use lifetime stats if available, otherwise fallback to legacy stats
+  COALESCE(CAST(gs.statistics->>'lifetimeSpins' AS BIGINT), CAST(gs.statistics->>'totalSpins' AS BIGINT), 0) as total_spins,
+  COALESCE(CAST(gs.statistics->>'lifetimeBiggestWin' AS BIGINT), CAST(gs.statistics->>'biggestWin' AS BIGINT), 0) as biggest_win,
+  -- totalEarnings is already cumulative in the new persistence logic, but we can be safe
   COALESCE(CAST(gs.statistics->>'totalEarnings' AS BIGINT), 0) as total_earnings,
   gs.updated_at
 FROM auth.users u

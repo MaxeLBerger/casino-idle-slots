@@ -20,6 +20,10 @@ interface UserProfileProps {
   coins: number
   prestigePoints: number
   totalSpins: number
+  lifetimeSpins: number
+  lifetimeWins: number
+  lifetimeBiggestWin: number
+  lifetimeEarnings: number
   lastSaveTime?: number
   onLogin: () => void
   onLogout: () => void
@@ -36,6 +40,10 @@ export function UserProfile({
   coins,
   prestigePoints,
   totalSpins,
+  lifetimeSpins,
+  lifetimeWins,
+  lifetimeBiggestWin,
+  lifetimeEarnings,
   lastSaveTime,
   onLogin,
   onLogout,
@@ -165,12 +173,37 @@ export function UserProfile({
               <Card className="p-4 bg-card border-secondary/20 col-span-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Lightning size={20} weight="fill" className="text-secondary" />
-                  <span className="text-sm font-semibold">Total Spins</span>
+                  <span className="text-sm font-semibold">Current Run Spins</span>
                 </div>
                 <div className="text-2xl font-bold orbitron tabular-nums">
                   {totalSpins.toLocaleString()}
                 </div>
               </Card>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <Sparkle size={16} weight="fill" />
+                Lifetime Statistics
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="p-3 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Total Spins</div>
+                  <div className="text-lg font-bold orbitron tabular-nums">{lifetimeSpins.toLocaleString()}</div>
+                </Card>
+                <Card className="p-3 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Total Wins</div>
+                  <div className="text-lg font-bold orbitron tabular-nums">{lifetimeWins.toLocaleString()}</div>
+                </Card>
+                <Card className="p-3 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Biggest Win</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-yellow-500">{lifetimeBiggestWin.toLocaleString()}</div>
+                </Card>
+                <Card className="p-3 bg-muted/30">
+                  <div className="text-xs text-muted-foreground mb-1">Total Earnings</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-primary">{lifetimeEarnings.toLocaleString()}</div>
+                </Card>
+              </div>
             </div>
 
             {onManualSave && (

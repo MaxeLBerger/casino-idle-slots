@@ -113,10 +113,10 @@ export async function getPlayerRank(category: LeaderboardCategory, userId: strin
 
 export function getCategoryLabel(category: LeaderboardCategory): string {
   const labels: Record<LeaderboardCategory, string> = {
-    coins: 'Total Coins',
-    totalSpins: 'Total Spins',
-    biggestWin: 'Biggest Win',
-    totalEarnings: 'Total Earnings',
+    coins: 'Current Coins',
+    totalSpins: 'Lifetime Spins',
+    biggestWin: 'Lifetime Biggest Win',
+    totalEarnings: 'Lifetime Earnings',
     level: 'Highest Level',
     prestigePoints: 'Prestige Points'
   }

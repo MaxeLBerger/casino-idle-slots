@@ -36,6 +36,9 @@ export const DEFAULT_GAME_STATE: GameState = {
   biggestWin: 0,
   totalEarnings: 0,
   lifetimeEarnings: 0,
+  lifetimeSpins: 0,
+  lifetimeWins: 0,
+  lifetimeBiggestWin: 0,
   
   // Streaks & Combos
   winStreak: 0,

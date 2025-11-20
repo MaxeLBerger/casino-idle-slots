@@ -29,6 +29,10 @@ export interface GameState {
   totalEarnings: number;
   lifetimeEarnings?: number; // Track earnings across all prestiges
   
+  lifetimeSpins?: number;
+  lifetimeWins?: number;
+  lifetimeBiggestWin?: number;
+  
   // Streaks & Combos
   winStreak: number;
   maxWinStreak: number;

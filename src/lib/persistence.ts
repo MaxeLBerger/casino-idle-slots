@@ -85,6 +85,9 @@ export function useSupabaseGameState<T extends Record<string, any>>(
           // Save separate fields for state restoration
           currentRunEarnings: data.totalEarnings || 0,
           lifetimeEarnings: data.lifetimeEarnings || 0,
+          lifetimeSpins: data.lifetimeSpins || 0,
+          lifetimeWins: data.lifetimeWins || 0,
+          lifetimeBiggestWin: data.lifetimeBiggestWin || 0,
           totalWins: data.totalWins || 0,
           winStreak: data.winStreak || 0,
           maxWinStreak: data.maxWinStreak || 0,
@@ -164,6 +167,9 @@ export function useSupabaseGameState<T extends Record<string, any>>(
         // If currentRunEarnings is present, totalEarnings in DB is the cumulative total (Lifetime + Current)
         totalEarnings: data.statistics?.currentRunEarnings ?? data.statistics?.totalEarnings ?? 0,
         lifetimeEarnings: data.statistics?.lifetimeEarnings || 0,
+        lifetimeSpins: data.statistics?.lifetimeSpins ?? data.statistics?.totalSpins ?? 0,
+        lifetimeWins: data.statistics?.lifetimeWins ?? data.statistics?.totalWins ?? 0,
+        lifetimeBiggestWin: data.statistics?.lifetimeBiggestWin ?? data.statistics?.biggestWin ?? 0,
         totalWins: data.statistics?.totalWins || 0,
         winStreak: data.statistics?.winStreak || 0,
         maxWinStreak: data.statistics?.maxWinStreak || 0,
