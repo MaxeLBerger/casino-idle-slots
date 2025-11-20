@@ -123,7 +123,7 @@ export function Achievements({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Trophy size={28} weight="fill" className="text-primary" />

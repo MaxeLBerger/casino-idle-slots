@@ -114,7 +114,7 @@ export function UserProfile({
       </Button>
 
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">
               <User size={28} weight="fill" className="text-primary" />
