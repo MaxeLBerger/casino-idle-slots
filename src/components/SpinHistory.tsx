@@ -24,53 +24,10 @@ export function SpinHistory({
   totalEarnings,
   rtp = 97.5 // Default theoretical RTP if not calculated
 }: SpinHistoryProps) {
-  const winRate = totalSpins > 0 ? (totalWins / totalSpins) * 100 : 0
   const recentSpins = history.slice(0, 50) // Show last 50 spins
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-3 bg-card/50 border-border">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <TrendUp size={16} />
-            <span className="text-xs font-bold uppercase">Win Rate</span>
-          </div>
-          <div className="text-xl font-bold text-primary">
-            {winRate.toFixed(1)}%
-          </div>
-        </Card>
-        
-        <Card className="p-3 bg-card/50 border-border">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Trophy size={16} />
-            <span className="text-xs font-bold uppercase">Biggest Win</span>
-          </div>
-          <div className="text-xl font-bold text-accent">
-            {biggestWin.toLocaleString()}
-          </div>
-        </Card>
-
-        <Card className="p-3 bg-card/50 border-border">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Coins size={16} />
-            <span className="text-xs font-bold uppercase">Total Won</span>
-          </div>
-          <div className="text-xl font-bold text-green-500">
-            {totalEarnings.toLocaleString()}
-          </div>
-        </Card>
-
-        <Card className="p-3 bg-card/50 border-border">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <ChartBar size={16} />
-            <span className="text-xs font-bold uppercase">RTP (Est.)</span>
-          </div>
-          <div className="text-xl font-bold text-blue-400">
-            {rtp.toFixed(1)}%
-          </div>
-        </Card>
-      </div>
-
       <Card className="border-border bg-card/30">
         <div className="p-3 border-b border-border flex items-center justify-between">
           <h3 className="font-bold flex items-center gap-2">

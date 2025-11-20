@@ -1382,7 +1382,7 @@ function App() {
                 <Gauge size={24} weight="fill" className="text-accent" />
                 <h2 className="text-2xl font-bold orbitron">Statistics</h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative bg-muted/30 rounded-xl p-4 border border-primary/20 text-center backdrop-blur-sm">
@@ -1429,8 +1429,30 @@ function App() {
                     </div>
                   </div>
                 </div>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-blue-500/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      Win Rate
+                    </div>
+                    <div className="text-3xl font-black orbitron text-blue-400 tabular-nums">
+                      {effectiveGameState.totalSpins > 0 ? ((effectiveGameState.totalWins / effectiveGameState.totalSpins) * 100).toFixed(1) : '0.0'}%
+                    </div>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative bg-muted/30 rounded-xl p-4 border border-purple-500/20 text-center backdrop-blur-sm">
+                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                      RTP (Est.)
+                    </div>
+                    <div className="text-3xl font-black orbitron text-purple-400 tabular-nums">
+                      {effectiveGameState.totalSpins > 0 ? ((effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100).toFixed(1) : '0.0'}%
+                    </div>
+                  </div>
+                </div>
                 {effectiveGameState.prestigePoints > 0 && (
-                  <div className="relative group col-span-2 md:col-span-4 mt-4">
+                  <div className="relative group col-span-2 md:col-span-3 mt-4">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="relative bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl p-4 border border-primary/40 text-center backdrop-blur-sm">
                       <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-1">
