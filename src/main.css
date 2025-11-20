@@ -8,7 +8,10 @@
 */
 @custom-variant dark (&:is(.dark *));
 
-@config '../tailwind.config.js';
+/* Custom media queries for responsive design */
+@custom-media --pwa (display-mode: standalone);
+@custom-media --coarse (pointer: coarse);
+@custom-media --fine (pointer: fine);
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
