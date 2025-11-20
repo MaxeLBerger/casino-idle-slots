@@ -831,7 +831,7 @@ function App() {
       if (!prev) return DEFAULT_STATE
       return {
         ...prev,
-        prestigePoints: prev.prestigePoints - machine.prestigeCost,
+        // Prestige points are not spent, just required
         unlockedSlotMachines: [...prev.unlockedSlotMachines, machineIndex],
       }
     })
@@ -1412,7 +1412,7 @@ function App() {
                       Total Earned
                     </div>
                     <div className="text-3xl font-black orbitron text-accent tabular-nums">
-                      {effectiveGameState.totalEarnings.toLocaleString()}
+                      {((effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)).toLocaleString()}
                     </div>
                   </div>
                 </div>
@@ -1455,7 +1455,7 @@ function App() {
                 totalSpins={effectiveGameState.totalSpins}
                 totalWins={effectiveGameState.totalWins}
                 biggestWin={effectiveGameState.biggestWin}
-                totalEarnings={effectiveGameState.totalEarnings}
+                totalEarnings={(effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)}
                 rtp={effectiveGameState.totalSpins > 0 ? (effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100 : undefined}
               />
             </div>
