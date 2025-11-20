@@ -53,17 +53,17 @@ const JACKPOT_CHANCE = 0.03
 const ULTRA_JACKPOT_CHANCE = 0.005
 
 const SLOT_MACHINE_CONFIGS = [
-  { name: 'Classic', rows: 1, reels: 3, prestigeCost: 0, symbols: SYMBOL_SETS[0] },
-  { name: 'Deluxe', rows: 2, reels: 3, prestigeCost: 5, symbols: SYMBOL_SETS[1] },
-  { name: 'Premium', rows: 3, reels: 3, prestigeCost: 10, symbols: SYMBOL_SETS[2] },
-  { name: 'Mega', rows: 3, reels: 4, prestigeCost: 15, symbols: SYMBOL_SETS[3] },
-  { name: 'Ultimate', rows: 4, reels: 5, prestigeCost: 20, symbols: SYMBOL_SETS[4] }
+  { name: 'Classic', rows: 1, reels: 3, prestigeCost: 0, symbols: SYMBOL_SETS[0], idleMultiplier: 1 },
+  { name: 'Deluxe', rows: 2, reels: 3, prestigeCost: 5, symbols: SYMBOL_SETS[1], idleMultiplier: 2 },
+  { name: 'Premium', rows: 3, reels: 3, prestigeCost: 10, symbols: SYMBOL_SETS[2], idleMultiplier: 5 },
+  { name: 'Mega', rows: 3, reels: 4, prestigeCost: 15, symbols: SYMBOL_SETS[3], idleMultiplier: 12 },
+  { name: 'Ultimate', rows: 4, reels: 5, prestigeCost: 20, symbols: SYMBOL_SETS[4], idleMultiplier: 30 }
 ]
 
 const SPIN_COST = 10
 const STARTING_COINS = 200
 const MAX_OFFLINE_HOURS = 4
-const PRESTIGE_EARNINGS_REQUIREMENT = 10000
+const BASE_PRESTIGE_REQUIREMENT = 50000
 
 
 
@@ -425,7 +425,8 @@ function App() {
       const maxSeconds = MAX_OFFLINE_HOURS * 3600
       const actualElapsed = Math.min(elapsed, maxSeconds)
       const prestigeMultiplier = calculatePrestigeMultiplier(gameState.prestigePoints || 0)
-      const earnings = Math.floor(actualElapsed * gameState.idleIncomePerSecond * prestigeMultiplier)
+      const machineMultiplier = SLOT_MACHINE_CONFIGS[gameState.currentSlotMachine].idleMultiplier || 1
+      const earnings = Math.floor(actualElapsed * gameState.idleIncomePerSecond * prestigeMultiplier * machineMultiplier)
       
       if (earnings > 0) {
         setOfflineEarnings(earnings)
@@ -447,7 +448,8 @@ function App() {
         setGameState(prev => {
           if (!prev) return DEFAULT_STATE
           const prestigeMultiplier = calculatePrestigeMultiplier(prev.prestigePoints || 0)
-          const earnings = Math.floor(prev.idleIncomePerSecond * prestigeMultiplier)
+          const machineMultiplier = SLOT_MACHINE_CONFIGS[prev.currentSlotMachine].idleMultiplier || 1
+          const earnings = Math.floor(prev.idleIncomePerSecond * prestigeMultiplier * machineMultiplier)
           return {
             ...prev,
             coins: prev.coins + earnings,
@@ -456,7 +458,8 @@ function App() {
           }
         })
         const prestigeMultiplier = calculatePrestigeMultiplier(gameState.prestigePoints || 0)
-        updateDailyChallengeProgress('earnings', Math.floor(gameState.idleIncomePerSecond * prestigeMultiplier))
+        const machineMultiplier = SLOT_MACHINE_CONFIGS[gameState.currentSlotMachine].idleMultiplier || 1
+        updateDailyChallengeProgress('earnings', Math.floor(gameState.idleIncomePerSecond * prestigeMultiplier * machineMultiplier))
       }
     }, 1000)
 
@@ -759,7 +762,7 @@ function App() {
   }
 
   const calculateUpgradeCost = (level: number, base: number = 50) => {
-    return Math.floor(base * Math.pow(1.5, level))
+    return Math.floor(base * Math.pow(1.6, level))
   }
 
   const upgradeSpinPower = () => {
@@ -811,7 +814,7 @@ function App() {
         ...prev,
         coins: prev.coins - cost,
         idleIncomeLevel: newLevel,
-        idleIncomePerSecond: prev.idleIncomePerSecond + 1,
+        idleIncomePerSecond: prev.idleIncomePerSecond + 5,
         totalUpgrades: newTotalUpgrades,
       }
     })
@@ -877,9 +880,16 @@ function App() {
     toast.success(`Switched to ${machine.name}!`)
   }
 
+  const getPrestigeRequirement = (points: number) => {
+    return BASE_PRESTIGE_REQUIREMENT + (points * 10000)
+  }
+
   const openPrestigeDialog = () => {
-    if (!gameState || gameState.totalEarnings < PRESTIGE_EARNINGS_REQUIREMENT) {
-      toast.error(`Need at least ${PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()} total earnings to prestige!`)
+    if (!gameState) return
+    const requirement = getPrestigeRequirement(gameState.prestigePoints || 0)
+    
+    if (gameState.totalEarnings < requirement) {
+      toast.error(`Need at least ${requirement.toLocaleString()} total earnings to prestige!`)
       return
     }
     setShowPrestigeDialog(true)
@@ -1042,7 +1052,8 @@ function App() {
   const effectiveGameState = gameState || DEFAULT_STATE
   const spinPowerCost = calculateUpgradeCost(effectiveGameState.spinPowerLevel, 50)
   const idleIncomeCost = calculateUpgradeCost(effectiveGameState.idleIncomeLevel, 100)
-  const canPrestige = effectiveGameState.totalEarnings >= PRESTIGE_EARNINGS_REQUIREMENT
+  const prestigeRequirement = getPrestigeRequirement(effectiveGameState.prestigePoints || 0)
+  const canPrestige = effectiveGameState.totalEarnings >= prestigeRequirement
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -1459,7 +1470,7 @@ function App() {
                   </div>
                 ) : (
                   <Progress 
-                    value={(effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100} 
+                    value={(effectiveGameState.totalEarnings / prestigeRequirement) * 100} 
                     className="h-2"
                   />
                 )}
@@ -1470,7 +1481,7 @@ function App() {
                   className="w-full"
                   size="sm"
                 >
-                  {canPrestige ? 'Prestige Now' : `Locked (${Math.floor((effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100)}%)`}
+                  {canPrestige ? 'Prestige Now' : `Locked (${Math.floor((effectiveGameState.totalEarnings / prestigeRequirement) * 100)}%)`}
                 </Button>
               </div>
             </Card>
