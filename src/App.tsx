@@ -73,6 +73,9 @@ const DEFAULT_STATE: GameState = {
   biggestWin: 0,
   totalEarnings: 0,
   lifetimeEarnings: 0,
+  lifetimeSpins: 0,
+  lifetimeWins: 0,
+  lifetimeBiggestWin: 0,
   spinHistory: [],
   spinMultiplier: 1,
   idleIncomePerSecond: 1,
@@ -703,6 +706,11 @@ function App() {
     const newWinStreak = hasWin ? (gameState?.winStreak || 0) + 1 : 0
     const newMaxWinStreak = Math.max(newWinStreak, gameState?.maxWinStreak || 0)
     const newTotalEarnings = (gameState?.totalEarnings || 0) + winAmount
+    
+    // Lifetime stats
+    const newLifetimeSpins = (gameState?.lifetimeSpins || 0) + 1
+    const newLifetimeWins = (gameState?.lifetimeWins || 0) + (hasWin ? 1 : 0)
+    const newLifetimeBiggestWin = Math.max(gameState?.lifetimeBiggestWin || 0, winAmount)
 
     const spinResult: SpinResult = {
       id: crypto.randomUUID(),
@@ -728,6 +736,9 @@ function App() {
         winStreak: newWinStreak,
         maxWinStreak: newMaxWinStreak,
         spinHistory: newHistory,
+        lifetimeSpins: newLifetimeSpins,
+        lifetimeWins: newLifetimeWins,
+        lifetimeBiggestWin: newLifetimeBiggestWin,
       }
     })
 
@@ -891,6 +902,9 @@ function App() {
         prestigePoints: newPrestigePoints,
         totalPrestigeEarned: newTotalPrestigeEarned,
         lifetimeEarnings: newLifetimeEarnings,
+        lifetimeSpins: prev.lifetimeSpins || 0,
+        lifetimeWins: prev.lifetimeWins || 0,
+        lifetimeBiggestWin: prev.lifetimeBiggestWin || 0,
         currentSlotMachine: 0,
         unlockedSlotMachines: [0],
         lastTimestamp: Date.now(),
@@ -1036,13 +1050,13 @@ function App() {
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
       <AchievementNotification achievement={achievementNotification} onClose={() => setAchievementNotification(null)} />
       
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-[1800px] mx-auto">
+        <div className="flex justify-between items-center mb-8 px-4">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight">
+            <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight drop-shadow-lg">
               🎰 CASINO IDLE SLOTS
             </h1>
           </motion.div>
@@ -1083,6 +1097,10 @@ function App() {
               coins={effectiveGameState.coins}
               prestigePoints={effectiveGameState.prestigePoints}
               totalSpins={effectiveGameState.totalSpins}
+              lifetimeSpins={effectiveGameState.lifetimeSpins || 0}
+              lifetimeWins={effectiveGameState.lifetimeWins || 0}
+              lifetimeBiggestWin={effectiveGameState.lifetimeBiggestWin || 0}
+              lifetimeEarnings={(effectiveGameState.lifetimeEarnings || 0) + (effectiveGameState.totalEarnings || 0)}
               lastSaveTime={lastSaveTime}
               onLogin={handleLogin}
               onLogout={handleLogout}
@@ -1091,403 +1109,14 @@ function App() {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="relative group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
-              <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-primary/40 shadow-xl backdrop-blur-sm p-6 hover:border-primary/60 transition-all">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
-                  <Coins size={14} weight="fill" className="text-primary/70" />
-                  Balance
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <motion.div
-                    animate={{ 
-                      rotate: [0, 360],
-                      scale: [1, 1.05, 1]
-                    }}
-                    transition={{ 
-                      rotate: { duration: 4, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                    }}
-                  >
-                    <Coins size={32} weight="fill" className="text-primary drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
-                  </motion.div>
-                  <motion.span
-                    key={effectiveGameState.coins}
-                    initial={{ scale: 1.2, filter: "brightness(1.5)" }}
-                    animate={{ scale: 1, filter: "brightness(1)" }}
-                    transition={{ duration: 0.3 }}
-                    className="text-3xl md:text-4xl font-black orbitron tabular-nums bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
-                    style={{
-                      textShadow: "0 0 20px rgba(255,215,0,0.3)"
-                    }}
-                  >
-                    {effectiveGameState.coins.toLocaleString()}
-                  </motion.span>
-                </div>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="relative group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-green-600/20 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
-              <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-green-500/40 shadow-xl backdrop-blur-sm p-6 hover:border-green-500/60 transition-all">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
-                  <Sparkle size={14} weight="fill" className="text-green-500/70" />
-                  Last Spin
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <AnimatePresence mode="wait">
-                    {lastSpinWin !== null ? (
-                      <motion.div
-                        key="win-display"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.8, opacity: 0 }}
-                        className="flex items-center gap-2"
-                      >
-                        <motion.span
-                          animate={{ 
-                            rotate: [0, 15, -15, 0],
-                            scale: [1, 1.1, 1]
-                          }}
-                          transition={{ 
-                            duration: 0.5,
-                            repeat: Infinity,
-                            repeatDelay: 2
-                          }}
-                          className="text-2xl"
-                        >
-                          🎉
-                        </motion.span>
-                        <span className="text-3xl md:text-4xl font-black orbitron tabular-nums text-green-400 drop-shadow-[0_0_12px_rgba(34,197,94,0.6)]">
-                          {lastSpinWin.toLocaleString()}
-                        </span>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="no-win"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-3xl md:text-4xl font-black orbitron text-muted-foreground/30"
-                      >
-                        ---
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </Card>
-            </motion.div>
-
-            {currentUser && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="relative group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-primary/20 to-accent/30 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-opacity" />
-                <Card className="relative bg-gradient-to-br from-card/90 via-card/80 to-secondary/40 border-2 border-accent/40 shadow-xl backdrop-blur-sm p-6 hover:border-accent/60 transition-all">
-                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-2">
-                    <Trophy size={14} weight="fill" className="text-accent/70" />
-                    Player Level
-                  </div>
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <motion.div
-                      animate={{ 
-                        rotate: [0, 360],
-                        scale: [1, 1.05, 1]
-                      }}
-                      transition={{ 
-                        rotate: { duration: 5, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
-                      }}
-                    >
-                      <Sparkle size={28} weight="fill" className="text-accent drop-shadow-[0_0_8px_rgba(147,197,253,0.6)]" />
-                    </motion.div>
-                    <span className="text-3xl md:text-4xl font-black orbitron tabular-nums bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
-                      {effectiveGameState.level || 1}
-                    </span>
-                  </div>
-                  <div className="relative h-2 bg-muted/50 rounded-full overflow-hidden border border-accent/20">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-accent via-primary to-accent rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ 
-                        width: `${((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100}%`,
-                        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"]
-                      }}
-                      transition={{ 
-                        width: { duration: 0.5 },
-                        backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" }
-                      }}
-                      style={{
-                        backgroundSize: "200% 200%",
-                        boxShadow: "0 0 12px rgba(147, 197, 253, 0.5)"
-                      }}
-                    />
-                  </div>
-                  <div className="text-[10px] text-center text-muted-foreground/60 mt-1 font-semibold tabular-nums">
-                    {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-
-          <div className="flex items-center justify-center gap-3 flex-wrap px-4">
-            {effectiveGameState.prestigePoints > 0 && (
-              <Badge className="bg-gradient-to-r from-accent/80 to-primary/80 text-white border-accent/50 shadow-lg shadow-accent/30 px-3 py-1.5">
-                <Trophy size={16} weight="fill" className="mr-1.5" />
-                <span className="font-bold">{effectiveGameState.prestigePoints}</span>
-                <span className="ml-1 text-xs opacity-90">Prestige</span>
-              </Badge>
-            )}
-            <Badge className="bg-gradient-to-r from-secondary/80 to-muted/80 text-foreground border-primary/30 shadow-md px-3 py-1.5">
-              <Sparkle size={16} weight="fill" className="mr-1.5 text-primary" />
-              <span className="font-bold">{currentMachine.name}</span>
-              <span className="ml-1.5 text-xs opacity-70">({currentMachine.rows}x{currentMachine.reels})</span>
-            </Badge>
-            <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/40 text-yellow-100 shadow-md px-3 py-1.5">
-              <span className="text-sm">💰</span>
-              <span className="ml-1.5 text-xs font-semibold">Jackpot 2x</span>
-            </Badge>
-            <Badge className="bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 border-cyan-400/40 text-cyan-100 shadow-md px-3 py-1.5">
-              <span className="text-sm">✨</span>
-              <span className="ml-1.5 text-xs font-semibold">Ultra 3x</span>
-            </Badge>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-secondary/30 border-2 border-primary/20 shadow-xl shadow-primary/10 relative overflow-hidden">
-              <div ref={coinParticleContainer} className="absolute inset-0 pointer-events-none" />
-              
-              <div className="flex flex-col gap-2 mb-8">
-                {reels.map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex justify-center gap-2 md:gap-4">
-                    {row.map((symbol, colIndex) => (
-                      <motion.div
-                        key={`${rowIndex}-${colIndex}`}
-                        animate={
-                          reelStates[rowIndex][colIndex] 
-                            ? { 
-                                scale: 1,
-                                y: 0,
-                              }
-                            : { 
-                                scale: 0.95,
-                                y: [0, -10, 0],
-                              }
-                        }
-                        transition={
-                          reelStates[rowIndex][colIndex]
-                            ? { 
-                                duration: 0.4,
-                                ease: [0.34, 1.56, 0.64, 1],
-                              }
-                            : {
-                                duration: 0.1,
-                                y: {
-                                  duration: 0.3,
-                                  repeat: Infinity,
-                                  ease: 'linear'
-                                }
-                              }
-                        }
-                        className={`bg-muted rounded-xl w-16 h-16 md:w-24 md:h-24 flex items-center justify-center border-4 shadow-lg relative overflow-hidden ${
-                          reelStates[rowIndex][colIndex] && isSpinning
-                            ? 'border-primary glow-pulse'
-                            : ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
-                            ? 'border-cyan-400 shadow-cyan-400/80 shadow-2xl'
-                            : JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
-                            ? 'border-yellow-500 shadow-yellow-500/50'
-                            : 'border-primary/30'
-                        }`}
-                      >
-                        {ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex] && (
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                            className="absolute inset-0 bg-gradient-to-br from-cyan-400/30 via-blue-500/30 via-purple-500/30 to-pink-500/30 rounded-xl"
-                          />
-                        )}
-                        {JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex] && (
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: [0.3, 0.6, 0.3] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-orange-400/20 to-pink-400/20 rounded-xl"
-                          />
-                        )}
-                        <motion.span 
-                          className={`text-3xl md:text-5xl relative z-10 ${
-                            ULTRA_JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_12px_rgba(34,211,238,1)]' :
-                            JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]' : ''
-                          }`}
-                          animate={reelStates[rowIndex][colIndex] && isSpinning ? {
-                            scale: [1, 1.2, 1],
-                            rotate: [0, -5, 5, 0]
-                          } : {}}
-                          transition={{ duration: 0.4, ease: 'easeOut' }}
-                        >
-                          {symbol}
-                        </motion.span>
-                      </motion.div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                size="lg"
-                onClick={spin}
-                disabled={isSpinning || effectiveGameState.coins < SPIN_COST}
-                className="w-full py-6 md:py-8 text-xl md:text-2xl font-bold uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 disabled:opacity-50"
-              >
-                {isSpinning ? (
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    ⚡
-                  </motion.span>
-                ) : (
-                  <>
-                    <Sparkle size={24} weight="fill" className="mr-2" />
-                    SPIN ({SPIN_COST} coins)
-                  </>
-                )}
-              </Button>
-            </Card>
-
-            <Card className="p-6 bg-gradient-to-br from-card/80 to-secondary/30 border border-primary/20 shadow-lg">
-              <div className="flex items-center gap-2 mb-6">
-                <Gauge size={24} weight="fill" className="text-accent" />
-                <h2 className="text-2xl font-bold orbitron">Statistics</h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-primary/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      Total Spins
-                    </div>
-                    <div className="text-3xl font-black orbitron text-primary tabular-nums">
-                      {effectiveGameState.totalSpins}
-                    </div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-green-500/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      Biggest Win
-                    </div>
-                    <div className="text-3xl font-black orbitron text-green-400 tabular-nums">
-                      {effectiveGameState.biggestWin}
-                    </div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-accent/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      Total Earned
-                    </div>
-                    <div className="text-3xl font-black orbitron text-accent tabular-nums">
-                      {((effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)).toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-yellow-500/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-1">
-                      <Lightning size={12} weight="fill" className="text-yellow-500" />
-                      Idle Income
-                    </div>
-                    <div className="text-3xl font-black orbitron text-yellow-400 tabular-nums">
-                      {(effectiveGameState.idleIncomePerSecond * calculatePrestigeMultiplier(effectiveGameState.prestigePoints || 0)).toFixed(1)}
-                      <span className="text-sm text-muted-foreground ml-1">/s</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-blue-500/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      Win Rate
-                    </div>
-                    <div className="text-3xl font-black orbitron text-blue-400 tabular-nums">
-                      {effectiveGameState.totalSpins > 0 ? ((effectiveGameState.totalWins / effectiveGameState.totalSpins) * 100).toFixed(1) : '0.0'}%
-                    </div>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative bg-muted/30 rounded-xl p-4 border border-purple-500/20 text-center backdrop-blur-sm">
-                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      RTP (Est.)
-                    </div>
-                    <div className="text-3xl font-black orbitron text-purple-400 tabular-nums">
-                      {effectiveGameState.totalSpins > 0 ? ((effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100).toFixed(1) : '0.0'}%
-                    </div>
-                  </div>
-                </div>
-                {effectiveGameState.prestigePoints > 0 && (
-                  <div className="relative group col-span-2 md:col-span-3 mt-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl p-4 border border-primary/40 text-center backdrop-blur-sm">
-                      <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center justify-center gap-1">
-                        <Trophy size={12} weight="fill" className="text-primary" />
-                        Prestige Bonus
-                      </div>
-                      <div className="text-3xl font-black orbitron bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tabular-nums">
-                        {calculatePrestigeMultiplier(effectiveGameState.prestigePoints || 0).toFixed(2)}x
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        All earnings multiplied by prestige bonus
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            <div className="mt-6">
-              <SpinHistory 
-                history={effectiveGameState.spinHistory || []}
-                totalSpins={effectiveGameState.totalSpins}
-                totalWins={effectiveGameState.totalWins}
-                biggestWin={effectiveGameState.biggestWin}
-                totalEarnings={(effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)}
-                rtp={effectiveGameState.totalSpins > 0 ? (effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100 : undefined}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="p-6 bg-card/50 border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4">
+          
+          {/* LEFT COLUMN - Progression */}
+          <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
+            <Card className="p-5 bg-card/80 border-border/50 shadow-sm hover:shadow-md transition-all">
               <div className="flex items-center gap-2 mb-4">
                 <ArrowUp size={24} weight="fill" className="text-accent" />
-                <h2 className="text-2xl font-bold">Upgrades</h2>
+                <h2 className="text-xl font-bold">Upgrades</h2>
               </div>
 
               <Tabs defaultValue="spin" className="w-full">
@@ -1541,73 +1170,12 @@ function App() {
                   </div>
                 </TabsContent>
               </Tabs>
-
-              <Separator className="my-6" />
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy size={20} weight="fill" className="text-primary" />
-                  <h3 className="font-bold">Prestige</h3>
-                  {canPrestige && (
-                    <Badge className="ml-auto bg-gradient-to-r from-primary to-accent text-white animate-pulse">
-                      Ready!
-                    </Badge>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Current Rank:</span>
-                    <span className={`font-bold ${getPrestigeRank(effectiveGameState.prestigePoints || 0).color}`}>
-                      {getPrestigeRank(effectiveGameState.prestigePoints || 0).name} ({effectiveGameState.prestigePoints || 0} PP)
-                    </span>
-                  </div>
-                  {canPrestige ? (
-                    <div className="bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg p-3 border border-primary/40">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold">Reward:</span>
-                        <span className="font-bold text-primary">
-                          +{calculatePrestigeReward(effectiveGameState.totalEarnings)} Prestige Points
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm mt-1">
-                        <span className="font-semibold">New Multiplier:</span>
-                        <span className="font-bold text-accent">
-                          {calculatePrestigeMultiplier((effectiveGameState.prestigePoints || 0) + calculatePrestigeReward(effectiveGameState.totalEarnings)).toFixed(2)}x
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <Progress 
-                      value={(effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100} 
-                      className="h-2"
-                    />
-                  )}
-                </div>
-                <Button
-                  onClick={openPrestigeDialog}
-                  disabled={!canPrestige}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  {canPrestige ? (
-                    <>
-                      <Sparkle size={20} weight="fill" className="mr-2" />
-                      Prestige Now
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={20} className="mr-2" />
-                      Locked ({effectiveGameState.totalEarnings.toLocaleString()}/{PRESTIGE_EARNINGS_REQUIREMENT.toLocaleString()})
-                    </>
-                  )}
-                </Button>
-              </div>
             </Card>
 
-            <Card className="p-6 bg-card/50 border-border">
+            <Card className="p-5 bg-card/80 border-border/50 shadow-sm hover:shadow-md transition-all">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar size={24} weight="fill" className="text-accent" />
-                <h2 className="text-2xl font-bold">Daily Challenge</h2>
+                <h2 className="text-xl font-bold">Daily Challenge</h2>
               </div>
               <DailyChallengeCard
                 dailyChallenge={dailyChallenge}
@@ -1616,65 +1184,309 @@ function App() {
                 onClick={() => setShowDailyChallenge(true)}
               />
             </Card>
+          </div>
 
-            <Card className="p-6 bg-card/50 border-border">
+          {/* CENTER COLUMN - The Game */}
+          <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
+            
+            {/* Top Stats Row */}
+            <div className="grid grid-cols-3 gap-4">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Card className="relative bg-card/90 border-primary/20 shadow-md p-4 flex flex-col items-center justify-center h-full overflow-hidden group hover:border-primary/40 transition-all">
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+                    <Coins size={12} weight="fill" className="text-primary" />
+                    Balance
+                  </div>
+                  <div className="text-xl md:text-3xl font-black orbitron tabular-nums text-primary">
+                    {effectiveGameState.coins.toLocaleString()}
+                  </div>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className="relative bg-card/90 border-green-500/20 shadow-md p-4 flex flex-col items-center justify-center h-full overflow-hidden group hover:border-green-500/40 transition-all">
+                  <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+                    <Sparkle size={12} weight="fill" className="text-green-500" />
+                    Last Spin
+                  </div>
+                  <div className="text-xl md:text-3xl font-black orbitron tabular-nums text-green-500">
+                    {lastSpinWin !== null ? `+${lastSpinWin.toLocaleString()}` : '---'}
+                  </div>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="relative bg-card/90 border-accent/20 shadow-md p-4 flex flex-col items-center justify-center h-full overflow-hidden group hover:border-accent/40 transition-all">
+                  <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+                    <Trophy size={12} weight="fill" className="text-accent" />
+                    Level {effectiveGameState.level || 1}
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden mt-1">
+                    <div 
+                      className="h-full bg-accent transition-all duration-500"
+                      style={{ width: `${((effectiveGameState.experience || 0) / calculateLevelProgress(effectiveGameState.level || 1)) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mt-1">
+                    {effectiveGameState.experience || 0} / {calculateLevelProgress(effectiveGameState.level || 1)} XP
+                  </div>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* SLOT MACHINE */}
+            <Card className="p-8 md:p-12 bg-gradient-to-b from-card via-background to-card border-primary/30 shadow-2xl relative overflow-hidden ring-1 ring-primary/10">
+              <div ref={coinParticleContainer} className="absolute inset-0 pointer-events-none" />
+              
+              <div className="flex flex-col gap-4 mb-10">
+                {reels.map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex justify-center gap-3 md:gap-6">
+                    {row.map((symbol, colIndex) => (
+                      <motion.div
+                        key={`${rowIndex}-${colIndex}`}
+                        animate={
+                          reelStates[rowIndex][colIndex] 
+                            ? { scale: 1, y: 0 }
+                            : { scale: 0.95, y: [0, -15, 0] }
+                        }
+                        transition={
+                          reelStates[rowIndex][colIndex]
+                            ? { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }
+                            : { duration: 0.1, y: { duration: 0.3, repeat: Infinity, ease: 'linear' } }
+                        }
+                        className={`bg-muted/50 rounded-2xl w-20 h-20 md:w-32 md:h-32 flex items-center justify-center border-4 shadow-inner relative overflow-hidden ${
+                          reelStates[rowIndex][colIndex] && isSpinning
+                            ? 'border-primary glow-pulse'
+                            : ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            ? 'border-cyan-400 shadow-cyan-400/50 shadow-lg'
+                            : JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            ? 'border-yellow-500 shadow-yellow-500/50 shadow-lg'
+                            : 'border-border'
+                        }`}
+                      >
+                        <motion.span 
+                          className={`text-4xl md:text-6xl relative z-10 select-none ${
+                            ULTRA_JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]' :
+                            JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]' : ''
+                          }`}
+                          animate={reelStates[rowIndex][colIndex] && isSpinning ? {
+                            scale: [1, 1.2, 1],
+                            rotate: [0, -5, 5, 0]
+                          } : {}}
+                        >
+                          {symbol}
+                        </motion.span>
+                      </motion.div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                size="lg"
+                onClick={spin}
+                disabled={isSpinning || effectiveGameState.coins < SPIN_COST}
+                className="w-full py-8 md:py-10 text-2xl md:text-4xl font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isSpinning ? (
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  >
+                    ⚡
+                  </motion.span>
+                ) : (
+                  <div className="flex flex-col items-center leading-none gap-2">
+                    <div className="flex items-center gap-3">
+                      <Sparkle size={32} weight="fill" />
+                      SPIN
+                      <Sparkle size={32} weight="fill" />
+                    </div>
+                    <span className="text-sm md:text-base font-normal opacity-80 tracking-normal">
+                      Cost: {SPIN_COST} Coins
+                    </span>
+                  </div>
+                )}
+              </Button>
+            </Card>
+
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              {effectiveGameState.prestigePoints > 0 && (
+                <Badge className="bg-accent/10 text-accent border-accent/20 px-3 py-1.5">
+                  <Trophy size={14} weight="fill" className="mr-1.5" />
+                  {effectiveGameState.prestigePoints} Prestige
+                </Badge>
+              )}
+              <Badge className="bg-secondary/50 text-foreground border-border px-3 py-1.5">
+                <Sparkle size={14} weight="fill" className="mr-1.5 text-primary" />
+                {currentMachine.name} ({currentMachine.rows}x{currentMachine.reels})
+              </Badge>
+              <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 px-3 py-1.5">
+                💰 Jackpot 2x
+              </Badge>
+              <Badge className="bg-cyan-500/10 text-cyan-500 border-cyan-500/20 px-3 py-1.5">
+                ✨ Ultra 3x
+              </Badge>
+            </div>
+
+          </div>
+
+          {/* RIGHT COLUMN - Meta & Stats */}
+          <div className="lg:col-span-3 space-y-6 order-3 lg:order-3">
+            
+            <Card className="p-5 bg-card/80 border-border/50 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-4">
+                <Gauge size={24} weight="fill" className="text-accent" />
+                <h2 className="text-xl font-bold">Statistics</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center">
+                  <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Total Spins</div>
+                  <div className="text-lg font-bold orbitron tabular-nums">{effectiveGameState.totalSpins}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center">
+                  <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Biggest Win</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-green-500">{effectiveGameState.biggestWin}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center col-span-2">
+                  <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Total Earned</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-accent">
+                    {((effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)).toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center">
+                  <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Idle/Sec</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-yellow-500">
+                    {(effectiveGameState.idleIncomePerSecond * calculatePrestigeMultiplier(effectiveGameState.prestigePoints || 0)).toFixed(1)}
+                  </div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 border border-border/50 text-center">
+                  <div className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Win Rate</div>
+                  <div className="text-lg font-bold orbitron tabular-nums text-blue-400">
+                    {effectiveGameState.totalSpins > 0 ? ((effectiveGameState.totalWins / effectiveGameState.totalSpins) * 100).toFixed(1) : '0.0'}%
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-5 bg-card/80 border-border/50 shadow-sm hover:shadow-md transition-all">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkle size={24} weight="fill" className="text-primary" />
-                <h2 className="text-2xl font-bold">Slot Machines</h2>
+                <h2 className="text-xl font-bold">Machines</h2>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {SLOT_MACHINE_CONFIGS.map((machine, index) => {
                   const isUnlocked = effectiveGameState?.unlockedSlotMachines?.includes(index) ?? false
                   const isCurrent = effectiveGameState?.currentSlotMachine === index
                   const canAfford = (effectiveGameState?.prestigePoints ?? 0) >= machine.prestigeCost
                   
                   return (
-                    <Card key={index} className={`p-4 ${isCurrent ? 'border-primary border-2' : ''}`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="font-bold text-lg">{machine.name}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {machine.rows}x{machine.reels} • {machine.symbols.length} symbols
-                          </p>
-                        </div>
-                        {isCurrent && (
-                          <Badge variant="default">Active</Badge>
+                    <div key={index} className={`p-3 rounded-lg border ${isCurrent ? 'bg-primary/10 border-primary' : 'bg-muted/20 border-border'} transition-all`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-sm">{machine.name}</span>
+                        {isCurrent && <Badge className="h-5 text-[10px]">Active</Badge>}
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted-foreground">{machine.rows}x{machine.reels}</span>
+                        {isUnlocked ? (
+                          <Button
+                            size="sm"
+                            variant={isCurrent ? "ghost" : "secondary"}
+                            className="h-7 text-xs"
+                            onClick={() => switchSlotMachine(index)}
+                            disabled={isCurrent}
+                          >
+                            {isCurrent ? 'Selected' : 'Select'}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            onClick={() => unlockSlotMachine(index)}
+                            disabled={!canAfford}
+                          >
+                            Unlock ({machine.prestigeCost} PP)
+                          </Button>
                         )}
                       </div>
-                      <div className="flex gap-1 mb-3 flex-wrap">
-                        {machine.symbols.slice(0, 8).map((symbol, i) => (
-                          <span key={i} className="text-xl">{symbol}</span>
-                        ))}
-                        {machine.symbols.length > 8 && <span className="text-muted-foreground">...</span>}
-                      </div>
-                      {isUnlocked ? (
-                        <Button
-                          size="sm"
-                          onClick={() => switchSlotMachine(index)}
-                          disabled={isCurrent}
-                          className="w-full"
-                          variant={isCurrent ? "secondary" : "default"}
-                        >
-                          {isCurrent ? 'Active' : 'Switch'}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => unlockSlotMachine(index)}
-                          disabled={!canAfford}
-                          className="w-full"
-                          variant="outline"
-                        >
-                          <Lock size={16} className="mr-2" />
-                          Unlock ({machine.prestigeCost} PP)
-                        </Button>
-                      )}
-                    </Card>
+                    </div>
                   )
                 })}
               </div>
             </Card>
+
+            <Card className="p-5 bg-card/80 border-border/50 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <Trophy size={20} weight="fill" className="text-primary" />
+                <h3 className="font-bold">Prestige</h3>
+                {canPrestige && (
+                  <Badge className="ml-auto bg-gradient-to-r from-primary to-accent text-white animate-pulse">
+                    Ready!
+                  </Badge>
+                )}
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Rank:</span>
+                  <span className={`font-bold ${getPrestigeRank(effectiveGameState.prestigePoints || 0).color}`}>
+                    {getPrestigeRank(effectiveGameState.prestigePoints || 0).name}
+                  </span>
+                </div>
+                {canPrestige ? (
+                  <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-semibold">Reward:</span>
+                      <span className="font-bold text-primary">
+                        +{calculatePrestigeReward(effectiveGameState.totalEarnings)} PP
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <Progress 
+                    value={(effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100} 
+                    className="h-2"
+                  />
+                )}
+                <Button
+                  onClick={openPrestigeDialog}
+                  disabled={!canPrestige}
+                  variant="destructive"
+                  className="w-full"
+                  size="sm"
+                >
+                  {canPrestige ? 'Prestige Now' : `Locked (${Math.floor((effectiveGameState.totalEarnings / PRESTIGE_EARNINGS_REQUIREMENT) * 100)}%)`}
+                </Button>
+              </div>
+            </Card>
+
+            <div className="opacity-80 hover:opacity-100 transition-opacity">
+              <SpinHistory 
+                history={effectiveGameState.spinHistory || []}
+                totalSpins={effectiveGameState.totalSpins}
+                totalWins={effectiveGameState.totalWins}
+                biggestWin={effectiveGameState.biggestWin}
+                totalEarnings={(effectiveGameState.totalEarnings || 0) + (effectiveGameState.lifetimeEarnings || 0)}
+                rtp={effectiveGameState.totalSpins > 0 ? (effectiveGameState.totalEarnings / (effectiveGameState.totalSpins * SPIN_COST)) * 100 : undefined}
+              />
+            </div>
           </div>
+
         </div>
       </div>
 
