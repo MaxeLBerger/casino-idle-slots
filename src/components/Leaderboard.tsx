@@ -81,9 +81,9 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] p-0">
         <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="text-3xl font-bold orbitron flex items-center gap-3">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold orbitron flex items-center gap-3">
             <Trophy size={32} weight="fill" className="text-primary" />
             Global Leaderboards
           </DialogTitle>
