@@ -112,27 +112,27 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
           {CATEGORIES.map(category => (
             <TabsContent key={category} value={category} className="mt-0">
               {currentUserId && playerRanks[category] && (
-                <Card className="mb-4 p-4 bg-accent/10 border-accent">
-                  <div className="flex items-center justify-between">
+                <Card className="mb-4 p-3 sm:p-4 bg-accent/10 border-accent">
+                  <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <Trophy size={24} weight="fill" className="text-accent" />
+                      <div className="p-2 bg-accent/20 rounded-full">
+                        <Trophy size={20} weight="fill" className="text-accent" />
+                      </div>
                       <div>
-                        <div className="font-bold">Your Rank</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="font-bold text-sm sm:text-base">Your Rank</div>
+                        <div className="text-xs text-muted-foreground">
                           {getCategoryLabel(category)}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-lg font-bold orbitron">
-                        #{playerRanks[category]}
-                      </Badge>
-                    </div>
+                    <Badge variant="secondary" className="text-base sm:text-lg font-bold orbitron px-3 py-1">
+                      #{playerRanks[category]}
+                    </Badge>
                   </div>
                 </Card>
               )}
 
-              <ScrollArea className="h-[50vh] pr-4">
+              <ScrollArea className="h-[50vh] pr-2 sm:pr-4">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <motion.div
@@ -157,41 +157,47 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ delay: index * 0.03 }}
                           >
-                            <Card className={`p-3 sm:p-4 ${isCurrentUser ? 'border-2 border-accent bg-accent/5' : ''} ${rank <= 3 ? 'shadow-lg' : ''}`}>
-                              <div className="flex items-center gap-3 sm:gap-4">
-                                <div className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full ${getRankColor(rank)} flex-shrink-0`}>
+                            <Card className={`p-2 sm:p-4 ${isCurrentUser ? 'border-2 border-accent bg-accent/5' : ''} ${rank <= 3 ? 'shadow-lg' : ''}`}>
+                              <div className="flex items-center gap-2 sm:gap-4">
+                                {/* Rank */}
+                                <div className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full ${getRankColor(rank)} flex-shrink-0 shadow-sm`}>
                                   {rank <= 3 ? (
                                     <div className="scale-75 sm:scale-100">{getRankIcon(rank)}</div>
                                   ) : (
-                                    <span className="font-bold text-sm sm:text-base text-foreground">#{rank}</span>
+                                    <span className="font-bold text-xs sm:text-base text-foreground">#{rank}</span>
                                   )}
                                 </div>
                                 
-                                <Avatar className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-border">
+                                {/* Avatar */}
+                                <Avatar className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-border hidden xs:block">
                                   <AvatarImage src={entry.avatarUrl} alt={entry.username} />
                                   <AvatarFallback>{entry.username[0].toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <div className="font-bold text-sm sm:text-lg truncate">
+                                {/* Info */}
+                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                  <div className="flex items-center gap-1 sm:gap-2">
+                                    <div className="font-bold text-sm sm:text-lg truncate leading-tight">
                                       {entry.username}
                                     </div>
                                     {isCurrentUser && (
-                                      <Badge variant="secondary" className="text-[10px] sm:text-xs px-1 py-0 h-5">You</Badge>
+                                      <Badge variant="secondary" className="text-[10px] sm:text-xs px-1 py-0 h-4 sm:h-5 flex items-center">You</Badge>
                                     )}
                                   </div>
-                                  <div className="text-xs sm:text-sm text-muted-foreground">
-                                    Level {entry.level}
-                                  </div>
+                                  {category !== 'level' && (
+                                    <div className="text-[10px] sm:text-sm text-muted-foreground truncate">
+                                      Level {entry.level}
+                                    </div>
+                                  )}
                                 </div>
                                 
-                                <div className="text-right">
-                                  <div className="text-sm sm:text-2xl font-bold orbitron text-primary">
+                                {/* Score */}
+                                <div className="text-right pl-2">
+                                  <div className="text-sm sm:text-2xl font-bold orbitron text-primary whitespace-nowrap">
                                     {formatScore(category, entry.score)}
                                   </div>
                                   {rank <= 3 && (
-                                    <Badge variant="outline" className="mt-1 text-[10px] sm:text-xs hidden sm:inline-flex">
+                                    <Badge variant="outline" className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs hidden sm:inline-flex">
                                       Top {rank}
                                     </Badge>
                                   )}

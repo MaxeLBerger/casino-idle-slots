@@ -47,46 +47,46 @@ export function Achievements({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
       >
-        <Card className={`p-3 sm:p-4 relative overflow-hidden h-full flex flex-col ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
+        <Card className={`p-3 relative overflow-hidden h-full flex flex-col ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
           {unlocked && (
             <div className="absolute top-2 right-2">
-              <Badge className="bg-primary text-primary-foreground scale-90 sm:scale-100 origin-top-right">
-                <Check size={14} weight="bold" className="mr-1" />
+              <Badge className="bg-primary text-primary-foreground scale-75 sm:scale-100 origin-top-right">
+                <Check size={12} weight="bold" className="mr-1" />
                 Unlocked
               </Badge>
             </div>
           )}
           
-          <div className="flex gap-3 sm:gap-4 flex-1">
-            <div className={`text-3xl sm:text-4xl flex-shrink-0 ${!unlocked && !canClaim ? 'grayscale opacity-50' : ''}`}>
+          <div className="flex gap-3 flex-1">
+            <div className={`text-2xl sm:text-4xl flex-shrink-0 mt-1 ${!unlocked && !canClaim ? 'grayscale opacity-50' : ''}`}>
               {achievement.icon}
             </div>
             
             <div className="flex-1 min-w-0 flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-bold text-base sm:text-lg leading-tight pr-16 sm:pr-0">{achievement.title}</h3>
+                <h3 className="font-bold text-sm sm:text-lg leading-tight pr-14 sm:pr-0">{achievement.title}</h3>
               </div>
               
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3 flex-1">
+              <p className="text-[10px] sm:text-sm text-muted-foreground mb-2 flex-1 leading-tight">
                 {achievement.description}
               </p>
               
               {!unlocked && (
-                <div className="space-y-2 mt-auto">
-                  <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="space-y-1.5 mt-auto">
+                  <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                     <span>Progress</span>
                     <span>{progress} / {achievement.requirement}</span>
                   </div>
-                  <Progress value={progressPercent} className="h-2" />
+                  <Progress value={progressPercent} className="h-1.5 sm:h-2" />
                 </div>
               )}
               
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <Badge variant="secondary" className="text-[10px] sm:text-xs">
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0 h-5">
                   +{achievement.rewardCoins} 💰
                 </Badge>
                 {achievement.rewardPrestige && (
-                  <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0 h-5">
                     +{achievement.rewardPrestige} 🏆
                   </Badge>
                 )}
@@ -96,10 +96,10 @@ export function Achievements({
                 <Button
                   onClick={() => onClaim(achievement.id)}
                   size="sm"
-                  className="w-full mt-3 bg-accent hover:bg-accent/90 text-accent-foreground h-8 sm:h-9 text-xs sm:text-sm"
+                  className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground h-7 sm:h-9 text-xs sm:text-sm"
                 >
-                  <Trophy size={16} weight="fill" className="mr-2" />
-                  Claim Reward
+                  <Trophy size={14} weight="fill" className="mr-1.5" />
+                  Claim
                 </Button>
               )}
             </div>

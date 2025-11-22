@@ -149,7 +149,7 @@ export function UserProfile({
               </p>
             </Card>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Card className="p-3 sm:p-4 bg-card border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
                   <Coins size={16} weight="fill" className="text-primary sm:w-5 sm:h-5" />
@@ -170,7 +170,7 @@ export function UserProfile({
                 </div>
               </Card>
 
-              <Card className="p-3 sm:p-4 bg-card border-secondary/20 col-span-2">
+              <Card className="p-3 sm:p-4 bg-card border-secondary/20 col-span-1 sm:col-span-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Lightning size={16} weight="fill" className="text-secondary sm:w-5 sm:h-5" />
                   <span className="text-xs sm:text-sm font-semibold">Current Run Spins</span>
@@ -199,9 +199,9 @@ export function UserProfile({
                   <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Biggest Win</div>
                   <div className="text-sm sm:text-lg font-bold orbitron tabular-nums text-yellow-500 truncate">{lifetimeBiggestWin.toLocaleString()}</div>
                 </Card>
-                <Card className="p-3 bg-muted/30">
-                  <div className="text-xs text-muted-foreground mb-1">Total Earnings</div>
-                  <div className="text-lg font-bold orbitron tabular-nums text-primary">{lifetimeEarnings.toLocaleString()}</div>
+                <Card className="p-2 sm:p-3 bg-muted/30">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Total Earnings</div>
+                  <div className="text-sm sm:text-lg font-bold orbitron tabular-nums text-primary truncate">{lifetimeEarnings.toLocaleString()}</div>
                 </Card>
               </div>
             </div>
