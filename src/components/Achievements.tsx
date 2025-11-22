@@ -133,9 +133,11 @@ export function Achievements({
             <Trophy size={20} weight="fill" className="text-primary sm:w-7 sm:h-7" />
             Achievements
           </DialogTitle>
-          <DialogDescription className="flex items-center gap-2 text-xs sm:text-sm">
-            <span>Unlocked {unlockedCount} of {totalAchievements}</span>
-            <Progress value={(unlockedCount / totalAchievements) * 100} className="h-1.5 sm:h-2 w-24 sm:w-32" />
+          <DialogDescription asChild className="flex items-center gap-2 text-xs sm:text-sm">
+            <div>
+              <span>Unlocked {unlockedCount} of {totalAchievements}</span>
+              <Progress value={(unlockedCount / totalAchievements) * 100} className="h-1.5 sm:h-2 w-24 sm:w-32" />
+            </div>
           </DialogDescription>
         </DialogHeader>
 
