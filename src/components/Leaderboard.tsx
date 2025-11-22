@@ -81,7 +81,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] p-0 gap-0">
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto p-0 gap-0 block">
         <DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 space-y-1 text-left">
           <DialogTitle className="text-lg sm:text-3xl font-bold orbitron flex items-center gap-2 sm:gap-3">
             <Trophy size={20} weight="fill" className="text-primary sm:w-8 sm:h-8 flex-shrink-0" />
@@ -92,7 +92,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-3 sm:px-6 flex-1 overflow-hidden flex flex-col">
+        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-3 sm:px-6 pb-6">
           <div className="overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide flex-shrink-0">
             <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 h-auto gap-1 mb-2 sm:mb-4 bg-muted/50 p-1">
               {CATEGORIES.map(category => (
@@ -110,7 +110,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
           </div>
 
           {CATEGORIES.map(category => (
-            <TabsContent key={category} value={category} className="mt-0 flex-1 overflow-hidden flex flex-col">
+            <TabsContent key={category} value={category} className="mt-0">
               {currentUserId && playerRanks[category] && (
                 <Card className="mb-3 sm:mb-4 p-3 sm:p-4 bg-accent/10 border-accent flex-shrink-0">
                   <div className="flex items-center justify-between gap-2">
@@ -132,7 +132,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                 </Card>
               )}
 
-              <ScrollArea className="flex-1 pr-2 sm:pr-4 -mr-2 sm:-mr-4">
+              <div className="pr-2 sm:pr-4 -mr-2 sm:-mr-4">
                 <div className="pr-2 sm:pr-4 pb-4">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
@@ -220,7 +220,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                   </div>
                 )}
                 </div>
-              </ScrollArea>
+              </div>
             </TabsContent>
           ))}
         </Tabs>

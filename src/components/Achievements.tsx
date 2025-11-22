@@ -123,7 +123,7 @@ export function Achievements({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[85vh] overflow-y-auto p-0 gap-0 block">
         <DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 text-left">
           <DialogTitle className="text-lg sm:text-2xl flex items-center gap-2">
             <Trophy size={20} weight="fill" className="text-primary sm:w-7 sm:h-7" />
@@ -135,7 +135,7 @@ export function Achievements({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="spins" className="flex-1 overflow-hidden flex flex-col px-3 sm:px-6">
+        <Tabs defaultValue="spins" className="px-3 sm:px-6 pb-6">
           <div className="overflow-x-auto pb-2 -mx-3 px-3 scrollbar-hide flex-shrink-0">
             <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 mb-2 h-auto p-1">
               {categories.map(cat => {
@@ -162,8 +162,8 @@ export function Achievements({
             </TabsList>
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2 -mr-2 pb-4">
-            <div className="pr-2">
+          <div className="pb-4">
+            <div>
             {categories.map(cat => (
               <TabsContent key={cat.value} value={cat.value} className="mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
