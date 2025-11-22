@@ -88,7 +88,8 @@ export function UserProfile({
         className="bg-primary hover:bg-primary/90 text-primary-foreground"
       >
         <User size={20} weight="fill" className="mr-2" />
-        Login with GitHub
+        <span className="hidden sm:inline">Login with GitHub</span>
+        <span className="sm:hidden">Login</span>
       </Button>
     )
   }
@@ -114,7 +115,7 @@ export function UserProfile({
       </Button>
 
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
-        <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-md p-4 sm:p-6">
+        <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-md p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
           <DialogHeader className="text-left">
             <DialogTitle className="text-xl sm:text-2xl flex items-center gap-2">
               <User size={24} weight="fill" className="text-primary sm:w-7 sm:h-7" />
