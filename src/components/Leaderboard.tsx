@@ -81,27 +81,27 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="text-2xl sm:text-3xl font-bold orbitron flex items-center gap-3">
-            <Trophy size={32} weight="fill" className="text-primary" />
-            Global Leaderboards
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] p-0 gap-0">
+        <DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 space-y-1 text-left">
+          <DialogTitle className="text-lg sm:text-3xl font-bold orbitron flex items-center gap-2 sm:gap-3">
+            <Trophy size={20} weight="fill" className="text-primary sm:w-8 sm:h-8 flex-shrink-0" />
+            <span>Global Leaderboards</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Compete with players from around the world
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-4 sm:px-6">
-          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 h-auto gap-1 mb-4 bg-muted/50 p-1">
+        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-3 sm:px-6 flex-1 overflow-hidden flex flex-col">
+          <div className="overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide flex-shrink-0">
+            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 h-auto gap-1 mb-2 sm:mb-4 bg-muted/50 p-1">
               {CATEGORIES.map(category => (
                 <TabsTrigger 
                   key={category} 
                   value={category} 
-                  className="text-xs sm:text-sm px-3 py-2 h-full whitespace-nowrap sm:whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1"
+                  className="text-xs sm:text-sm px-3 py-1.5 sm:py-2 h-full whitespace-nowrap sm:whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1"
                 >
-                  <span className="mr-1 text-lg sm:text-base">{getCategoryIcon(category)}</span>
+                  <span className="mr-1 text-base sm:text-base">{getCategoryIcon(category)}</span>
                   <span className="hidden sm:inline">{getCategoryLabel(category)}</span>
                   <span className="sm:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
                 </TabsTrigger>
@@ -110,29 +110,30 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
           </div>
 
           {CATEGORIES.map(category => (
-            <TabsContent key={category} value={category} className="mt-0">
+            <TabsContent key={category} value={category} className="mt-0 flex-1 overflow-hidden flex flex-col">
               {currentUserId && playerRanks[category] && (
-                <Card className="mb-4 p-3 sm:p-4 bg-accent/10 border-accent">
+                <Card className="mb-3 sm:mb-4 p-3 sm:p-4 bg-accent/10 border-accent flex-shrink-0">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-accent/20 rounded-full">
-                        <Trophy size={20} weight="fill" className="text-accent" />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="p-1.5 sm:p-2 bg-accent/20 rounded-full">
+                        <Trophy size={16} weight="fill" className="text-accent sm:w-5 sm:h-5" />
                       </div>
                       <div>
-                        <div className="font-bold text-sm sm:text-base">Your Rank</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-bold text-xs sm:text-base">Your Rank</div>
+                        <div className="text-[10px] sm:text-sm text-muted-foreground">
                           {getCategoryLabel(category)}
                         </div>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-base sm:text-lg font-bold orbitron px-3 py-1">
+                    <Badge variant="secondary" className="text-sm sm:text-lg font-bold orbitron px-2 sm:px-3 py-0.5 sm:py-1">
                       #{playerRanks[category]}
                     </Badge>
                   </div>
                 </Card>
               )}
 
-              <ScrollArea className="h-[50vh] pr-2 sm:pr-4">
+              <ScrollArea className="flex-1 pr-2 sm:pr-4 -mr-2 sm:-mr-4">
+                <div className="pr-2 sm:pr-4 pb-4">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <motion.div
@@ -160,7 +161,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                             <Card className={`p-2 sm:p-4 ${isCurrentUser ? 'border-2 border-accent bg-accent/5' : ''} ${rank <= 3 ? 'shadow-lg' : ''}`}>
                               <div className="flex items-center gap-2 sm:gap-4">
                                 {/* Rank */}
-                                <div className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full ${getRankColor(rank)} flex-shrink-0 shadow-sm`}>
+                                <div className={`flex items-center justify-center w-6 h-6 sm:w-12 sm:h-12 rounded-full ${getRankColor(rank)} flex-shrink-0 shadow-sm`}>
                                   {rank <= 3 ? (
                                     <div className="scale-75 sm:scale-100">{getRankIcon(rank)}</div>
                                   ) : (
@@ -177,7 +178,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                                 {/* Info */}
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                                   <div className="flex items-center gap-1 sm:gap-2">
-                                    <div className="font-bold text-sm sm:text-lg truncate leading-tight">
+                                    <div className="font-bold text-xs sm:text-lg truncate leading-tight">
                                       {entry.username}
                                     </div>
                                     {isCurrentUser && (
@@ -192,8 +193,8 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                                 </div>
                                 
                                 {/* Score */}
-                                <div className="text-right pl-2">
-                                  <div className="text-sm sm:text-2xl font-bold orbitron text-primary whitespace-nowrap">
+                                <div className="text-right pl-1 sm:pl-2">
+                                  <div className="text-xs sm:text-2xl font-bold orbitron text-primary whitespace-nowrap">
                                     {formatScore(category, entry.score)}
                                   </div>
                                   {rank <= 3 && (
@@ -211,13 +212,14 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Trophy size={64} weight="light" className="text-muted-foreground mb-4" />
-                    <p className="text-lg font-semibold mb-2">No rankings yet</p>
-                    <p className="text-sm text-muted-foreground">
+                    <Trophy size={48} weight="light" className="text-muted-foreground mb-4 sm:w-16 sm:h-16" />
+                    <p className="text-base sm:text-lg font-semibold mb-2">No rankings yet</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Be the first to claim the top spot!
                     </p>
                   </div>
                 )}
+                </div>
               </ScrollArea>
             </TabsContent>
           ))}
@@ -225,13 +227,13 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
 
         <Separator className="my-0" />
         
-        <div className="p-6 pt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CloudArrowUp size={16} weight="fill" />
+        <div className="p-3 sm:p-6 pt-2 sm:pt-4 flex items-center justify-between bg-background z-10">
+          <div className="flex items-center gap-2 text-[10px] sm:text-sm text-muted-foreground">
+            <CloudArrowUp size={14} weight="fill" className="sm:w-4 sm:h-4" />
             <span>Rankings update in real-time</span>
           </div>
-          <Button onClick={loadLeaderboards} variant="outline" size="sm">
-            <ArrowUp size={16} className="mr-2" />
+          <Button onClick={loadLeaderboards} variant="outline" size="sm" className="h-7 sm:h-9 text-xs sm:text-sm">
+            <ArrowUp size={14} className="mr-1 sm:mr-2 sm:w-4 sm:h-4" />
             Refresh
           </Button>
         </div>

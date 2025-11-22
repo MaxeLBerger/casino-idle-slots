@@ -123,20 +123,20 @@ export function Achievements({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-2">
-            <Trophy size={28} weight="fill" className="text-primary" />
+      <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-3xl lg:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+        <DialogHeader className="p-4 sm:p-6 pb-2 sm:pb-4 text-left">
+          <DialogTitle className="text-lg sm:text-2xl flex items-center gap-2">
+            <Trophy size={20} weight="fill" className="text-primary sm:w-7 sm:h-7" />
             Achievements
           </DialogTitle>
-          <DialogDescription className="flex items-center gap-2">
+          <DialogDescription className="flex items-center gap-2 text-xs sm:text-sm">
             <span>Unlocked {unlockedCount} of {totalAchievements}</span>
-            <Progress value={(unlockedCount / totalAchievements) * 100} className="h-2 w-32" />
+            <Progress value={(unlockedCount / totalAchievements) * 100} className="h-1.5 sm:h-2 w-24 sm:w-32" />
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="spins" className="flex-1 overflow-hidden flex flex-col">
-          <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+        <Tabs defaultValue="spins" className="flex-1 overflow-hidden flex flex-col px-3 sm:px-6">
+          <div className="overflow-x-auto pb-2 -mx-3 px-3 scrollbar-hide flex-shrink-0">
             <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 mb-2 h-auto p-1">
               {categories.map(cat => {
                 const count = getUnlockedCountByCategory(cat.value)
@@ -144,9 +144,9 @@ export function Achievements({
                   <TabsTrigger 
                     key={cat.value} 
                     value={cat.value} 
-                    className="text-xs relative flex-1 px-3 py-2 data-[state=active]:bg-background"
+                    className="text-xs relative flex-1 px-3 py-1.5 sm:py-2 data-[state=active]:bg-background"
                   >
-                    <span className="mr-1 text-lg sm:text-base">{cat.icon}</span>
+                    <span className="mr-1 text-base sm:text-base">{cat.icon}</span>
                     <span className="hidden sm:inline">{cat.label}</span>
                     {count > 0 && (
                       <Badge 
@@ -162,10 +162,11 @@ export function Achievements({
             </TabsList>
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-2">
+          <div className="flex-1 overflow-y-auto pr-2 -mr-2 pb-4">
+            <div className="pr-2">
             {categories.map(cat => (
               <TabsContent key={cat.value} value={cat.value} className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
                   <AnimatePresence mode="popLayout">
                     {getAchievementsByCategory(cat.value).map(achievement => 
                       renderAchievement(achievement)
@@ -174,6 +175,7 @@ export function Achievements({
                 </div>
               </TabsContent>
             ))}
+            </div>
           </div>
         </Tabs>
       </DialogContent>

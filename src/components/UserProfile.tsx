@@ -114,13 +114,13 @@ export function UserProfile({
       </Button>
 
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
-        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl flex items-center gap-2">
-              <User size={28} weight="fill" className="text-primary" />
+        <DialogContent className="max-w-[calc(100%-1rem)] sm:max-w-md p-4 sm:p-6">
+          <DialogHeader className="text-left">
+            <DialogTitle className="text-xl sm:text-2xl flex items-center gap-2">
+              <User size={24} weight="fill" className="text-primary sm:w-7 sm:h-7" />
               Player Profile
             </DialogTitle>
-            <DialogDescription>Your casino stats and progress</DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">Your casino stats and progress</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
