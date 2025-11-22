@@ -123,81 +123,81 @@ export function UserProfile({
             <DialogDescription>Your casino stats and progress</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            <div className="flex flex-col items-center py-4">
-              <Avatar className="w-24 h-24 mb-4 border-4 border-primary/20">
+          <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
+            <div className="flex flex-col items-center py-2 sm:py-4">
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24 mb-3 sm:mb-4 border-4 border-primary/20">
                 <AvatarImage src={avatarUrl} alt={username} />
                 <AvatarFallback className="text-2xl">{username[0]?.toUpperCase()}</AvatarFallback>
               </Avatar>
-              <h2 className="text-2xl font-bold mb-1">{username}</h2>
-              <Badge variant="outline" className={`mb-6 ${prestigeRank.color} border-current`}>
+              <h2 className="text-xl sm:text-2xl font-bold mb-1">{username}</h2>
+              <Badge variant="outline" className={`mb-4 sm:mb-6 ${prestigeRank.color} border-current`}>
                 <Crown size={14} weight="fill" className="mr-1" />
                 {prestigeRank.name} Rank
               </Badge>
             </div>
 
-            <Card className="p-4 bg-muted/50">
+            <Card className="p-3 sm:p-4 bg-muted/50">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold">Experience</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs sm:text-sm font-semibold">Experience</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">
                   {experience} / {experienceToNextLevel}
                 </span>
               </div>
-              <Progress value={progressPercent} className="h-3" />
-              <p className="text-xs text-muted-foreground mt-2">
+              <Progress value={progressPercent} className="h-2 sm:h-3" />
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
                 {experienceToNextLevel - experience} XP to Level {level + 1}
               </p>
             </Card>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4 bg-card border-primary/20">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <Card className="p-3 sm:p-4 bg-card border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Coins size={20} weight="fill" className="text-primary" />
-                  <span className="text-sm font-semibold">Coins</span>
+                  <Coins size={16} weight="fill" className="text-primary sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-semibold">Coins</span>
                 </div>
-                <div className="text-2xl font-bold orbitron tabular-nums">
+                <div className="text-lg sm:text-2xl font-bold orbitron tabular-nums truncate">
                   {coins.toLocaleString()}
                 </div>
               </Card>
 
-              <Card className="p-4 bg-card border-accent/20">
+              <Card className="p-3 sm:p-4 bg-card border-accent/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Trophy size={20} weight="fill" className="text-accent" />
-                  <span className="text-sm font-semibold">Prestige</span>
+                  <Trophy size={16} weight="fill" className="text-accent sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-semibold">Prestige</span>
                 </div>
-                <div className="text-2xl font-bold orbitron tabular-nums">
+                <div className="text-lg sm:text-2xl font-bold orbitron tabular-nums truncate">
                   {prestigePoints}
                 </div>
               </Card>
 
-              <Card className="p-4 bg-card border-secondary/20 col-span-2">
+              <Card className="p-3 sm:p-4 bg-card border-secondary/20 col-span-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <Lightning size={20} weight="fill" className="text-secondary" />
-                  <span className="text-sm font-semibold">Current Run Spins</span>
+                  <Lightning size={16} weight="fill" className="text-secondary sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-semibold">Current Run Spins</span>
                 </div>
-                <div className="text-2xl font-bold orbitron tabular-nums">
+                <div className="text-lg sm:text-2xl font-bold orbitron tabular-nums truncate">
                   {totalSpins.toLocaleString()}
                 </div>
               </Card>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <Sparkle size={16} weight="fill" />
                 Lifetime Statistics
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <Card className="p-3 bg-muted/30">
-                  <div className="text-xs text-muted-foreground mb-1">Total Spins</div>
-                  <div className="text-lg font-bold orbitron tabular-nums">{lifetimeSpins.toLocaleString()}</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <Card className="p-2 sm:p-3 bg-muted/30">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Total Spins</div>
+                  <div className="text-sm sm:text-lg font-bold orbitron tabular-nums truncate">{lifetimeSpins.toLocaleString()}</div>
                 </Card>
-                <Card className="p-3 bg-muted/30">
-                  <div className="text-xs text-muted-foreground mb-1">Total Wins</div>
-                  <div className="text-lg font-bold orbitron tabular-nums">{lifetimeWins.toLocaleString()}</div>
+                <Card className="p-2 sm:p-3 bg-muted/30">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Total Wins</div>
+                  <div className="text-sm sm:text-lg font-bold orbitron tabular-nums truncate">{lifetimeWins.toLocaleString()}</div>
                 </Card>
-                <Card className="p-3 bg-muted/30">
-                  <div className="text-xs text-muted-foreground mb-1">Biggest Win</div>
-                  <div className="text-lg font-bold orbitron tabular-nums text-yellow-500">{lifetimeBiggestWin.toLocaleString()}</div>
+                <Card className="p-2 sm:p-3 bg-muted/30">
+                  <div className="text-[10px] sm:text-xs text-muted-foreground mb-1">Biggest Win</div>
+                  <div className="text-sm sm:text-lg font-bold orbitron tabular-nums text-yellow-500 truncate">{lifetimeBiggestWin.toLocaleString()}</div>
                 </Card>
                 <Card className="p-3 bg-muted/30">
                   <div className="text-xs text-muted-foreground mb-1">Total Earnings</div>

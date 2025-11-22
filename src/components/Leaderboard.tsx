@@ -92,20 +92,22 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-6">
-          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 mb-4 bg-muted/50 p-1">
-            {CATEGORIES.map(category => (
-              <TabsTrigger 
-                key={category} 
-                value={category} 
-                className="text-[10px] sm:text-xs md:text-sm px-1 py-2 h-full whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm"
-              >
-                <span className="mr-1 hidden md:inline">{getCategoryIcon(category)}</span>
-                <span className="hidden sm:inline">{getCategoryLabel(category)}</span>
-                <span className="sm:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-4 sm:px-6">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 h-auto gap-1 mb-4 bg-muted/50 p-1">
+              {CATEGORIES.map(category => (
+                <TabsTrigger 
+                  key={category} 
+                  value={category} 
+                  className="text-xs sm:text-sm px-3 py-2 h-full whitespace-nowrap sm:whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1"
+                >
+                  <span className="mr-1 text-lg sm:text-base">{getCategoryIcon(category)}</span>
+                  <span className="hidden sm:inline">{getCategoryLabel(category)}</span>
+                  <span className="sm:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {CATEGORIES.map(category => (
             <TabsContent key={category} value={category} className="mt-0">
@@ -155,41 +157,41 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ delay: index * 0.03 }}
                           >
-                            <Card className={`p-4 ${isCurrentUser ? 'border-2 border-accent bg-accent/5' : ''} ${rank <= 3 ? 'shadow-lg' : ''}`}>
-                              <div className="flex items-center gap-4">
-                                <div className={`flex items-center justify-center w-12 h-12 rounded-full ${getRankColor(rank)} flex-shrink-0`}>
+                            <Card className={`p-3 sm:p-4 ${isCurrentUser ? 'border-2 border-accent bg-accent/5' : ''} ${rank <= 3 ? 'shadow-lg' : ''}`}>
+                              <div className="flex items-center gap-3 sm:gap-4">
+                                <div className={`flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-full ${getRankColor(rank)} flex-shrink-0`}>
                                   {rank <= 3 ? (
-                                    getRankIcon(rank)
+                                    <div className="scale-75 sm:scale-100">{getRankIcon(rank)}</div>
                                   ) : (
-                                    <span className="font-bold text-foreground">#{rank}</span>
+                                    <span className="font-bold text-sm sm:text-base text-foreground">#{rank}</span>
                                   )}
                                 </div>
                                 
-                                <Avatar className="w-12 h-12 border-2 border-border">
+                                <Avatar className="w-8 h-8 sm:w-12 sm:h-12 border-2 border-border">
                                   <AvatarImage src={entry.avatarUrl} alt={entry.username} />
                                   <AvatarFallback>{entry.username[0].toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <div className="font-bold text-lg truncate">
+                                    <div className="font-bold text-sm sm:text-lg truncate">
                                       {entry.username}
                                     </div>
                                     {isCurrentUser && (
-                                      <Badge variant="secondary" className="text-xs">You</Badge>
+                                      <Badge variant="secondary" className="text-[10px] sm:text-xs px-1 py-0 h-5">You</Badge>
                                     )}
                                   </div>
-                                  <div className="text-sm text-muted-foreground">
+                                  <div className="text-xs sm:text-sm text-muted-foreground">
                                     Level {entry.level}
                                   </div>
                                 </div>
                                 
                                 <div className="text-right">
-                                  <div className="text-2xl font-bold orbitron text-primary">
+                                  <div className="text-sm sm:text-2xl font-bold orbitron text-primary">
                                     {formatScore(category, entry.score)}
                                   </div>
                                   {rank <= 3 && (
-                                    <Badge variant="outline" className="mt-1 text-xs">
+                                    <Badge variant="outline" className="mt-1 text-[10px] sm:text-xs hidden sm:inline-flex">
                                       Top {rank}
                                     </Badge>
                                   )}

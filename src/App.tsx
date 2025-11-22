@@ -1056,18 +1056,18 @@ function App() {
   const canPrestige = effectiveGameState.totalEarnings >= prestigeRequirement
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-background p-2 sm:p-4 md:p-8">
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
       <AchievementNotification achievement={achievementNotification} onClose={() => setAchievementNotification(null)} />
       
       <div className="max-w-[1800px] mx-auto">
-        <div className="flex justify-between items-center mb-8 px-4">
+        <div className="flex justify-between items-center mb-4 md:mb-8 px-2 sm:px-4">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight drop-shadow-lg">
+            <h1 className="text-xl sm:text-3xl md:text-5xl font-bold text-primary tracking-tight drop-shadow-lg">
               🎰 CASINO IDLE SLOTS
             </h1>
           </motion.div>
@@ -1075,7 +1075,7 @@ function App() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2"
           >
             <LeaderboardButton
               onClick={() => setShowLeaderboard(true)}
@@ -1094,7 +1094,7 @@ function App() {
               onClick={() => setShowAchievements(true)}
               variant="outline"
               size="sm"
-              className="md:hidden"
+              className="md:hidden px-2 sm:px-3"
             >
               <Trophy size={20} weight="fill" />
             </Button>
@@ -1120,7 +1120,7 @@ function App() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start px-0 sm:px-4">
           
           {/* LEFT COLUMN - Progression */}
           <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">

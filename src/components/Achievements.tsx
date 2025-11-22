@@ -47,27 +47,27 @@ export function Achievements({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
       >
-        <Card className={`p-4 relative overflow-hidden h-full flex flex-col ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
+        <Card className={`p-3 sm:p-4 relative overflow-hidden h-full flex flex-col ${unlocked ? 'border-primary' : canClaim ? 'border-accent' : ''}`}>
           {unlocked && (
             <div className="absolute top-2 right-2">
-              <Badge className="bg-primary text-primary-foreground">
+              <Badge className="bg-primary text-primary-foreground scale-90 sm:scale-100 origin-top-right">
                 <Check size={14} weight="bold" className="mr-1" />
                 Unlocked
               </Badge>
             </div>
           )}
           
-          <div className="flex gap-4 flex-1">
-            <div className={`text-4xl flex-shrink-0 ${!unlocked && !canClaim ? 'grayscale opacity-50' : ''}`}>
+          <div className="flex gap-3 sm:gap-4 flex-1">
+            <div className={`text-3xl sm:text-4xl flex-shrink-0 ${!unlocked && !canClaim ? 'grayscale opacity-50' : ''}`}>
               {achievement.icon}
             </div>
             
             <div className="flex-1 min-w-0 flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-bold text-lg leading-tight">{achievement.title}</h3>
+                <h3 className="font-bold text-base sm:text-lg leading-tight pr-16 sm:pr-0">{achievement.title}</h3>
               </div>
               
-              <p className="text-sm text-muted-foreground mb-3 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 flex-1">
                 {achievement.description}
               </p>
               
@@ -81,12 +81,12 @@ export function Achievements({
                 </div>
               )}
               
-              <div className="flex items-center gap-2 mt-3">
-                <Badge variant="secondary" className="text-xs">
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <Badge variant="secondary" className="text-[10px] sm:text-xs">
                   +{achievement.rewardCoins} 💰
                 </Badge>
                 {achievement.rewardPrestige && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="secondary" className="text-[10px] sm:text-xs">
                     +{achievement.rewardPrestige} 🏆
                   </Badge>
                 )}
@@ -96,7 +96,7 @@ export function Achievements({
                 <Button
                   onClick={() => onClaim(achievement.id)}
                   size="sm"
-                  className="w-full mt-3 bg-accent hover:bg-accent/90 text-accent-foreground"
+                  className="w-full mt-3 bg-accent hover:bg-accent/90 text-accent-foreground h-8 sm:h-9 text-xs sm:text-sm"
                 >
                   <Trophy size={16} weight="fill" className="mr-2" />
                   Claim Reward
@@ -136,25 +136,31 @@ export function Achievements({
         </DialogHeader>
 
         <Tabs defaultValue="spins" className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid grid-cols-6 mb-4">
-            {categories.map(cat => {
-              const count = getUnlockedCountByCategory(cat.value)
-              return (
-                <TabsTrigger key={cat.value} value={cat.value} className="text-xs relative">
-                  <span className="mr-1">{cat.icon}</span>
-                  <span className="hidden sm:inline">{cat.label}</span>
-                  {count > 0 && (
-                    <Badge 
-                      variant="secondary" 
-                      className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] border border-border bg-background shadow-sm"
-                    >
-                      {count}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
+          <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 mb-2 h-auto p-1">
+              {categories.map(cat => {
+                const count = getUnlockedCountByCategory(cat.value)
+                return (
+                  <TabsTrigger 
+                    key={cat.value} 
+                    value={cat.value} 
+                    className="text-xs relative flex-1 px-3 py-2 data-[state=active]:bg-background"
+                  >
+                    <span className="mr-1 text-lg sm:text-base">{cat.icon}</span>
+                    <span className="hidden sm:inline">{cat.label}</span>
+                    {count > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center rounded-full text-[10px] border border-border bg-background shadow-sm"
+                      >
+                        {count}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                )
+              })}
+            </TabsList>
+          </div>
 
           <div className="flex-1 overflow-y-auto pr-2">
             {categories.map(cat => (
