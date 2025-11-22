@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Crown, Medal, Sparkle, ArrowUp, CloudArrowUp } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -93,20 +94,22 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
         </DialogHeader>
 
         <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)} className="px-3 sm:px-6 pb-6">
-          <div className="overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide flex-shrink-0">
-            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 h-auto gap-1 mb-2 sm:mb-4 bg-muted/50 p-1">
-              {CATEGORIES.map(category => (
-                <TabsTrigger 
-                  key={category} 
-                  value={category} 
-                  className="text-xs sm:text-sm px-3 py-1.5 sm:py-2 h-full whitespace-nowrap sm:whitespace-normal leading-tight data-[state=active]:bg-background data-[state=active]:shadow-sm flex-1"
-                >
-                  <span className="mr-1 text-base sm:text-base">{getCategoryIcon(category)}</span>
-                  <span className="hidden sm:inline">{getCategoryLabel(category)}</span>
-                  <span className="sm:hidden">{category === 'coins' ? 'Coins' : category === 'totalSpins' ? 'Spins' : category === 'biggestWin' ? 'Biggest' : category === 'totalEarnings' ? 'Earned' : category === 'level' ? 'Level' : 'Prestige'}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <div className="mb-4">
+            <Select value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as LeaderboardCategory)}>
+              <SelectTrigger className="w-full h-12">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(category => (
+                  <SelectItem key={category} value={category}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{getCategoryIcon(category)}</span>
+                      <span className="font-medium">{getCategoryLabel(category)}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {CATEGORIES.map(category => (

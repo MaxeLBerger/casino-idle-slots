@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, X, Lock, Check } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
@@ -6,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ACHIEVEMENTS, Achievement } from '@/lib/achievements'
 
 interface AchievementsProps {
@@ -23,7 +25,9 @@ export function Achievements({
   achievementProgress,
   onClaim
 }: AchievementsProps) {
-  const getAchievementsByCategory = (category: Achievement['category']) => {
+  const [activeCategory, setActiveCategory] = useState<string>('spins')
+
+  const getAchievementsByCategory = (category: string) => {
     return ACHIEVEMENTS.filter(a => a.category === category)
   }
 
@@ -135,35 +139,34 @@ export function Achievements({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="spins" className="px-3 sm:px-6 pb-6">
-          <div className="overflow-x-auto pb-2 -mx-3 px-3 scrollbar-hide flex-shrink-0">
-            <TabsList className="w-full flex min-w-max sm:grid sm:grid-cols-6 sm:min-w-0 mb-2 h-auto p-1">
-              {categories.map(cat => {
-                const count = getUnlockedCountByCategory(cat.value)
-                return (
-                  <TabsTrigger 
-                    key={cat.value} 
-                    value={cat.value} 
-                    className="text-xs relative flex-1 px-3 py-1.5 sm:py-2 data-[state=active]:bg-background"
-                  >
-                    <span className="mr-1 text-base sm:text-base">{cat.icon}</span>
-                    <span className="hidden sm:inline">{cat.label}</span>
-                    {count > 0 && (
-                      <Badge 
-                        variant="secondary" 
-                        className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center rounded-full text-[10px] border border-border bg-background shadow-sm"
-                      >
-                        {count}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                )
-              })}
-            </TabsList>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="px-3 sm:px-6 pb-6">
+          <div className="mb-4">
+            <Select value={activeCategory} onValueChange={setActiveCategory}>
+              <SelectTrigger className="w-full h-12">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(cat => {
+                  const count = getUnlockedCountByCategory(cat.value)
+                  return (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      <div className="flex items-center gap-2 w-full">
+                        <span className="text-lg">{cat.icon}</span>
+                        <span className="font-medium">{cat.label}</span>
+                        {count > 0 && (
+                          <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">
+                            {count}
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="pb-4">
-            <div>
             {categories.map(cat => (
               <TabsContent key={cat.value} value={cat.value} className="mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
@@ -175,7 +178,6 @@ export function Achievements({
                 </div>
               </TabsContent>
             ))}
-            </div>
           </div>
         </Tabs>
       </DialogContent>
