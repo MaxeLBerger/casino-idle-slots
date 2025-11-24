@@ -9,6 +9,12 @@ export interface SlotMachineConfig {
   reels: number;
   prestigeCost: number;
   symbols: string[];
+  /** Multiplikator für Idle-Einkommen je Maschine */
+  idleMultiplier?: number;
+  /** Pfad-Basis unter /public für Assets, z.B. /assets/slots/classic_1 */
+  assetBasePath: string;
+  /** Dateiname des Hintergrundbildes innerhalb des Asset-Pfads */
+  backgroundImage: string;
 }
 
 export interface SpinResult {

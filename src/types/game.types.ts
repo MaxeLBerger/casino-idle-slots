@@ -3,6 +3,75 @@
  * Zentrale TypeScript-Typen für den Game State
  */
 
+export type SlotTierId =
+  | 'classic'
+  | 'sapphire'
+  | 'emerald'
+  | 'royal'
+  | 'celestial'
+  | 'dragonEvent';
+
+export type PrestigeRankId =
+  | 'bronze'
+  | 'silver'
+  | 'gold'
+  | 'platinum'
+  | 'diamond';
+
+export type CurrencyId =
+  | 'coins'
+  | 'prestigePoints'
+  | 'diamonds'
+  | 'eventTokenDragonJade'
+  | 'eventTokenSapphire'
+  | 'eventTokenEmerald'
+  | 'eventTokenRoyal'
+  | 'eventTokenCelestial'
+  | 'limitedPass';
+
+export type UiIconId =
+  | 'map'
+  | 'shop'
+  | 'stats'
+  | 'workers'
+  | 'prestige'
+  | 'prestigeNav'
+  | 'settings'
+  | 'soundOn'
+  | 'soundOff'
+  | 'notification'
+  | 'inventory'
+  | 'upgradeMenu'
+  | 'info'
+  | 'lockOverlay'
+  | 'event'
+  | 'hostElegant';
+
+export type ActionUiId =
+  | 'spinButton'
+  | 'autoSpinToggle'
+  | 'tooltipPanel'
+  | 'notificationToast'
+  | 'loadingSpinner';
+
+export type WorkerRoleId =
+  | 'cashier'
+  | 'host'
+  | 'security'
+  | 'analyst'
+  | 'vipConcierge'
+  | 'marketing'
+  | 'technician'
+  | 'manager';
+
+export type AvatarId =
+  | 'male'
+  | 'female'
+  | 'highRoller'
+  | 'dealer'
+  | 'security'
+  | 'vipHost';
+
 export interface SpinResult {
   id: string;
   timestamp: number;

@@ -127,6 +127,18 @@ export const PRESTIGE_CONFIG = {
 } as const;
 
 // ============================================================================
+// PRESTIGE RANK ASSETS
+// ============================================================================
+
+export const PRESTIGE_RANK_ASSETS = {
+  bronze: '/assets/ranks/rank_bronze.png',
+  silver: '/assets/ranks/rank_silver.png',
+  gold: '/assets/ranks/rank_gold.png',
+  platinum: '/assets/ranks/rank_platin.png',
+  diamond: '/assets/ranks/rank_diamond.png',
+} as const;
+
+// ============================================================================
 // STORAGE KEYS
 // ============================================================================
 
