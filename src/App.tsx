@@ -38,27 +38,13 @@ import {
   formatPrestigeBonus,
   getPrestigeRank
 } from '@/lib/prestige'
+import { SLOT_MACHINE_CONFIGS, SYMBOL_MULTIPLIERS, JACKPOT_SYMBOLS, ULTRA_JACKPOT_SYMBOLS, SYMBOL_ASSET_MAP } from '@/constants/slot.constants'
+import { UI_ICON_ASSETS } from '@/constants/ui.constants'
+import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants'
+import MapView from '@/components/MapView'
 
-const SYMBOL_SETS = [
-  ['🍒', '🍋', '🔔'],
-  ['🍒', '🍋', '🔔', '💎', '⭐'],
-  ['🍒', '🍋', '🔔', '💎', '⭐', '🍀', '🎰'],
-  ['🍒', '🍋', '🔔', '💎', '⭐', '🍀', '🎰', '💰', '🎁'],
-  ['🍒', '🍋', '🔔', '💎', '⭐', '🍀', '🎰', '💰', '🎁', '👑', '🔥']
-]
-
-const JACKPOT_SYMBOLS = ['💰', '💎', '👑', '⭐', '🔥']
-const ULTRA_JACKPOT_SYMBOLS = ['🌟', '💫', '✨']
 const JACKPOT_CHANCE = 0.03
 const ULTRA_JACKPOT_CHANCE = 0.005
-
-const SLOT_MACHINE_CONFIGS = [
-  { name: 'Classic', rows: 1, reels: 3, prestigeCost: 0, symbols: SYMBOL_SETS[0], idleMultiplier: 1 },
-  { name: 'Deluxe', rows: 2, reels: 3, prestigeCost: 5, symbols: SYMBOL_SETS[1], idleMultiplier: 2 },
-  { name: 'Premium', rows: 3, reels: 3, prestigeCost: 10, symbols: SYMBOL_SETS[2], idleMultiplier: 5 },
-  { name: 'Mega', rows: 3, reels: 4, prestigeCost: 15, symbols: SYMBOL_SETS[3], idleMultiplier: 12 },
-  { name: 'Ultimate', rows: 4, reels: 5, prestigeCost: 20, symbols: SYMBOL_SETS[4], idleMultiplier: 30 }
-]
 
 const SPIN_COST = 10
 const STARTING_COINS = 200
@@ -125,6 +111,21 @@ function App() {
   const [hasMigratedData, setHasMigratedData] = useState(false)
   const [showDataMigrationDialog, setShowDataMigrationDialog] = useState(false)
   const [showPrestigeDialog, setShowPrestigeDialog] = useState(false)
+  const [showMap, setShowMap] = useState(false)
+
+  const hudIcons = {
+    map: UI_ICON_ASSETS.map,
+    stats: UI_ICON_ASSETS.stats,
+    workers: UI_ICON_ASSETS.workers,
+    shop: UI_ICON_ASSETS.shop,
+    prestige: UI_ICON_ASSETS.prestigeNav,
+  }
+
+  const currencyIcons = {
+    coins: CURRENCY_ICON_ASSETS.coins,
+    prestige: CURRENCY_ICON_ASSETS.prestigePoints,
+    diamonds: CURRENCY_ICON_ASSETS.diamonds,
+  }
 
   const currentMachine = SLOT_MACHINE_CONFIGS[gameState?.currentSlotMachine || 0]
   const initialReels = useMemo(() => {
@@ -199,6 +200,41 @@ function App() {
     }
   }, [isLoadingGameState, gameState, gameStateUserId, currentUser])
 
+  // Development-only cheat for localhost: grant effectively infinite resources for testing.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!gameState || isLoadingGameState) return
+    // Only apply in Vite dev mode AND when running on localhost (not a deployed preview)
+    const isDev = import.meta.env.DEV && window.location.hostname === 'localhost'
+    if (!isDev) return
+    // Avoid re-applying on every render
+    if (localStorage.getItem('CHEAT_LOCAL_APPLIED') === '1') return
+
+    setGameState(prev => {
+      if (!prev) return DEFAULT_STATE
+      const unlocked = SLOT_MACHINE_CONFIGS.map((_, idx) => idx)
+      return {
+        ...prev,
+        coins: 1_000_000_000_000, // 1e12 coins
+        prestigePoints: 1_000_000, // huge prestige to unlock all scaling
+        totalPrestigeEarned: 1_000_000,
+        spinPowerLevel: 50,
+        spinMultiplier: 50, // massive multiplier
+        idleIncomeLevel: 50,
+        idleIncomePerSecond: 100_000_000, // high passive income
+        totalUpgrades: prev.totalUpgrades + 200,
+        unlockedSlotMachines: unlocked,
+        currentSlotMachine: prev.currentSlotMachine,
+        level: 99,
+        experience: 0,
+        lifetimeEarnings: (prev.lifetimeEarnings || 0) + 5_000_000_000_000,
+        biggestWin: Math.max(prev.biggestWin, 10_000_000),
+      }
+    })
+    localStorage.setItem('CHEAT_LOCAL_APPLIED', '1')
+    toast.success('Dev Cheat Applied: Unlimited resources active (localhost only)')
+  }, [gameState, isLoadingGameState, setGameState])
+
   useEffect(() => {
     if (isLoadingGameState) return
 
@@ -215,6 +251,74 @@ function App() {
 
     checkDataMigration()
   }, [currentUser, isLoadingGameState, hasMigratedData, gameStateUserId])
+
+  const renderTopHud = () => (
+    <div className="flex items-center justify-between gap-3 px-3 pt-3 pb-2 bg-gradient-to-b from-black/70 via-black/40 to-transparent">
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#050317]/80 border border-[#312556]">
+          {currencyIcons.coins && (
+            <img src={currencyIcons.coins} alt="Coins" className="w-4 h-4 object-contain" loading="lazy" />
+          )}
+          <span className="text-[11px] font-medium text-amber-200 truncate max-w-[80px]">
+            {gameState?.coins.toLocaleString() ?? 0}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#050317]/80 border border-[#312556]">
+          {currencyIcons.prestige && (
+            <img src={currencyIcons.prestige} alt="Prestige" className="w-4 h-4 object-contain" loading="lazy" />
+          )}
+          <span className="text-[11px] font-medium text-cyan-200">
+            {gameState?.prestigePoints ?? 0}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        {hudIcons.map && (
+          <button
+            type="button"
+            onClick={() => setShowMap(true)}
+            className="w-8 h-8 rounded-full bg-[#050317]/80 border border-[#312556] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <img src={hudIcons.map} alt="Map" className="w-5 h-5 object-contain" loading="lazy" />
+          </button>
+        )}
+        {hudIcons.stats && (
+          <button
+            type="button"
+            className="w-8 h-8 rounded-full bg-[#050317]/80 border border-[#312556] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <img src={hudIcons.stats} alt="Stats" className="w-5 h-5 object-contain" loading="lazy" />
+          </button>
+        )}
+        {hudIcons.workers && (
+          <button
+            type="button"
+            className="w-8 h-8 rounded-full bg-[#050317]/80 border border-[#312556] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <img src={hudIcons.workers} alt="Workers" className="w-5 h-5 object-contain" loading="lazy" />
+          </button>
+        )}
+        {hudIcons.shop && (
+          <button
+            type="button"
+            className="w-8 h-8 rounded-full bg-[#050317]/80 border border-[#312556] flex items-center justify-center active:scale-95 transition-transform"
+          >
+            <img src={hudIcons.shop} alt="Shop" className="w-5 h-5 object-contain" loading="lazy" />
+          </button>
+        )}
+        {hudIcons.prestige && (
+          <button
+            type="button"
+            onClick={() => setShowPrestigeDialog(true)}
+            className="w-8 h-8 rounded-full bg-[#050317]/80 border border-[#f97316]/70 flex items-center justify-center shadow-[0_0_14px_rgba(248,113,113,0.7)] active:scale-95 transition-transform"
+          >
+            <img src={hudIcons.prestige} alt="Prestige" className="w-5 h-5 object-contain" loading="lazy" />
+          </button>
+        )}
+      </div>
+    </div>
+  )
 
   useEffect(() => {
     const syncInterval = setInterval(() => {
@@ -563,36 +667,18 @@ function App() {
       if (allMatch) {
         hasWin = true
         const symbol = rowSymbols[0]
-        const isJackpotSymbol = JACKPOT_SYMBOLS.includes(symbol)
-        const isUltraSymbol = ULTRA_JACKPOT_SYMBOLS.includes(symbol)
-        
-        let symbolMultiplier = 20
-        if (symbol === '💎') symbolMultiplier = 100
-        else if (symbol === '⭐') symbolMultiplier = 50
-        else if (symbol === '👑') symbolMultiplier = 150
-        else if (symbol === '🔥') symbolMultiplier = 200
-        else if (symbol === '💰') {
-          symbolMultiplier = 300
+        const isJackpotSymbol = JACKPOT_SYMBOLS.includes(symbol as any)
+        const isUltraSymbol = ULTRA_JACKPOT_SYMBOLS.includes(symbol as any)
+
+        let symbolMultiplier = SYMBOL_MULTIPLIERS[symbol] ?? 20
+
+        if (isJackpotSymbol) {
           isJackpot = true
-        }
-        else if (symbol === '🌟') {
-          symbolMultiplier = 500
-          isUltraJackpot = true
-        }
-        else if (symbol === '💫') {
-          symbolMultiplier = 750
-          isUltraJackpot = true
-        }
-        else if (symbol === '✨') {
-          symbolMultiplier = 1000
-          isUltraJackpot = true
-        }
-        
-        if (isJackpotSymbol && allMatch) {
           symbolMultiplier *= 2
         }
         
-        if (isUltraSymbol && allMatch) {
+        if (isUltraSymbol) {
+          isUltraJackpot = true
           symbolMultiplier *= 3
         }
         
@@ -603,14 +689,14 @@ function App() {
           winAmount += Math.floor(5 * gameState.spinMultiplier)
         }
         
-        const jackpotCount = rowSymbols.filter(s => JACKPOT_SYMBOLS.includes(s)).length
+        const jackpotCount = rowSymbols.filter(s => JACKPOT_SYMBOLS.includes(s as any)).length
         if (jackpotCount >= 2) {
           const jackpotBonus = Math.floor(50 * jackpotCount * gameState.spinMultiplier)
           winAmount += jackpotBonus
           hasWin = true
         }
         
-        const ultraCount = rowSymbols.filter(s => ULTRA_JACKPOT_SYMBOLS.includes(s)).length
+        const ultraCount = rowSymbols.filter(s => ULTRA_JACKPOT_SYMBOLS.includes(s as any)).length
         if (ultraCount >= 2) {
           const ultraBonus = Math.floor(200 * ultraCount * gameState.spinMultiplier)
           winAmount += ultraBonus
@@ -880,6 +966,11 @@ function App() {
     toast.success(`Switched to ${machine.name}!`)
   }
 
+  const handleSelectCasinoFromMap = (index: number) => {
+    switchSlotMachine(index)
+    setShowMap(false)
+  }
+
   const getPrestigeRequirement = (points: number) => {
     return BASE_PRESTIGE_REQUIREMENT + (points * 10000)
   }
@@ -1057,6 +1148,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background p-2 sm:p-4 md:p-8">
+      {renderTopHud()}
       <Confetti active={showConfetti} intensity={confettiIntensity} />
       <WinBanner show={showWinBanner} amount={winBannerAmount} type={winBannerType} />
       <AchievementNotification achievement={achievementNotification} onClose={() => setAchievementNotification(null)} />
@@ -1261,8 +1353,17 @@ function App() {
             </div>
 
             {/* SLOT MACHINE */}
-            <Card className="p-8 md:p-12 bg-gradient-to-b from-card via-background to-card border-primary/30 shadow-2xl relative overflow-hidden ring-1 ring-primary/10">
+            {!showMap && (
+            <Card
+              className="p-8 md:p-12 bg-gradient-to-b from-card via-background to-card border-primary/30 shadow-2xl relative overflow-hidden ring-1 ring-primary/10"
+              style={{
+                backgroundImage: `url(${currentMachine.assetBasePath}/${currentMachine.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <div ref={coinParticleContainer} className="absolute inset-0 pointer-events-none" />
+              <div className="absolute inset-0 bg-background/60" />
               
               <div className="flex flex-col gap-4 mb-10">
                 {reels.map((row, rowIndex) => (
@@ -1283,25 +1384,34 @@ function App() {
                         className={`bg-muted/50 rounded-2xl w-20 h-20 md:w-32 md:h-32 flex items-center justify-center border-4 shadow-inner relative overflow-hidden ${
                           reelStates[rowIndex][colIndex] && isSpinning
                             ? 'border-primary glow-pulse'
-                            : ULTRA_JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            : ULTRA_JACKPOT_SYMBOLS.includes(symbol as any) && reelStates[rowIndex][colIndex]
                             ? 'border-cyan-400 shadow-cyan-400/50 shadow-lg'
-                            : JACKPOT_SYMBOLS.includes(symbol) && reelStates[rowIndex][colIndex]
+                            : JACKPOT_SYMBOLS.includes(symbol as any) && reelStates[rowIndex][colIndex]
                             ? 'border-yellow-500 shadow-yellow-500/50 shadow-lg'
                             : 'border-border'
                         }`}
                       >
-                        <motion.span 
-                          className={`text-4xl md:text-6xl relative z-10 select-none ${
-                            ULTRA_JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]' :
-                            JACKPOT_SYMBOLS.includes(symbol) ? 'drop-shadow-[0_0_10px_rgba(255,215,0,0.6)]' : ''
+                        <motion.div
+                          className={`relative z-10 select-none flex items-center justify-center w-14 h-14 md:w-24 md:h-24 rounded-xl overflow-hidden bg-black/40 ${
+                            ULTRA_JACKPOT_SYMBOLS.includes(symbol as any)
+                              ? 'ring-2 ring-cyan-400 shadow-[0_0_18px_rgba(34,211,238,0.8)]'
+                              : JACKPOT_SYMBOLS.includes(symbol as any)
+                              ? 'ring-2 ring-yellow-400 shadow-[0_0_14px_rgba(250,204,21,0.7)]'
+                              : ''
                           }`}
-                          animate={reelStates[rowIndex][colIndex] && isSpinning ? {
-                            scale: [1, 1.2, 1],
-                            rotate: [0, -5, 5, 0]
-                          } : {}}
+                          animate={
+                            reelStates[rowIndex][colIndex] && isSpinning
+                              ? { scale: [1, 1.08, 1], rotate: [0, -3, 3, 0] }
+                              : {}
+                          }
                         >
-                          {symbol}
-                        </motion.span>
+                          <img
+                            src={`${currentMachine.assetBasePath}/${SYMBOL_ASSET_MAP[symbol] || `${symbol}.png`}`}
+                            alt={symbol}
+                            className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(0,0,0,0.6)]"
+                            loading="lazy"
+                          />
+                        </motion.div>
                       </motion.div>
                     ))}
                   </div>
@@ -1335,6 +1445,17 @@ function App() {
                 )}
               </Button>
             </Card>
+            )}
+            {showMap && (
+              <div className="mt-4">
+                <MapView 
+                  gameState={gameState} 
+                  slotMachines={SLOT_MACHINE_CONFIGS} 
+                  onSelectCasino={handleSelectCasinoFromMap} 
+                  onClose={() => setShowMap(false)}
+                />
+              </div>
+            )}
 
             <div className="flex items-center justify-center gap-3 flex-wrap">
               {effectiveGameState.prestigePoints > 0 && (
@@ -1415,6 +1536,7 @@ function App() {
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-muted-foreground">{machine.rows}x{machine.reels}</span>
                         {isUnlocked ? (
+                          <div className="flex flex-col md:flex-row gap-4 w-full">
                           <Button
                             size="sm"
                             variant={isCurrent ? "ghost" : "secondary"}
@@ -1424,6 +1546,15 @@ function App() {
                           >
                             {isCurrent ? 'Selected' : 'Select'}
                           </Button>
+                          <Button
+                            size="lg"
+                            variant="secondary"
+                            onClick={() => setShowMap(prev => !prev)}
+                            className="w-full py-8 md:py-10 text-xl md:text-2xl font-bold uppercase tracking-wider bg-muted hover:bg-muted/80 text-foreground shadow-xl disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            {showMap ? 'Back to Slots' : 'Open Map'}
+                          </Button>
+                          </div>
                         ) : (
                           <Button
                             size="sm"

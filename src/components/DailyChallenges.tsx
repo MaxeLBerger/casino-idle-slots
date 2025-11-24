@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { DailyChallenge } from '@/lib/achievements'
+import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants'
 
 interface DailyChallengesProps {
   open: boolean
@@ -77,14 +78,21 @@ export function DailyChallenges({
             )}
 
             <div className="flex items-center gap-2 mb-4">
-              <Badge className="bg-primary/20 text-primary">
-                <Trophy size={16} weight="fill" className="mr-1" />
-                +{dailyChallenge.reward} Coins
+              <Badge className="bg-primary/15 text-primary flex items-center gap-1">
+                {CURRENCY_ICON_ASSETS.coins && (
+                  <img
+                    src={CURRENCY_ICON_ASSETS.coins}
+                    alt="Coins"
+                    className="w-3.5 h-3.5 object-contain"
+                    loading="lazy"
+                  />
+                )}
+                <span>+{dailyChallenge.reward.toLocaleString()} Coins</span>
               </Badge>
               {dailyChallenge.rewardPrestige && (
-                <Badge className="bg-accent/20 text-accent">
+                <Badge className="bg-accent/15 text-accent flex items-center gap-1">
                   <Trophy size={16} weight="fill" className="mr-1" />
-                  +{dailyChallenge.rewardPrestige} Prestige
+                  <span>+{dailyChallenge.rewardPrestige} Prestige</span>
                 </Badge>
               )}
             </div>

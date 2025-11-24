@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
+import { PRESTIGE_RANK_ASSETS } from '@/constants/game.constants'
 import {
   calculatePrestigeReward,
   calculatePrestigeMultiplier,
@@ -52,6 +53,8 @@ export function PrestigeDialog({
   
   const currentRank = getPrestigeRank(currentPrestigePoints)
   const newRank = getPrestigeRank(newPrestigeTotal)
+  const currentRankBadge = PRESTIGE_RANK_ASSETS[currentRank.id]
+  const newRankBadge = PRESTIGE_RANK_ASSETS[newRank.id]
 
   const handleConfirm = () => {
     if (!confirming) {
@@ -83,7 +86,17 @@ export function PrestigeDialog({
 
         <div className="space-y-4 py-4">
           {/* Prestige Reward */}
-          <Card className="p-6 bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50">
+          <Card className="p-6 bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50 relative overflow-hidden">
+            {newRankBadge && (
+              <div className="absolute -right-2 -top-4 opacity-40">
+                <img
+                  src={newRankBadge}
+                  alt={newRank.name}
+                  className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.9)]"
+                  loading="lazy"
+                />
+              </div>
+            )}
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold flex items-center gap-2">
@@ -101,14 +114,32 @@ export function PrestigeDialog({
                 <div className="text-sm text-muted-foreground">Prestige Points</div>
               </motion.div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Total Prestige Points:</span>
-              <span className={`font-bold ${currentRank.color}`}>{currentPrestigePoints}</span>
-              <ArrowRight size={16} weight="bold" />
-              <span className={`font-bold ${newRank.color}`}>{newPrestigeTotal}</span>
+            <div className="flex items-center gap-3 text-sm mt-2">
+              {currentRankBadge && (
+                <img
+                  src={currentRankBadge}
+                  alt={currentRank.name}
+                  className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(148,163,184,0.8)]"
+                  loading="lazy"
+                />
+              )}
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-muted-foreground">Total Prestige Points:</span>
+                <span className={`font-bold ${currentRank.color}`}>{currentPrestigePoints}</span>
+                <ArrowRight size={16} weight="bold" />
+                <span className={`font-bold ${newRank.color}`}>{newPrestigeTotal}</span>
+              </div>
             </div>
             {newRank.name !== currentRank.name && (
-              <div className="mt-2 p-2 bg-background/50 rounded flex items-center justify-center gap-2">
+              <div className="mt-3 p-2 bg-background/50 rounded flex items-center justify-center gap-2">
+                {newRankBadge && (
+                  <img
+                    src={newRankBadge}
+                    alt={newRank.name}
+                    className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+                    loading="lazy"
+                  />
+                )}
                 <Crown size={16} weight="fill" className={newRank.color} />
                 <span className="text-sm font-bold">Rank Up: <span className={newRank.color}>{newRank.name}</span></span>
               </div>
