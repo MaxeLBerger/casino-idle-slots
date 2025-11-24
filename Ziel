@@ -1,0 +1,274 @@
+Zielbild & Theme („Schema“), auf deine Zielgruppe optimiert
+Deine Screens zeigen bereits ein starkes Fundament: dunkles Violett, Gold, klare Cards, gut lesbare Typografie. Für deine Kernzielgruppe (30–55, eher weiblich, mobile-first, entspannte „Lounge-/Me-Time“-Nutzung) passt ein konsistentes Theme sehr gut:
+
+Theme-Vorschlag: „Midnight Luxury Lounge“
+
+Farbwelt:
+
+Hintergrund: sehr dunkles Blau/Violett (#07071A – #120427 Gradient).
+
+Primär-Akzent: warmes Gold (#FFC94A) für Gewinne, Buttons, Zahlen.
+
+Sekundär: Türkis / Cyan (#00E5FF) für Progress/XP; Pink/Violett (#FF4FE0) für Specials.
+
+Icon-Stil: weich gerundete, leicht 3D-artige Symbole mit Glow (du hast das bereits gut umgesetzt).
+
+Typografie: 1 serifenlose Display-Font für Überschriften (Casino-Logo, „SPIN“), 1 klare Sans für Zahlen und Texte (Lesbarkeit auf kleineren Geräten).
+
+UI-Prinzipien:
+
+Jede „Entscheidungsebene“ auf max. 5–7 Optionen beschränken (z.B. 5 Slot-Maschinen im Standard, 3–4 Währungen/Lanes in einem Screen). Das folgt Hick’s Law und Choice-Overload-Forschung: zu viele Optionen verschlechtern Entscheidungen und Zufriedenheit.
+Harvard Business Review
++3
+dovetail.com
++3
+opignac.com
++3
+
+Dieses Schema verwenden wir nun, um konkrete Zahlen und Strukturen festzulegen.
+
+Gesamtplan: Konkrete Anzahl an Systemen (Übersicht)
+
+System	Empfohlene Anzahl zum Mobile-Launch	Begründung (UX/Economy)
+Verschiedene Spielautomaten	6 (5 permanente + 1 Event)	Genug Vielfalt, ohne Choice Overload.
+dovetail.com
++1
+
+Arbeiter (Idle-Worker)	8	Saubere Progression, gute Monetarisierungs-Hooks wie in erfolgreichen Idle Games.
+machinations.io
++2
+games.themindstudios.com
++2
+
+Slot-Symbole (Items)	12 Kernsymbole	4 low, 4 mid, 4 high/spezial – leicht erlernbar, dennoch reichhaltig.
+ResearchGate
+
+Permanente Währungen	3 (Soft, Prestige, Premium)	Standardmodell in F2P-Economies: Soft + Hard + Meta.
+Game Developer
++2
+machinations.io
++2
+
+Event-Währung	1 (temporär)	Für zeitbegrenzte Events/Shop, optional.
+Kernstatistiken insgesamt	8 (Detailansicht), davon 3 „Quick Stats“ im Hauptscreen	Genug Infos ohne Überladen des HUD.
+machinations.io
++1
+
+Hauptscreen-UI-Sektionen	10 persistente Sektionen + 2 Overlays (Shop, Event)	Balanciert zwischen Funktionsumfang und Einfachheit.
+dovetail.com
++1
+
+Prestige-Ränge	5 Ränge (Bronze → Diamond)	Klar, vertraut, starke Metaprogression; typisch für Idle/Reset-Games.
+Computools
++1
+
+Im Folgenden gehe ich alle Punkte im Detail durch und mache sie konkret nutzbar für dein Spiel.
+
+Slot-Maschinen: 6 klar definierte Stufen
+
+3.1 Maschinen-Typen und Rollen
+
+Du hast bereits 5 Maschinengrößen (1×3 bis 4×5). Ich würde sie so strukturieren und eine 6., zeitlich limitierte Event-Maschine ergänzen:
+
+ID	Name	Grid	Rolle im Progress	Unlock-Bedingung	Monetarisierungs-Hooks
+M1	Classic	1×3	Einstieg, Tutorial	Start	Keine Käufe nötig; frühe „Feel-Good“-Phase.
+M2	Deluxe	2×3	Frühes Midgame	Level 5 + kleiner Coin-Preis	kleines „Unlock-Paket“ (Coins + Booster).
+M3	Premium	3×3	Midgame-Standard	Prestige-Rang Bronze 3	Bundle, das Premium sofort voll upgraden kann.
+M4	Mega	3×4	Fortgeschrittenes Midgame	Prestige-Rang Silber 2	Höhere Basispayouts → attraktiv für Booster-Verkauf.
+M5	Ultimate	4×5	Lategame, High-Roll	Prestige-Rang Gold 1	Zielmaschine für High Spender, viele Cosmetic-Themes.
+M6	Event Slot	variabel (z.B. 3×5)	Zeitlich begrenzte Events	nur während Events sichtbar	Event-Währung + exklusive Cosmetics/Booster.
+
+3.2 Symboldichte je Maschine
+
+Classic/Deluxe: eher wenige High-Symbole → klare Lesbarkeit für Einsteiger.
+
+Mega/Ultimate/Event: höhere Dichte an High-Value- und Spezialsymbolen → visuell „reicher“, spannender; hier spielen zahlungsbereite Nutzer später.
+
+Arbeiter-System: 8 Worker als Idle-Backbone
+
+Ziel: auch im Offlinemodus spürbaren Fortschritt liefern und gute Spots für Käufe schaffen (z.B. „Hire all workers“, „Boost workers for 24h“). Idle-Game-Design zeigt, dass mehrere parallel skalierende Generatoren ein Kernmerkmal von Engagement sind.
+Game Developer
++2
+machinations.io
++2
+
+4.1 Konkrete Worker-Liste (8 Stück)
+
+ID	Name	Thema	Basisfunktion	Unlock
+W1	Cashier	Kasse	+X Coins/sec global	ab Level 3
+W2	Slot Attendant	Floor-Staff	+Y % Idle Income nur für aktuelle Maschine	ab Level 5
+W3	Technician	Wartung	+Z % Chance auf kleinere Bonus-Drops	Prestige Bronze 1
+W4	Security	Sicherheit	Reduziert Kosten von Upgrades um X %	Prestige Bronze 3
+W5	VIP Host	VIP-Lounge	+% auf alle Gewinne bei hohen Bets	Prestige Silber 1
+W6	Marketing Lead	Werbung	+% mehr Spieler-XP pro Spin	Prestige Silber 3
+W7	Data Analyst	Analytics	+% auf Idle/sec, wenn Spieler offline ist (Offline-Bonus)	Prestige Gold 1
+W8	Casino Manager	Management	globaler Multiplikator auf alle Worker-Effekte	Prestige Diamond 1
+
+4.2 Monetarisierungs-Ideen rund um Worker
+
+„Hire Pack“: einmaliger Kauf schaltet Worker W1–W4 sofort frei.
+
+„24h Worker Frenzy“: Hard-Currency-Item, das alle Worker-Effekte 24h verdoppelt.
+
+„Auto-Collect“: Premium-Feature, das alle x Minuten Idle-Rewards einsammelt, ohne dass der Spieler online sein muss (wichtig für Mobile-User mit kurzen Sessions).
+games.themindstudios.com
++1
+
+Slot-Items: 12 Kernsymbole, klar in Tiers strukturiert
+
+Um Lesbarkeit und „Pattern Recognition“ zu erleichtern, aber trotzdem Progression zu ermöglichen, empfehle ich 12 Symbole in vier Tiers (Common, Rare, Epic, Special). Idle-Game-Analysen zeigen, dass klare, wenige Symbolkategorien das Verständnis erleichtern.
+ResearchGate
++1
+
+5.1 Symbol-Tabelle
+
+Tier	Symbole (Vorschlag)	Einsatz
+Common	Kirsche, Zitrone, Orange, Glocke	Hohe Häufigkeit, kleine Gewinne
+Rare	Kleeblatt, Hufeisen, Stern, Geschenkbox	Mittlere Gewinne, relevant für Win-Streaks
+Epic	Dollar-Sack, Diamant, Flamme, 777-Symbol	Große Gewinne, Jackpot-Basis
+Special	Wild-Symbol (beliebiges), Bonus-Symbol (Free Spins), Multiplier-Symbol (x2/x3), Event-Token-Symbol	Selten, Trigger für Features & Events
+
+Jede Maschine kann eine leicht andere Gewichtung und Symbolzusammenstellung haben (z.B. Classic ohne Special-Symbole, Ultimate mit allen).
+
+Währungen: 3 permanente + 1 Event-Währung
+
+F2P-Literatur zur Economy-Design zeigt, dass 2–3 Kernwährungen (Soft, Hard, Meta) in den meisten erfolgreichen Mobile Games verwendet werden – mehr erhöht Komplexität und senkt Conversion.
+Udonis Mobile Marketing Agency
++3
+Game Developer
++3
+machinations.io
++3
+
+6.1 Konkrete Währungen
+
+Währungstyp	Name (Vorschlag)	Quelle	Verwendung
+Soft Currency	Coins	Gewinne aus Spins, Idle Income, Challenges	Bets, Standard-Upgrades, Maschinen-Unlocks
+Meta Currency	Prestige Points	Prestige-Resets	Dauerhafte globale Upgrades, Maschinen/Worker Unlocks
+Premium	Diamonds	In-App-Käufe, seltene Events	Booster, Worker-Packs, Cosmetics, VIP-Pass
+Event Token	Chips / Tickets	Nur während zeitlich begrenzten Events	Event-Shop, limitierte Cosmetics/Boosts
+
+Wichtig: alle Gameplay-kritischen Elemente sollten über Coins/Prestige erreichbar bleiben; Diamonds v.a. für Beschleunigung und Komfort.
+
+Statistiken: 8 Kernmetriken (3 auf dem Hauptscreen)
+
+Empfehlung aus Idle/Game-Analytics: wenige, gut erklärte Kennzahlen im HUD, Detailtiefe im Stats-Screen.
+machinations.io
++2
+Udonis Mobile Marketing Agency
++2
+
+7.1 Kernstatistiken (Detailansicht)
+
+ID	Metrik	Beschreibung
+S1	Total Spins	Lebenszeit-Spins
+S2	Total Earned	Gesamt verdiente Coins
+S3	Biggest Win	Höchster Einzelgewinn
+S4	Idle/sec	Aktuelles Idle-Einkommen pro Sekunde
+S5	Win Rate (letzte 100)	Gewinnrate der letzten 100 Spins
+S6	Session Time (heute)	Spielzeit heute
+S7	Prestige Count	Anzahl durchgeführter Prestiges
+S8	Highest Machine Tier	höchste freigeschaltete Maschine
+
+7.2 Quick-Stats direkt im Hauptscreen (3 Anzeigen)
+
+Oben unter der Top-Bar, immer sichtbar:
+
+Balance (Coins) – große Zahl, bereits vorhanden.
+
+Idle/sec – kleiner Text unter Balance oder rechts daneben.
+
+Win Rate (letzte 100 Spins) – in der „Last Spin“-Card ergänzen (z.B. „+66 | WR 87.5 %“).
+
+Optional in einer kleinen Leiste: „Aktive Booster“ (Icon + Restdauer).
+
+UI-Elemente: 10 persistente Sektionen + 2 Overlays
+
+Hick’s Law und Choice-Overload zeigen klar: mehrere kleine, logisch getrennte Bereiche sind besser als eine überladene Oberfläche.
+Zoovu
++3
+dovetail.com
++3
+Laws of UX
++3
+
+8.1 Hauptscreen-Sektionen (persistent)
+
+Top-Bar: Logo, Profilbild, Level/XP, Shop-Button.
+
+Quick-Stats-Leiste: Balance, Idle/sec, Win Rate.
+
+Slot-View: Reels, Symbole, ggf. kleiner Glow für aktive Linien.
+
+Spin-Bar: Spin-Button, Auto-Spin, Bet-Slider.
+
+Mode/Modifier-Pills: Auswahl der Machine + Jackpot 2x / Ultra 3x Tokens.
+
+Upgrades-Panel: Tabs „Spin Power“ / „Idle Income“.
+
+Workers-Panel: Liste deiner 8 Worker, Upgrades, ggf. Auto-Collect-Schalter.
+
+Daily Challenge-Panel: aktuelle Aufgabe + Fortschrittsleiste + Rewards.
+
+Statistics & Recent Activity: Kompakte Cards mit Zugriff auf Detailansicht.
+
+Prestige-Panel: aktueller Rang, Reward-Vorschau, „Prestige Now“-Button.
+
+8.2 Overlays/Modals
+
+Shop-Overlay: Kategorien „Bundles“, „Booster“, „Cosmetics“, „VIP“.
+
+Event-Overlay: Event-Ziele, Event-Währung, Event-Shop.
+
+Damit bleibt der vertikale Flow klar: Scrollen von Core Gameplay → Progression (Upgrades/Worker) → Ziele (Daily/Stats) → Metaprogression (Prestige).
+
+Prestige-System: 5 Ränge mit klaren Rewards
+
+Prestige-/Reset-Mechaniken sind ein Standardwerkzeug in Idle-Games, um langfristige Bindung und monetarisierbare Metaprogression zu erzeugen.
+Computools
++2
+games.themindstudios.com
++2
+
+9.1 Rangstruktur (5 Ränge)
+
+Rang	Stufen (Beispiel)	Globaler Effekt
+Bronze	Prestige-Level 1–10	+X % Coins, leichte Worker-Buffs
+Silber	11–20	+Y % Coins, neue Maschine (Mega), neue Worker
+Gold	21–30	+Z % Coins, deutlich höhere Idle/sec, Zugang zu Ultimate-Machine
+Platin	31–40	+% auf Prestige-Point-Gewinn, exklusive Cosmetics
+Diamond	41+	hohe Meta-Boni, Zugang zu High-Roller-Bundles & VIP-Features
+
+9.2 Prestige-Loop
+
+Spieler sammeln Prestige Points beim Reset.
+
+PP werden genutzt für:
+
+Freischalten neuer Maschinen/Worker,
+
+globale Multiplikatoren,
+
+spezielle Premium-Slots im Shop (z.B. Bundles, die nur gekauft werden können, wenn du Prestige-Rang X erreicht hast).
+
+Prestige ist damit sowohl Gameplay-Motor als auch Monetarisierungsfilter (nur engagierte Spieler sehen die High-Value-Angebote).
+
+Kurze Zusammenfassung
+
+Wir setzen ein klares Theme „Midnight Luxury Lounge“ ein, das sich an eine zahlungskräftige, mobile Zielgruppe 30–55 orientiert und mit begrenzter Zahl an Optionen arbeitet, um Choice Overload zu vermeiden.
+dovetail.com
++2
+BehavioralEconomics.com | The BE Hub
++2
+
+Konkrete Zahlen: 6 Slot-Maschinen, 8 Worker, 12 Kernsymbole, 3 permanente + 1 Event-Währung, 8 Kernstatistiken (3 davon ständig sichtbar), 10 Hauptscreen-Sektionen + 2 Overlays, 5 Prestige-Ränge.
+
+Diese Struktur folgt etablierten F2P- und Idle-Design-Prinzipien (Soft/Hard/Meta-Währung, mehrere Generatoren, Prestige-Loop) und bietet reichlich Anknüpfungspunkte für faire, aber leistungsfähige Monetarisierung.
+Udonis Mobile Marketing Agency
++4
+Game Developer
++4
+machinations.io
++4
+
+Wenn du magst, mache ich im nächsten Schritt aus diesen Zahlen direkt ein konkretes JSON-Schema für deine Spielkonstanten (slot.constants, workers.constants, economy.constants), das du 1:1 ins Repo übernehmen kannst.

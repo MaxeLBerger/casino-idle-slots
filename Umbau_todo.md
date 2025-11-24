@@ -1,0 +1,17 @@
+# Umbau TODO – Asset-Integration & Mobile UX
+
+- [x] Schritt 1: Typ-IDs für Slots, Map, UI, Währungen, Worker, Avatare anlegen (`types/*`)
+- [x] Schritt 2: Zentrale Slot- und Feature-Asset-Registry erstellen (`src/constants/asset.constants.ts`)
+- [x] Schritt 3: UI-Icon- und Action-Asset-Registries erstellen (`src/constants/ui.constants.ts`)
+- [x] Schritt 4: Währungs-Icons und Event-Tokens typisiert abbilden (`src/constants/economy.constants.ts`)
+- [x] Schritt 5: Worker-Rollen- und Avatar-Asset-Registries aufsetzen (`src/constants/workers.constants.ts`, `src/constants/avatar.constants.ts`)
+- [x] Schritt 6: Prestige-Rang-Badges typisiert anbinden (`src/constants/game.constants.ts` um `PRESTIGE_RANK_ASSETS` erweitern)
+- [x] Schritt 7: Map-Building-Assets und Hintergrund zentralisieren (`src/constants/map.constants.ts` verfeinern)
+- [x] Schritt 8: Slot-Maschinen-Konfiguration auf Registries umstellen (`src/constants/slot.constants.ts`)
+- [x] Schritt 9: Slot-UI (Reels, Features, Jackpot) an neue Asset-Registries anbinden (`src/features/slot-machine/*`)
+- [x] Schritt 10: Map-View an Registry + Avatar-System anschließen (`src/features/map/*`)
+- [x] Schritt 11: HUD/Top-Bar und Navigation mit UI- und Currency-Icons ausstatten (`src/App.tsx` und relevante Layout-Komponenten)
+- [x] Schritt 12: Upgrades- und Worker-Screens mit Icons, Tooltips und Mobile-Layout ausbauen (`src/features/upgrades/*`, `src/features/workers/*`)
+- [x] Schritt 13: Prestige-Dialog und Rang-Anzeigen visuell veredeln (`src/components/PrestigeDialog.tsx` u.a.)
+- [x] Schritt 14: Event-/Season-Währungen im Event-Flow nutzen (Event-Slot, Event-Plaza, Shops)
+- [x] Schritt 15: Mobile-First-Finishing (Icon-Größen, feste Container, Lazy-Loading, Wohlfühl-Flow prüfen)
