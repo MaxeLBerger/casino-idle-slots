@@ -3,7 +3,55 @@
  * Zentrale Spielkonstanten und Konfiguration
  */
 
-import { GameConfig, GameState } from '@/types';
+import {
+  EventTokenId,
+  GameConfig,
+  GameState,
+  PlayerPreferences,
+  WorkerState,
+} from '@/types';
+import { SLOT_MACHINE_CONFIGS } from './slot.constants';
+
+const EVENT_TOKEN_IDS: EventTokenId[] = [
+  'eventTokenDragonJade',
+  'eventTokenSapphire',
+  'eventTokenEmerald',
+  'eventTokenRoyal',
+  'eventTokenCelestial',
+  'limitedPass',
+];
+
+export const createDefaultEventTokenBalances = (): Record<EventTokenId, number> =>
+  EVENT_TOKEN_IDS.reduce((acc, token) => {
+    acc[token] = 0;
+    return acc;
+  }, {} as Record<EventTokenId, number>);
+
+export const DEFAULT_EVENT_TOKEN_BALANCES = createDefaultEventTokenBalances();
+
+export const DEFAULT_PLAYER_PREFERENCES: PlayerPreferences = {
+  soundEnabled: true,
+  musicEnabled: true,
+  hapticsEnabled: true,
+  autoSpinEnabled: false,
+  autoSpinBatchSize: 10,
+};
+
+const WORKER_BLUEPRINT: WorkerState[] = [
+  { role: 'cashier', level: 1, isUnlocked: true, efficiencyBonus: 0.05 },
+  { role: 'host', level: 1, isUnlocked: false, efficiencyBonus: 0.04 },
+  { role: 'security', level: 1, isUnlocked: false, efficiencyBonus: 0.03 },
+  { role: 'analyst', level: 1, isUnlocked: false, efficiencyBonus: 0.04 },
+  { role: 'vipConcierge', level: 0, isUnlocked: false, efficiencyBonus: 0.05 },
+  { role: 'marketing', level: 0, isUnlocked: false, efficiencyBonus: 0.03 },
+  { role: 'technician', level: 0, isUnlocked: false, efficiencyBonus: 0.02 },
+  { role: 'manager', level: 0, isUnlocked: false, efficiencyBonus: 0.06 },
+];
+
+export const createDefaultWorkers = (): WorkerState[] =>
+  WORKER_BLUEPRINT.map((worker) => ({ ...worker }));
+
+const DEFAULT_BET = SLOT_MACHINE_CONFIGS[0]?.betOptions?.[0] ?? 10;
 
 // ============================================================================
 // GAME CONFIGURATION
@@ -26,6 +74,8 @@ export const DEFAULT_GAME_STATE: GameState = {
   // Currency & Resources
   coins: GAME_CONFIG.STARTING_COINS,
   prestigePoints: 0,
+  diamonds: 0,
+  eventTokenBalances: createDefaultEventTokenBalances(),
   totalPrestigeEarned: 0,
   
   // Player Progress
@@ -50,11 +100,16 @@ export const DEFAULT_GAME_STATE: GameState = {
   spinMultiplier: 1,
   idleIncomeLevel: 1,
   idleIncomePerSecond: 1,
+  reelSpeedLevel: 0,
+  jackpotChanceLevel: 0,
+  workerEfficiencyLevel: 0,
+  offlineEarningsLevel: 0,
   totalUpgrades: 0,
   
   // Slot Machines
   currentSlotMachine: 0,
   unlockedSlotMachines: [0],
+  currentBet: DEFAULT_BET,
   
   // Achievements & Challenges
   unlockedAchievements: [],
@@ -62,6 +117,9 @@ export const DEFAULT_GAME_STATE: GameState = {
   dailyChallengeDate: '',
   dailyChallengeProgress: 0,
   dailyChallengeCompleted: false,
+  avatarId: 'highRoller',
+  preferences: { ...DEFAULT_PLAYER_PREFERENCES },
+  workers: createDefaultWorkers(),
   
   // Timestamps
   lastTimestamp: Date.now(),
