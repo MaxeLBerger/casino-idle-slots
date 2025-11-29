@@ -8,25 +8,6 @@ export type { UserInfo }
 // This allows the app to work without Supabase configuration
 // Full features (cloud sync, leaderboard) require Supabase setup
 
-interface GameStateRow {
-  user_id: string
-  coins: number
-  level: number
-  experience: number
-  prestige_points: number
-  prestige_level: number
-  slots_unlocked: any
-  upgrades: any
-  achievements: any[]
-  statistics: any
-  daily_challenges: any[]
-  last_daily_reset: string | null
-  last_login_date: string
-  login_streak: number
-  created_at: string
-  updated_at: string
-}
-
 const SAVE_DEBOUNCE_MS = 1000
 const AUTO_SAVE_INTERVAL_MS = 30000
 
@@ -65,11 +46,13 @@ export function useSupabaseGameState<T extends Record<string, any>>(
       const gameStateData = {
         user_id: uid,
         coins: data.coins || 0,
+        diamonds: data.diamonds || 0,
         level: data.level || 1,
         experience: data.experience || 0,
         prestige_points: data.prestigePoints || 0,
         prestige_level: data.prestigeLevel || 0,
-        slots_unlocked: data.unlockedSlotMachines || [],
+        prestige_rank: data.prestigeRank || 'bronze',
+        unlocked_slot_machines: data.unlockedSlotMachines || [0],
         upgrades: {
           spinPowerLevel: data.spinPowerLevel || 0,
           idleIncomeLevel: data.idleIncomeLevel || 0,
@@ -99,9 +82,15 @@ export function useSupabaseGameState<T extends Record<string, any>>(
           progress: data.dailyChallengeProgress || 0,
           completed: data.dailyChallengeCompleted || false
         }],
+        event_token_balances: data.eventTokenBalances || {},
+        preferences: data.preferences || {},
+        workers: data.workers || [],
+        spin_history: (data.spinHistory || []).slice(0, 50), // Optimistic save batching: only sync tail window
+        avatar: { id: data.avatarId || 'male' },
         last_daily_reset: data.dailyChallengeDate || null,
         last_login_date: data.lastLoginDate || new Date().toISOString().split('T')[0],
-        login_streak: data.loginStreak || 1
+        login_streak: data.loginStreak || 1,
+        last_spin_at: data.spinHistory?.[0]?.timestamp ? new Date(data.spinHistory[0].timestamp).toISOString() : null
       }
 
       const { error } = await supabase!
@@ -151,11 +140,13 @@ export function useSupabaseGameState<T extends Record<string, any>>(
       const gameState: T = {
         ...defaultValue,
         coins: data.coins,
+        diamonds: data.diamonds || 0,
         level: data.level,
         experience: data.experience,
         prestigePoints: data.prestige_points,
         prestigeLevel: data.prestige_level || 0,
-        unlockedSlotMachines: data.slots_unlocked || [0],
+        prestigeRank: data.prestige_rank || 'bronze',
+        unlockedSlotMachines: data.unlocked_slot_machines || data.slots_unlocked || [0],
         spinPowerLevel: data.upgrades?.spinPowerLevel || 0,
         idleIncomeLevel: data.upgrades?.idleIncomeLevel || 0,
         spinMultiplier: data.upgrades?.spinMultiplier || 1,
@@ -178,6 +169,11 @@ export function useSupabaseGameState<T extends Record<string, any>>(
         dailyChallengeDate: data.daily_challenges?.[0]?.date || new Date().toISOString().split('T')[0],
         dailyChallengeProgress: data.daily_challenges?.[0]?.progress || 0,
         dailyChallengeCompleted: data.daily_challenges?.[0]?.completed || false,
+        eventTokenBalances: data.event_token_balances || {},
+        preferences: data.preferences || defaultValue.preferences,
+        workers: data.workers || [],
+        spinHistory: data.spin_history || [],
+        avatarId: data.avatar?.id || 'male',
         lastLoginDate: data.last_login_date,
         loginStreak: data.login_streak,
         lastTimestamp: Date.now()
@@ -318,7 +314,7 @@ export function useSupabaseGameState<T extends Record<string, any>>(
   return [value, setValueAndPersist, deleteValue, isLoading, userId, saveImmediately, lastSaveTime]
 }
 
-export async function migrateLocalDataToUser(baseKey: string, userId: string): Promise<boolean> {
+export async function migrateLocalDataToUser(): Promise<boolean> {
   console.log('[Persistence] Migration not needed for Supabase')
   return false
 }

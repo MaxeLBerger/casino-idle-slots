@@ -1,5 +1,4 @@
 import { supabase, isDemoMode } from './supabase'
-import { getCurrentUser } from './auth'
 
 export interface LeaderboardEntry {
   userId: string
@@ -18,7 +17,7 @@ export interface LeaderboardData {
   lastUpdated: number
 }
 
-export type LeaderboardCategory = 'coins' | 'totalSpins' | 'biggestWin' | 'totalEarnings' | 'level' | 'prestigePoints'
+export type LeaderboardCategory = 'coins' | 'totalSpins' | 'biggestWin' | 'totalEarnings' | 'level' | 'prestigePoints' | 'diamonds'
 
 const CATEGORY_TO_FIELD: Record<LeaderboardCategory, string> = {
   coins: 'coins',
@@ -26,7 +25,8 @@ const CATEGORY_TO_FIELD: Record<LeaderboardCategory, string> = {
   biggestWin: 'biggest_win',
   totalEarnings: 'total_earnings',
   level: 'level',
-  prestigePoints: 'prestige_points'
+  prestigePoints: 'prestige_points',
+  diamonds: 'diamonds'
 }
 
 const MAX_LEADERBOARD_SIZE = 100
@@ -71,6 +71,7 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
       if (category === 'coins') score = row.coins || 0
       else if (category === 'level') score = row.level || 0
       else if (category === 'prestigePoints') score = row.prestige_points || 0
+      else if (category === 'diamonds') score = row.diamonds || 0
       else if (category === 'totalSpins') score = row.total_spins || 0
       else if (category === 'biggestWin') score = row.biggest_win || 0
       else if (category === 'totalEarnings') score = row.total_earnings || 0
@@ -96,7 +97,7 @@ export async function getLeaderboard(category: LeaderboardCategory): Promise<Lea
   }
 }
 
-export async function submitScore(category: LeaderboardCategory, score: number, level: number): Promise<boolean> {
+export async function submitScore(): Promise<boolean> {
   return true
 }
 
@@ -118,7 +119,8 @@ export function getCategoryLabel(category: LeaderboardCategory): string {
     biggestWin: 'Lifetime Biggest Win',
     totalEarnings: 'Lifetime Earnings',
     level: 'Highest Level',
-    prestigePoints: 'Prestige Points'
+    prestigePoints: 'Prestige Points',
+    diamonds: 'Diamonds'
   }
   return labels[category]
 }
@@ -130,7 +132,8 @@ export function getCategoryIcon(category: LeaderboardCategory): string {
     biggestWin: '💎',
     totalEarnings: '💵',
     level: '⭐',
-    prestigePoints: '👑'
+    prestigePoints: '👑',
+    diamonds: '💠'
   }
   return icons[category]
 }
