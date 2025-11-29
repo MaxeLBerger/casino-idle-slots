@@ -5,7 +5,7 @@ import { PrestigeDialog } from '@/components/PrestigeDialog';
 
 export const PrestigeScreen: React.FC = () => {
   const { goBack } = useNavigation();
-  const { gameState } = useGame();
+  const { gameState, handlePrestige } = useGame();
 
   return (
     <div className='w-full h-full flex flex-col bg-[#050317]'>
@@ -25,9 +25,10 @@ export const PrestigeScreen: React.FC = () => {
             open={true} 
             onOpenChange={() => {}} 
             currentCoins={gameState.coins}
-            lifetimeEarnings={gameState.lifetimeEarnings}
-            prestigePoints={gameState.prestigePoints}
-            onPrestige={() => console.log('Prestige Triggered')}
+            totalEarnings={gameState.lifetimeEarnings ?? gameState.totalEarnings}
+            currentPrestigePoints={gameState.prestigePoints}
+            level={gameState.level}
+            onConfirm={handlePrestige}
           />
         </div>
       </div>

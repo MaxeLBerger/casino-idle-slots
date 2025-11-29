@@ -1,13 +1,9 @@
 import React from 'react';
-import { useNavigation } from '@/contexts/NavigationContext';
-import { useGame } from '@/contexts/GameContext';
 import { WorkersPanel } from './WorkersPanel';
 import { WORKER_ROLE_ASSETS } from '@/constants/workers.constants';
+import { BackButton } from '@/components/ui/BackButton';
 
 export const WorkersHQScreen: React.FC = () => {
-  const { goBack } = useNavigation();
-  const { gameState } = useGame();
-
   // TODO: Map actual workers from state
   const workers = [
     { id: '1', role: 'bartender' as keyof typeof WORKER_ROLE_ASSETS, level: 1, description: 'Serves drinks to increase idle income.' },
@@ -24,9 +20,7 @@ export const WorkersHQScreen: React.FC = () => {
     <div className='w-full h-full flex flex-col bg-[#050317]'>
       {/* Header */}
       <div className='flex items-center justify-between p-4 bg-black/40 border-b border-white/10'>
-        <button onClick={goBack} className='px-4 py-2 bg-white/10 rounded-full text-white hover:bg-white/20'>
-          Back
-        </button>
+        <BackButton />
         <h1 className='text-xl font-bold text-white tracking-widest uppercase'>Workers HQ</h1>
         <div className='w-16' /> {/* Spacer */}
       </div>

@@ -19,7 +19,7 @@ function UpgradeItem({ title, description, level, cost, onUpgrade, disabled }: U
     <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#050317]/80 border border-[#312556]">
       <div className="w-10 h-10 rounded-xl bg-[#0b0418] flex items-center justify-center overflow-hidden">
         {UI_ICON_ASSETS.upgradeMenu && (
-          <img src={UI_ICON_ASSETS.upgradeMenu} alt="Upgrade" className="w-7 h-7 object-contain" loading="lazy" />
+          <img src={UI_ICON_ASSETS.upgradeMenu} alt="Upgrade" className="w-7 h-7 object-contain icon-blend" loading="lazy" />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -38,7 +38,7 @@ function UpgradeItem({ title, description, level, cost, onUpgrade, disabled }: U
       >
         <div className="flex items-center gap-1">
           {coinIcon && (
-            <img src={coinIcon} alt="Coins" className="w-3.5 h-3.5 object-contain" loading="lazy" />
+            <img src={coinIcon} alt="Coins" className="w-3.5 h-3.5 object-contain icon-blend" loading="lazy" />
           )}
           <span>{cost.toLocaleString()}</span>
         </div>
@@ -64,7 +64,7 @@ export function UpgradesPanel(props: UpgradesPanelProps) {
     <Card className="p-4 bg-[#02010d]/90 border-[#312556] space-y-3">
       <div className="flex items-center gap-2 mb-1">
         {UI_ICON_ASSETS.upgradeMenu && (
-          <img src={UI_ICON_ASSETS.upgradeMenu} alt="Upgrades" className="w-5 h-5 object-contain" loading="lazy" />
+          <img src={UI_ICON_ASSETS.upgradeMenu} alt="Upgrades" className="w-5 h-5 object-contain icon-blend" loading="lazy" />
         )}
         <h2 className="text-sm font-semibold tracking-[0.14em] uppercase text-slate-100">Upgrades</h2>
       </div>

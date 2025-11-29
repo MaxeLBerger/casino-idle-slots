@@ -1,10 +1,9 @@
 import React from 'react';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { useGame } from '@/contexts/GameContext';
 import { UpgradesPanel } from './UpgradesPanel';
+import { BackButton } from '@/components/ui/BackButton';
 
 export const UpgradesScreen: React.FC = () => {
-  const { goBack } = useNavigation();
   const { gameState, setGameState } = useGame();
 
   const handleUpgradeSpin = () => {
@@ -31,9 +30,7 @@ export const UpgradesScreen: React.FC = () => {
     <div className='w-full h-full flex flex-col bg-[#050317]'>
       {/* Header */}
       <div className='flex items-center justify-between p-4 bg-black/40 border-b border-white/10'>
-        <button onClick={goBack} className='px-4 py-2 bg-white/10 rounded-full text-white hover:bg-white/20'>
-          Back
-        </button>
+        <BackButton />
         <h1 className='text-xl font-bold text-white tracking-widest uppercase'>Upgrades Lab</h1>
         <div className='w-16' /> {/* Spacer */}
       </div>

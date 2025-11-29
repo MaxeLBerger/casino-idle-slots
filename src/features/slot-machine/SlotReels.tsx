@@ -1,39 +1,26 @@
-import { SLOT_SYMBOL_ASSETS, FEATURE_GLOBAL_ASSETS } from '@/constants/asset.constants';
-import { SlotTierId } from '@/types';
+import { FEATURE_GLOBAL_ASSETS } from '@/constants/asset.constants';
+import { SlotTierId, SlotReelView } from '@/types';
+import { ReelStrip } from './ReelStrip';
 
 interface SlotReelsProps {
   tier: SlotTierId;
-  symbols: string[];
-  isSpinning: boolean;
+  reels: SlotReelView[];
 }
 
-export function SlotReels({ tier, symbols, isSpinning }: SlotReelsProps) {
-  const assets = SLOT_SYMBOL_ASSETS[tier];
-
+export function SlotReels({ tier, reels }: SlotReelsProps) {
   return (
     <div className="flex justify-center gap-2 py-3">
-      {symbols.map((symbol, index) => {
-        const src = assets[symbol as keyof typeof assets];
-        return (
-          <div
-            key={`${symbol}-${index}`}
-            className="w-16 h-16 sm:w-20 sm:h-20 bg-[#050317]/60 rounded-xl border border-[#3b2a6b] flex items-center justify-center overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.7)]"
-          >
-            {src ? (
-              <img
-                src={src}
-                alt={symbol}
-                className={`w-full h-full object-contain transition-transform duration-150 ${
-                  isSpinning ? 'animate-pulse scale-105' : ''
-                }`}
-                loading="lazy"
-              />
-            ) : (
-              <span className="text-xs text-cyan-300/60">{symbol}</span>
-            )}
-          </div>
-        );
-      })}
+      {reels.map((reel, index) => (
+        <ReelStrip
+          key={reel.id ?? `${index}`}
+          tier={tier}
+          symbol={reel.symbol}
+          phase={reel.phase}
+          delayMs={reel.delayMs}
+          isWinning={reel.isWinning}
+          index={index}
+        />
+      ))}
     </div>
   );
 }
