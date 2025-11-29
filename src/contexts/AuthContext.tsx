@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserInfo, getCurrentUser, onAuthStateChange, signInWithGitHub, signOut } from '../lib/auth';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { UserInfo, getCurrentUser, onAuthStateChange, signInWithGitHub, signOut as doSignOut } from '../lib/auth';
 
 interface AuthContextType {
   user: UserInfo | null;
@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     // Subscribe to changes
-    const unsubscribe = onAuthStateChange((u) => {
+    onAuthStateChange((u) => {
       if (u) {
         // Map Supabase User to UserInfo
         const userInfo: UserInfo = {
@@ -42,18 +42,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
+  const handleSignIn = useCallback(async (): Promise<void> => {
+    await signInWithGitHub();
+  }, []);
+
+  const handleSignOut = useCallback(async (): Promise<void> => {
+    await doSignOut();
+  }, []);
+
   return (
     <AuthContext.Provider value={{ 
       user, 
       isLoading, 
-      signIn: signInWithGitHub, 
-      signOut: signOut 
+      signIn: handleSignIn, 
+      signOut: handleSignOut 
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
