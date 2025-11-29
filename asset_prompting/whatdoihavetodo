@@ -1,0 +1,28 @@
+## What Do I Have To Do?
+
+1. **Finalize Planning Docs**
+	- Implementation roadmap (`asset_prompting/implementation_plan`)
+	- Fix list (`asset_prompting/fix_plan`)
+	- Supabase schema plan (`asset_prompting/supabase.md`)
+	- Execution checklist (`asset_prompting/todo_plan`)
+
+2. **Slot Machine Feature Work**
+	- Files: `src/features/slot-machine/*`, `src/hooks/useSlotMachine.ts`, `src/components/SpinHistory.tsx`, `src/components/Statistics.tsx`.
+	- Goals: restore backgrounds, add bet/auto-spin controls, log history, surface stats.
+
+3. **Navigation + Top Bar**
+	- Files: `src/contexts/NavigationContext.tsx`, `src/components/layout/TopBar.tsx`, `src/features/map/CasinoCityMapScreen.tsx`.
+	- Goals: multi-depth navigation stack, map/back CTA, clickable currencies.
+
+4. **Settings + Preferences**
+	- Files: `src/features/settings/SettingsScreen.tsx`, `src/constants/game.constants.ts` (default prefs).
+	- Goals: expose toggles, persist to state/Supabase, add account section.
+
+5. **Supabase Alignment**
+	- Files: `src/lib/persistence.ts`, SQL migrations outside repo.
+	- Goals: add new columns, update save/load, ensure demo mode parity.
+
+6. **QA + Tooling**
+	- Reinstate `npm run lint` (needs flat config) and `npm run build` gating.
+	- Manual device sweep (mobile widths, desktop) for navigation + spin loop.
+

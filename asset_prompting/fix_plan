@@ -1,0 +1,15 @@
+## Fix Plan
+
+| Priority | Issue | Location | Fix Strategy | Validation |
+| --- | --- | --- | --- | --- |
+| P0 | Slot spins ignore machine configs (flat cost 10, no unlock guard) | `src/features/slot-machine/SlotCasinoScreen.tsx`, `src/hooks/useSlotMachine.ts` | Read cost + unlock flag from `SLOT_MACHINE_CONFIGS`, block spins when machine locked, disable button when `gameState.coins < spinCost`. | Manual spin per machine + unit test for `canSpin` helper.
+| P0 | `spinHistory` never updated, analytics dead | `useSlotMachine.ts`, `GameState` | Append `SpinResult` after each spin, cap list (e.g., 200 entries) to control payload size. | Confirm `SpinHistory` renders entries and persistence payload includes history tail.
+| P0 | Navigation stack only remembers one screen | `src/contexts/NavigationContext.tsx` | Replace `previousScreen` with stack array, add `goHome` fallback. | Navigate map → slot → settings → upgrades and ensure Back unwinds correctly.
+| P1 | Top bar currencies/level are non-interactive + diamonds hardcoded to 0 | `src/components/layout/TopBar.tsx` | Bind diamonds to `gameState.diamonds`, add buttons opening drawers/routes for coins/prestige/diamonds/level. | Click tests, ensures values update visually when state changes.
+| P1 | Settings screen is placeholder | `src/features/settings/SettingsScreen.tsx` | Implement toggles for audio/gameplay/account controls using `gameState.preferences`, include `Save` + `Back`. | Manual toggle persistence + snapshot tests.
+| P1 | No back CTA on slot/feature screens | `SlotCasinoScreen.tsx`, wrappers in `ScreenRouter.tsx` | Add consistent `BackButton` component (top-left) calling `goBack`. | Manual navigation.
+| P2 | Statistics screen empty, but route exists | `src/components/Statistics.tsx` | Implement layout pulling from `gameState` aggregates + `SpinHistory`. | Verify renders values, add storybook/docs entry.
+| P2 | Supabase mapping missing modern fields (diamonds, event tokens, workers, preferences, avatar, spinHistory) | `src/lib/persistence.ts` | Update upsert/select payloads to round-trip entire `GameState`. | Integration test with Supabase dev project.
+| P2 | Feature strip icons (scatter/bonus/jackpot) not tied to logic | `SlotCasinoScreen.tsx`, `useSlotMachine.ts` | Use new config data to determine available features and trigger overlays. | Manual tests w/ debug seeds.
+| P3 | Toast feedback missing for map locks/spin errors | `src/features/map/CasinoCityMapScreen.tsx`, `useSlotMachine.ts` | Add descriptive toasts for insufficient coins, locked buildings, and wins. | Visual confirmation.
+

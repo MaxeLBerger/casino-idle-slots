@@ -1,0 +1,45 @@
+## Implementation Plan
+
+### Phase 1 – Slot Machine Experience Rehab
+1. **Visual shell** (`src/features/slot-machine/SlotCasinoScreen.tsx`, `SlotReels.tsx`)
+	- Inject tier-specific background + cabinet assets from `public/assets/slots/**`.
+	- Add bet selector + auto-spin toggle wired to `gameState.preferences`.
+	- Expose map/back CTA in the header to call `navigateTo('CITY_MAP')`.
+2. **Spin logic** (`src/hooks/useSlotMachine.ts`, `src/constants/slot.constants.ts`)
+	- Move spin cost, reel count, symbol weights, jackpot odds into configs per machine.
+	- Animate reels sequentially (staggered timeouts) and trigger result overlays per tier.
+	- Append `SpinResult` entries to `gameState.spinHistory` and update derived statistics (RTP, streaks) after each spin.
+3. **Session telemetry** (`src/components/SpinHistory.tsx`, `src/components/Statistics.tsx`)
+	- Render the redesigned analytics view when the player opens the Stats tab.
+	- Provide lightweight meters (win streak, RTP, session profit) directly on the slot screen using live data.
+
+### Phase 2 – Navigation + Layout
+1. **Navigation stack** (`src/contexts/NavigationContext.tsx`)
+	- Replace single `previousScreen` with a stack to support deep navigation.
+	- Add typed route params for slot machine index, worker IDs, shop tabs.
+2. **Global UI entry points** (`src/components/layout/TopBar.tsx`, `src/components/MapView.tsx`)
+	- Add buttons for Map, Stats, Shop in the top bar with tooltips and navigation calls.
+	- Highlight the active destination in Map view and support long-press tooltips (prestige requirement, rewards).
+3. **Back buttons**
+	- Ensure every feature screen (Slots, Workers, Upgrades, Settings, Shop) renders a consistent `BackButton` that calls `goBack()`.
+
+### Phase 3 – Settings + Resource Interactions
+1. **Settings hub** (`src/features/settings/SettingsScreen.tsx`)
+	- Build sections: Audio (sound/music toggles), Gameplay (auto-spin batch size, haptics), Account (login/logout, cloud sync).
+	- Persist changes via `useGame.setGameState` + `saveGame`.
+2. **Resource drawers**
+	- Coins: open upgrades drawer showing income/sinks.
+	- Prestige: show rank progress + multipliers.
+	- Diamonds: open shop-focused CTA (and display live diamond count from state).
+	- Implement via shared `ResourceDrawer` component + `useNavigation` routes.
+
+### Phase 4 – Persistence + Supabase Alignment
+1. Update `useSupabaseGameState` mappings once new columns exist (see `supabase.md`).
+2. Add optimistic save batching for spin history (only sync tail window to Supabase).
+3. Re-enable linting/build tasks once TypeScript types align.
+
+### QA + Launch Checklist
+- Manual flow: city → casino → spin → stats → back to city → settings → shop.
+- Automated: extend unit tests for `useSlotMachine` probability math and navigation stack reducer.
+- Tooling: `npm run lint`, `npm run build`, Lighthouse pass on 320px viewport.
+

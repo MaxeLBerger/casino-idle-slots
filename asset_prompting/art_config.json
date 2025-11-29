@@ -1,0 +1,318 @@
+{
+  "global": {
+    "symbol_style": "Stylized 3D mobile game icon with a clear, bold silhouette, smooth shading and high contrast, designed to be perfectly readable at small mobile icon size. Simple geometry, one main object, no noisy details, subtle rim light, isolated on a pure black background.",
+    "background_style": "Stylized 3D casino environment, rendered for a 9:16 mobile screen. Clean composition with a clear focal area in the center, soft depth of field, reduced noise and clutter, slightly simplified shapes, designed as a game background with space for UI overlays.",
+    "map_style": "Isometric stylized 3D building, clean shapes and moderate detail, dark purple night sky and subtle neon rim light, color grading consistent with the slot symbols, designed as a clear game UI asset without noisy surroundings.",
+    "ui_icon_style": "Stylized 3D UI icon with flat lighting, thick outline and very high contrast, readable at 32x32 px on a mobile HUD. Simple, bold silhouette, isolated on a pure black background.",
+    "avatar_style": "Stylized 3D casino avatar character in the same rendering style as the slot symbols. Clear, bold silhouette, friendly expression, minimal but readable facial detail, smooth shading, designed to be used as a small portrait icon on mobile, isolated on black.",
+    "defaults": {
+      "symbol_suffix": "--v 6.0",
+      "background_suffix": "--ar 9:16 --v 6.0",
+      "map_background_suffix": "--ar 16:9 --v 6.0",
+      "map_building_suffix": "--v 6.0",
+      "ui_icon_suffix": "--v 6.0",
+      "avatar_suffix": "--v 6.0"
+    }
+  },
+  "tiers": [
+    {
+      "id": 1,
+      "key": "classic",
+      "name": "The Classic Lounge",
+      "theme": "Retro Vegas, warmth, nostalgia.",
+      "colors": ["deep red", "mahogany", "gold"],
+      "background": {
+        "description": "Luxury retro casino lounge with red velvet curtains, mahogany wood paneling and warm vintage yellow lighting. Classy 1950s Las Vegas vibe, soft bokeh in the distance, plenty of dark areas for UI overlays."
+      },
+      "symbols": [
+        {
+          "key": "cherry",
+          "role": "low",
+          "description": "Ruby-red crystal cherries with gold stems, very simple rounded shapes, gentle specular highlights, centered."
+        },
+        {
+          "key": "bell",
+          "role": "mid",
+          "description": "Polished brass bell with a simple, rounded body and a small handle, warm gold reflections, no engravings."
+        },
+        {
+          "key": "seven",
+          "role": "high",
+          "description": "Classic red number 7 with a thick, simple vintage font and gold trim, slightly beveled, centered."
+        },
+        {
+          "key": "bar",
+          "role": "top",
+          "description": "Rectangular gold ingot with the word \"BAR\" engraved in a bold, simple font, minimal surface detail."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "key": "sapphire",
+      "name": "The Sapphire Room",
+      "theme": "Modern, cool, nightlife, ice.",
+      "colors": ["deep blue", "cyan", "silver", "chrome"],
+      "background": {
+        "description": "Modern VIP club casino interior with blue neon lights, glass walls and chrome accents. Cool, sleek nightlife atmosphere, strong blue and cyan light, floor and walls kept simple and clean for mobile readability."
+      },
+      "symbols": [
+        {
+          "key": "gem",
+          "role": "high",
+          "description": "Faceted blue sapphire gemstone with a simple, clear heart shape, glowing softly from within, facets not too dense."
+        },
+        {
+          "key": "ice7",
+          "role": "top",
+          "description": "Number 7 carved from clear ice, simple blocky shape, blue light refracting through it, slightly melting edges."
+        },
+        {
+          "key": "star",
+          "role": "mid",
+          "description": "Chrome silver star with five thick points and smooth surfaces, reflecting blue neon light, centered."
+        },
+        {
+          "key": "cocktail",
+          "role": "low",
+          "description": "Elegant blue martini cocktail in a simple crystal glass with a straight stem, slight condensation, silver olive pick, no busy background garnish."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "key": "emerald",
+      "name": "The Emerald Suite",
+      "theme": "Wealth, cash, high society, old money.",
+      "colors": ["emerald green", "gold", "dark wood"],
+      "background": {
+        "description": "Private high-stakes poker room with green leather wall panels, dark wood shelves with books and soft, dim warm lighting. Subtle haze like cigar smoke, but overall clean shapes and a clear area in the center for gameplay."
+      },
+      "symbols": [
+        {
+          "key": "cash_stack",
+          "role": "low",
+          "description": "Thick stack of $100 bills wrapped with a simple gold band, visible paper edges but not overly detailed, slight bend to the stack."
+        },
+        {
+          "key": "gold_watch",
+          "role": "high",
+          "description": "Luxury gold wristwatch with a simple round emerald-green face, minimal dial markings, diamonds around the bezel, shown as a clear icon."
+        },
+        {
+          "key": "yacht",
+          "role": "top",
+          "description": "Stylized miniature luxury white-and-gold yacht with simplified geometry and a clear silhouette, floating on a minimal hint of water base."
+        },
+        {
+          "key": "emerald_ring",
+          "role": "mid",
+          "description": "Large square-cut emerald in a heavy gold ring setting, simple chunky shapes, strong green glow from the stone."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "key": "royal",
+      "name": "The Royal Palace",
+      "theme": "Royalty, majesty, crown jewels.",
+      "colors": ["royal purple", "platinum", "white marble", "gold"],
+      "background": {
+        "description": "Royal palace throne room converted into a casino. White marble columns, purple silk drapes and large chandeliers, bright but not overexposed lighting, open space in the center for reels and UI."
+      },
+      "symbols": [
+        {
+          "key": "crown",
+          "role": "top",
+          "description": "Imperial crown with a purple velvet cap and a simple platinum frame, encrusted with a few large diamonds rather than many tiny ones, clear outline."
+        },
+        {
+          "key": "scepter",
+          "role": "high",
+          "description": "Royal scepter with a large amethyst orb at the top and a straight gold handle, elegant but minimal ornamental details."
+        },
+        {
+          "key": "throne",
+          "role": "mid",
+          "description": "Miniature golden throne with thick legs and a tall backrest, purple cushions, simplified carvings for a bold icon shape."
+        },
+        {
+          "key": "faberge_egg",
+          "role": "low",
+          "description": "Jeweled egg in purple and gold enamel with a few large gem inlays, slightly opening to reveal warm inner light, simple overall silhouette."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "key": "celestial",
+      "name": "The Celestial Deck",
+      "theme": "Sci-fi, future, space, infinite wealth.",
+      "colors": ["white", "holographic prism", "black", "chrome"],
+      "background": {
+        "description": "Futuristic space-station casino observation deck with a panoramic window showing a spiral galaxy outside. White glossy floor, subtle holographic UI panels, soft reflections, open central area for slot reels."
+      },
+      "symbols": [
+        {
+          "key": "planet",
+          "role": "mid",
+          "description": "Glowing ringed planet made of opal-like material, simple orb with one clean ring, holographic rainbow sheen."
+        },
+        {
+          "key": "atom",
+          "role": "low",
+          "description": "Stylized atom with a bright central sphere and a few smooth golden rings orbiting around it, minimalistic with a clear icon shape."
+        },
+        {
+          "key": "robot",
+          "role": "high",
+          "description": "Face of a sleek luxury golden android with smooth surfaces, two bright blue eye slits, no busy mechanical detail."
+        },
+        {
+          "key": "infinity",
+          "role": "top",
+          "description": "Infinity symbol made of liquid mercury or chrome metal, thick continuous loop with smooth reflections."
+        }
+      ]
+    }
+  ],
+  "event_casino": {
+    "id": 6,
+    "key": "dragon",
+    "name": "The Golden Dragon",
+    "theme": "Asian luxury, luck, festival.",
+    "colors": ["red", "jade green", "gold", "dark wood"],
+    "background": {
+      "description": "Asian luxury casino hall with red lanterns, gold dragon statues and dark polished wood. Festive atmosphere with soft warm light, clean floor space in the center."
+    },
+    "symbols": [
+      {
+        "key": "dragon",
+        "role": "top",
+        "description": "Golden Chinese dragon head with simplified scales and horns, glowing jade-green eyes, strong iconic silhouette."
+      },
+      {
+        "key": "coin",
+        "role": "low",
+        "description": "Ancient Chinese coin with a square hole, jade center and gold rim, simple engraved symbols, very clear round shape."
+      },
+      {
+        "key": "lantern",
+        "role": "mid",
+        "description": "Glowing red paper lantern with a gold top and bottom and short gold tassels, soft warm inner light."
+      },
+      {
+        "key": "firecracker",
+        "role": "high",
+        "description": "Compact bundle of red and gold firecrackers tied together, a few visible sparks at one end, simplified shapes."
+      }
+    ]
+  },
+  "map": {
+    "background": {
+      "description": "Isometric view of a short luxury casino strip at night, dark purple sky, wide street with a few clear building plots, minimal surrounding detail so that buildings and UI overlays stand out."
+    },
+    "buildings": [
+      {
+        "key": "classic",
+        "description": "Retro brick casino building with a large neon sign saying \"CLASSIC\", warm red and gold accents, simple rectangular massing."
+      },
+      {
+        "key": "sapphire",
+        "description": "Modern glass casino tower with blue neon strips and a clear \"SAPPHIRE\" sign, cool blue and cyan palette."
+      },
+      {
+        "key": "emerald",
+        "description": "Green marble bank-style casino with columns, gold details and a discreet \"EMERALD\" sign above the entrance."
+      },
+      {
+        "key": "royal",
+        "description": "White castle-like casino with purple turrets and a small crown emblem above the door, subtle gold trim."
+      },
+      {
+        "key": "celestial",
+        "description": "Futuristic saucer-shaped casino with a white body and holographic accents, hovering slightly above its base."
+      },
+      {
+        "key": "dragon",
+        "description": "Pagoda-style casino with tiered red and gold roofs and a small dragon emblem over the entrance."
+      }
+    ]
+  },
+  "ui": {
+    "coin": {
+      "description": "Single gold casino chip with a simple circular design and a holographic center, thick outer rim, clear coin silhouette."
+    },
+    "diamond": {
+      "description": "Blue brilliant-cut diamond with a clean, simplified faceting pattern and bright inner glow."
+    },
+    "prestige": {
+      "description": "Gold trophy cup with two handles and a small base, very bold and simple shape."
+    }
+  },
+  "avatars": {
+    "male": {
+      "description": "Stylized 3D casino avatar of a handsome man in a black tuxedo with a bow tie, friendly confident expression, short well-groomed hair."
+    },
+    "female": {
+      "description": "Stylized 3D casino avatar of an elegant woman in a long evening gown, simple jewelry, confident and friendly expression, medium-length hair."
+    }
+  }
+  "map": {
+  "background": {
+    "description": "Isometric view of a short luxury casino strip at night, dark purple sky, wide street with a few clear building plots, minimal surrounding detail so that buildings and UI overlays stand out."
+  },
+  "buildings": [
+    {
+      "key": "classic",
+      "type": "casino",
+      "description": "Retro brick casino building with a large neon sign saying \"CLASSIC\", warm red and gold accents, simple rectangular massing."
+    },
+    {
+      "key": "sapphire",
+      "type": "casino",
+      "description": "Modern glass casino tower with blue neon strips and a clear \"SAPPHIRE\" sign, cool blue and cyan palette."
+    },
+    {
+      "key": "emerald",
+      "type": "casino",
+      "description": "Green marble bank-style casino with columns, gold details and a discreet \"EMERALD\" sign above the entrance."
+    },
+    {
+      "key": "royal",
+      "type": "casino",
+      "description": "White castle-like casino with purple turrets and a small crown emblem above the door, subtle gold trim."
+    },
+    {
+      "key": "celestial",
+      "type": "casino",
+      "description": "Futuristic saucer-shaped casino with a white body and holographic accents, hovering slightly above its base."
+    },
+    {
+      "key": "dragon",
+      "type": "casino_event",
+      "description": "Pagoda-style casino with tiered red and gold roofs and a small dragon emblem over the entrance."
+    },
+    {
+      "key": "workers_hq",
+      "type": "feature",
+      "description": "Compact modern office building with dark glass facade, a subtle gear-and-chip logo above the entrance, soft purple and gold accent lighting."
+    },
+    {
+      "key": "boutique",
+      "type": "feature",
+      "description": "Small luxury boutique building with a wide glass front, soft pink and gold accents, a hanger-shaped neon sign and a red carpet leading to the door."
+    },
+    {
+      "key": "vip_lounge",
+      "type": "feature",
+      "description": "Exclusive low-rise club building with a discreet \"VIP\" neon sign, deep purple exterior, gold trim and rope barriers at the entrance."
+    },
+    {
+      "key": "event_plaza",
+      "type": "feature",
+      "description": "Open-air stage building with a large curved LED screen, two banner pillars and subtle confetti or spotlight details, designed as the central event hub."
+    }
+  ]
+}
+}

@@ -1,0 +1,173 @@
+3.1 Casino 1 – „The Classic Lounge“ (Tier 1)
+
+Background
+
+Beschreibung:
+Luxury retro casino lounge with red velvet curtains, mahogany wood paneling and warm vintage yellow lighting. Classy 1950s Las Vegas vibe, soft bokeh in the distance, plenty of dark areas for UI overlays.
+
+Symbole
+
+Cherry
+Ruby-red crystal cherries with gold stems, very simple rounded shapes, gentle specular highlights, centered.
+
+Bell
+Polished brass bell with a simple, rounded body and a small handle, warm gold reflections, no engravings.
+
+7
+Classic red number 7 with a thick, simple vintage font and gold trim, slightly beveled, centered.
+
+BAR
+Rectangular gold ingot with the word "BAR" engraved in a bold, simple font, minimal surface detail.
+
+3.2 Casino 2 – „The Sapphire Room“ (Tier 2)
+
+Background
+
+Beschreibung:
+Modern VIP club casino interior with blue neon lights, glass walls and chrome accents. Cool, sleek nightlife atmosphere, strong blue and cyan light, floor and walls kept simple and clean for mobile readability.
+
+Symbole
+
+Gem
+Faceted blue sapphire gemstone with a simple, clear heart shape, glowing softly from within, facets not too dense.
+
+Ice 7
+Number 7 carved from clear ice, simple blocky shape, blue light refracting through it, slightly melting edges.
+
+Silver Star
+Chrome silver star with five thick points and smooth surfaces, reflecting blue neon light, centered.
+
+Cocktail
+Elegant blue martini cocktail in a simple crystal glass with a straight stem, slight condensation, silver olive pick, no busy background garnish.
+
+3.3 Casino 3 – „The Emerald Suite“ (Tier 3)
+
+Background
+
+Beschreibung:
+Private high-stakes poker room with green leather wall panels, dark wood shelves with books and soft, dim warm lighting. Subtle haze like cigar smoke, but overall clean shapes and a clear area in the center for gameplay.
+
+Symbole
+
+Cash Stack
+Thick stack of $100 bills wrapped with a simple gold band, visible paper edges but not overly detailed, slight bend to the stack.
+
+Gold Watch
+Luxury gold wristwatch with a simple round emerald-green face, minimal dial markings, diamonds around the bezel, shown as a clear icon.
+
+Yacht
+Stylized miniature luxury white-and-gold yacht with simplified geometry, clear silhouette, floating on a minimal hint of water base.
+
+Emerald Ring
+Large square-cut emerald in a heavy gold ring setting, simple chunky shapes, strong green glow from the stone.
+
+3.4 Casino 4 – „The Royal Palace“ (Tier 4)
+
+Background
+
+Beschreibung:
+Royal palace throne room converted into a casino. White marble columns, purple silk drapes and large chandeliers, bright but not overexposed lighting, open space in the center for reels and UI.
+
+Symbole
+
+Crown
+Imperial crown with a purple velvet cap and a simple platinum frame, encrusted with a few large diamonds rather than many tiny ones, clear outline.
+
+Scepter
+Royal scepter with a large amethyst orb at the top and a straight gold handle, elegant but minimal ornamental details.
+
+Throne
+Miniature golden throne with thick legs and a tall backrest, purple cushions, simplified carvings for a bold icon shape.
+
+Fabergé Egg
+Jeweled egg in purple and gold enamel with a few large gem inlays, slightly opening to reveal warm inner light, simple overall silhouette.
+
+3.5 Casino 5 – „The Celestial Deck“ (Tier 5)
+
+Background
+
+Beschreibung:
+Futuristic space-station casino observation deck with a panoramic window showing a spiral galaxy outside. White glossy floor, subtle holographic UI panels, soft reflections, open central area for slot reels.
+
+Symbole
+
+Planet
+Glowing ringed planet made of opal-like material, simple orb with one clean ring, holographic rainbow sheen.
+
+Atom
+Stylized atom with a bright central sphere and a few smooth golden rings orbiting around it, minimalistic, clear icon shape.
+
+Robot
+Face of a sleek luxury golden android with smooth surfaces, two bright blue eye slits, no busy mechanical detail.
+
+Infinity
+Infinity symbol made of liquid mercury or chrome metal, thick continuous loop with smooth reflections.
+
+3.6 Event Casino – „The Golden Dragon“ (Event)
+
+Background
+
+Beschreibung:
+Asian luxury casino hall with red lanterns, gold dragon statues and dark polished wood. Festive atmosphere with soft warm light, clean floor space in the center.
+
+Symbole
+
+Dragon
+Golden Chinese dragon head with simplified scales and horns, glowing jade-green eyes, strong iconic silhouette.
+
+Coin
+Ancient Chinese coin with a square hole, jade center and gold rim, simple engraved symbols, very clear round shape.
+
+Lantern
+Glowing red paper lantern with a gold top and bottom and short gold tassels, soft warm inner light.
+
+Firecracker
+Compact bundle of red and gold firecrackers tied together, a few visible sparks at one end, simplified shapes.
+
+3.7 Map & Buildings
+
+Hier nutzen wir [GLOBAL_MAP_STYLE] als Präfix.
+
+Map Background
+Isometric view of a short luxury casino strip at night, dark purple sky, wide street with a few clear building plots, minimal surrounding detail so that buildings and UI overlays stand out. --ar 16:9 --v 6.0
+
+Classic Building
+Retro brick casino building with a large neon sign saying "CLASSIC", warm red and gold accents, simple rectangular massing.
+
+Sapphire Building
+Modern glass casino tower with blue neon strips and a clear "SAPPHIRE" sign, cool blue and cyan palette.
+
+Emerald Building
+Green marble bank-style casino with columns, gold details and a discreet "EMERALD" sign above the entrance.
+
+Royal Building
+White castle-like casino with purple turrets and a small crown emblem above the door, subtle gold trim.
+
+Celestial Building
+Futuristic floating saucer-shaped casino with a white body and holographic accents, hovering slightly above its base.
+
+Dragon Building
+Pagoda-style casino with tiered red and gold roofs, a small dragon emblem over the entrance.
+
+3.8 UI & Avatare
+
+Mit [GLOBAL_UI_ICON_STYLE] bzw. [GLOBAL_AVATAR_STYLE].
+
+UI-Icons
+
+Coin Icon
+Single gold casino chip with a simple circular design and a holographic center, thick outer rim, clear "coin" silhouette.
+
+Diamond Icon
+Blue brilliant-cut diamond with a clean, simplified faceting pattern, bright inner glow.
+
+Prestige Icon
+Gold trophy cup with two handles and a small base, very bold and simple shape.
+
+Avatare
+
+Male Avatar
+Stylized 3D casino avatar of a handsome man in a black tuxedo with a bow tie, friendly confident expression, short well-groomed hair.
+
+Female Avatar
+Stylized 3D casino avatar of an elegant woman in a long evening gown, simple jewelry, confident and friendly expression, medium-length hair.

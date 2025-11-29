@@ -1,0 +1,98 @@
+# TODO Plan
+
+1. **Docs & Alignment**
+	- [x] Implementation plan (asset_prompting/implementation_plan)
+	- [x] Fix list (asset_prompting/fix_plan)
+	- [x] Supabase plan (asset_prompting/supabase.md)
+	- [ ] Missing.md detail pass (assets + UX gaps)
+
+2. **Slot Machine Feature Track**
+	- [ ] Tie machine configs to visuals (backgrounds, bet costs, feature strip data)
+	- [ ] Implement reel animation + win overlays per tier
+	- [ ] Populate `spinHistory` + `Statistics` components
+
+3. **Navigation & UI Track**
+	- [ ] Navigation stack with goBack/goHome
+	- [ ] Slot back button + top bar shortcuts (map, stats, shop)
+	- [ ] Make coins/prestige/diamonds tappable drawers/tooltips
+
+4. **Settings & Preferences Track**
+	- [ ] Build settings form (audio, gameplay, account)
+	- [ ] Persist preferences + respect sound toggles in `lib/sounds`
+
+5. **Supabase & Persistence Track**
+	- [ ] Run schema migration (new JSON columns, diamonds field)
+	- [ ] Update `useSupabaseGameState` save/load mapping
+	- [ ] Add integration test/manual verification (cloud + demo mode)
+
+6. **QA Track**
+	- [ ] Re-enable lint script (flat config)
+	- [ ] `npm run build`
+	- [ ] Device sanity sweep + bug bash checklist
+
+# TODO Plan
+
+1. **Docs & Alignment**
+	- [x] Implementation plan
+	- [x] Fix list
+	- [x] Supabase plan
+	- [ ] Missing.md updates (tie into stats/asset needs)
+
+2. **Slot Machine Feature Track**
+	- [ ] Tie machine configs to visuals (backgrounds, bet costs)
+	- [ ] Implement reel animation + win overlays
+	- [ ] Populate `spinHistory` + `Statistics`
+
+3. **Navigation & UI Track**
+	- [ ] Navigation stack w/ goBack/goHome
+	- [ ] Slot back button + top bar shortcuts
+	- [ ] Make coins/prestige/diamonds tappable drawers
+
+4. **Settings & Preferences Track**
+	- [ ] Build settings form (audio/gameplay/account)
+	- [ ] Persist preferences + respect sound toggles
+
+5. **Supabase & Persistence Track**
+	- [ ] Run schema migration (new columns)
+	- [ ] Update `useSupabaseGameState` mappings
+	- [ ] Add integration test / manual verification
+
+6. **QA Track**
+	- [ ] Re-enable lint script (flat config)
+	- [ ] `npm run build`
+	- [ ] Device sanity sweep + bug bash checklist
+
+Path Back to Playable
+
+SlotCasinoScreen.tsx + useSlotMachine.ts still render reels but the hook only subtracts a fixed 10 coins, rolls random symbols without weights/paylines, and never touches XP, streaks, workers, or new currencies, so wins feel random and progression is broken. The constants (slot.constants.ts) lack paytables, rarity weights, and unlock data needed to balance the machines.
+Implementation Roadmap
+
+Rebuild data + unlock rules
+
+Extend SLOT_MACHINE_CONFIGS with per-machine metadata: base bet, bet scaling, reel layouts (rows x reels), weighted symbol tables, scatter/wild definitions, and prestige or quest requirements.
+Define PAYLINES and FEATURE_RULES constants (e.g., 5 common line patterns per tier, scatter counts for free spins, jackpot symbols) plus helper utilities for computing probability tables.
+Map machine unlocks to new game-state fields (workers, eventTokenBalances, preferences) so we can gate machines by prestige rank, worker efficiency, or event tokens.
+Author deterministic spin engine (useSlotMachine)
+
+Replace the placeholder random loop with:
+Bet validation (respect base bet, modifiers from upgrades/workers, optional auto-spin batches).
+RNG that samples per-reel symbols using configured weights and honors “near miss” or bonus reels for high tiers.
+Payline evaluation: iterate defined lines, detect n-of-a-kind, handle wilds, scatter payouts, and jackpots; compute win tiers via WIN_TIER_THRESHOLDS.
+Reward pipeline: adjust coins, diamonds/event tokens, streaks, XP, achievements, worker XP, and SpinResult history in one transaction to keep persistence consistent.
+Trigger bonus modes (free spins, multipliers, mini-games) by enqueueing state in the hook so UI can react.
+Wins, feedback, and progression loops
+
+Reintroduce SpinResultOverlay logic to show tiered wins, jackpot animations, and confetti intensity. Use playSmallWinSound/playBigWinSound plus new SFX for scatter/jackpot events.
+Update Statistics feature to read the richer history (total win tiers, hottest machine, jackpot count) and surface them in UI badges.
+Wire event tokens/diamonds to premium actions (e.g., “Hyper Spin” button) and ensure persistence writes through saveGame.
+Ensure achievements/daily challenges listen for new win events.
+UI & UX polish
+
+Enhance SlotReels to support multi-row reels, per-symbol animations, locked reels during bonuses, and show payline highlights.
+Add bet controls (slider or buttons) and auto-spin toggle tied to PlayerPreferences.
+Surface unlock states on the map (disabled cards for future machines, event timers).
+Validation & persistence
+
+Expand useSupabaseGameState serialization so new stats (diamonds, event tokens, workers, spin history) round-trip cleanly; consider a migration helper for legacy saves.
+Add unit tests for the payout engine (pure functions for spin resolution) and a storybook/dev mode to force specific outcomes for QA.
+When ready, run npm run build (already green) and add an ESLint flat config so npm run lint can gate regressions.
