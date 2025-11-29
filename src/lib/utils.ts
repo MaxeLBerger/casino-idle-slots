@@ -57,3 +57,23 @@ export function ratioToTier(multiplier?: number): WinTier | null {
   }
   return 'small'
 }
+
+/**
+ * Gets the correct asset path that works in both development and production.
+ * In production on GitHub Pages, assets are served from /CasinoIdleSlots/assets/...
+ * In development, they're served from /assets/...
+ * 
+ * @param path - The asset path starting with /assets/ or just the filename
+ * @returns The correctly prefixed asset path
+ */
+export function getAssetPath(path: string): string {
+  // Remove leading slash if present for consistent handling
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  
+  // In production, Vite sets import.meta.env.BASE_URL to '/CasinoIdleSlots/'
+  // In development, it's '/'
+  const base = import.meta.env.BASE_URL || '/';
+  
+  // Ensure no double slashes
+  return `${base}${cleanPath}`.replace(/\/\//g, '/');
+}

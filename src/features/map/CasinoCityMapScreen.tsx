@@ -7,6 +7,8 @@ import { useGame } from '@/contexts/GameContext';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { MapBuilding, MapBuildingId } from '@/types/map.types';
 import { GameScreen } from '@/types/navigation.types';
+import { getAssetPath } from '@/lib/utils';
+import { AssetImage } from '@/components/ui/asset-image';
 
 interface CasinoCityMapScreenProps {
   avatarId?: AvatarId;
@@ -60,7 +62,7 @@ export function CasinoCityMapScreen({ avatarId = 'highRoller' }: CasinoCityMapSc
     <div
       className="relative w-full max-w-md mx-auto aspect-[9/16] rounded-3xl overflow-hidden border border-[#312556] bg-[#02010d] shadow-[0_0_40px_rgba(0,0,0,0.85)]"
       style={{
-        backgroundImage: `url(${MAP_CONFIG.backgroundAsset})`,
+        backgroundImage: `url(${getAssetPath(MAP_CONFIG.backgroundAsset)})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -79,7 +81,7 @@ export function CasinoCityMapScreen({ avatarId = 'highRoller' }: CasinoCityMapSc
             key={building.id}
             type="button"
             onClick={() => handleBuildingClick(building)}
-            className={`absolute transition-transform duration-300 ${isLocked ? 'opacity-60 grayscale' : 'hover:scale-105'} ${isActive ? 'drop-shadow-[0_0_18px_rgba(248,191,36,0.8)]' : ''}`}
+            className={`absolute transition-transform duration-300 ${isLocked ? 'opacity-60 grayscale' : 'hover:scale-105 active:scale-95'} ${isActive ? 'drop-shadow-[0_0_18px_rgba(248,191,36,0.8)]' : ''}`}
             style={{
               left: `${building.position.x}%`,
               top: `${building.position.y}%`,
@@ -90,19 +92,19 @@ export function CasinoCityMapScreen({ avatarId = 'highRoller' }: CasinoCityMapSc
             title={lockReason ?? building.description}
           >
             <div className="relative">
-              <img
+              <AssetImage
                 src={building.assetName}
                 alt={building.name}
-                className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(0,0,0,0.9)]"
+                className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_0_16px_rgba(0,0,0,0.9)]"
                 loading="lazy"
               />
               {isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 backdrop-blur-sm text-[10px] font-semibold text-gold-200">
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 backdrop-blur-sm text-[8px] sm:text-[10px] font-semibold text-gold-200">
                   Locked
                 </div>
               )}
               {isActive && !isLocked && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 text-[9px] font-semibold bg-[#fbbf24] text-[#050317] rounded-full shadow-lg">
+                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-semibold bg-[#fbbf24] text-[#050317] rounded-full shadow-lg whitespace-nowrap">
                   Active
                 </div>
               )}
@@ -115,9 +117,9 @@ export function CasinoCityMapScreen({ avatarId = 'highRoller' }: CasinoCityMapSc
         <div
           className="absolute bottom-4 left-1/2 -translate-x-1/2"
         >
-          <div className="w-16 h-16 rounded-full bg-gradient-to-b from-[#fbbf24] via-[#f97316] to-[#ec4899] p-[3px] shadow-[0_0_24px_rgba(248,250,252,0.75)]">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-b from-[#fbbf24] via-[#f97316] to-[#ec4899] p-[2px] sm:p-[3px] shadow-[0_0_24px_rgba(248,250,252,0.75)]">
             <div className="w-full h-full rounded-full bg-[#050317]/95 flex items-center justify-center overflow-hidden">
-              <img
+              <AssetImage
                 src={avatarSrc}
                 alt="Avatar"
                 className="w-full h-full object-contain"

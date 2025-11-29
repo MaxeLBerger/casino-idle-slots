@@ -72,3 +72,7 @@ packages/casino-mcp-server/node_modules/
 # Debug
 *.tsbuildinfo
 .eslintcache
+
+# Temporary notes/planning files (root level only)
+/Map
+/Ziel

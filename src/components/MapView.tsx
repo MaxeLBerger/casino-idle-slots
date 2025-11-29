@@ -6,13 +6,14 @@ import { Lock } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants';
+import { AssetImage } from '@/components/ui/asset-image';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, getAssetPath } from '@/lib/utils';
 
 interface MapViewProps {
 	gameState: GameState | null;
@@ -46,10 +47,10 @@ export function MapView({ gameState, onSelectCasino, onClose }: MapViewProps) {
 	};
 
 	return (
-		<div className="relative w-full h-full min-h-[70vh] md:min-h-[600px] rounded-xl overflow-hidden border border-primary/20 shadow-2xl bg-black/60">
+		<div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] md:min-h-[600px] rounded-xl overflow-hidden border border-primary/20 shadow-2xl bg-black/60">
 			{/* Background */}
-			<img 
-				src={`/assets/buildings/${MAP_CONFIG.backgroundAsset}`} 
+			<AssetImage 
+				src={MAP_CONFIG.backgroundAsset}
 				alt="Map Background" 
 				className="absolute inset-0 w-full h-full object-cover opacity-40" 
 				loading="lazy"
@@ -57,99 +58,140 @@ export function MapView({ gameState, onSelectCasino, onClose }: MapViewProps) {
 			<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/40 to-background/80" />
 
 			{/* Header */}
-			<div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
-				<h2 className="text-xl md:text-2xl font-bold tracking-wide">Casino City Map</h2>
+			<div className="absolute top-0 left-0 right-0 p-2 sm:p-4 flex items-center justify-between z-20">
+				<h2 className="text-base sm:text-xl md:text-2xl font-bold tracking-wide">Casino City Map</h2>
 				{onClose && (
-					<Button size="sm" variant="secondary" onClick={onClose}>Close</Button>
+					<Button size="sm" variant="secondary" onClick={onClose} className="text-xs sm:text-sm">Close</Button>
 				)}
 			</div>
 
-			{/* Buildings Layer */}
-			<div className="absolute inset-0">
-        <TooltipProvider>
-				{buildings.map(b => {
-					const locked = isBuildingLocked(b, gameState);
-					const isActive = b.type === 'casino' && gameState?.currentSlotMachine === b.slotMachineIndex;
-					return (
-            <Tooltip key={b.id}>
-              <TooltipTrigger asChild>
-						<button
-							onClick={() => handleBuildingClick(b)}
-							style={{
-								position: 'absolute',
-								left: `${b.position.x}%`,
-								top: `${b.position.y}%`,
-								transform: `translate(-50%, -50%) scale(${b.scale || 1})`,
-							}}
-							className={`group cursor-pointer transition-all duration-300 relative flex flex-col items-center ${
-								locked ? 'opacity-40 grayscale' : 'opacity-100'
-							} ${isActive ? 'ring-4 ring-primary rounded-xl' : ''}`}
-						>
-							<div className="relative w-28 h-20 md:w-36 md:h-24 flex items-center justify-center">
-								<img
-									src={`/assets/buildings/${b.assetName}`}
-									alt={b.name}
-									className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
-									loading="lazy"
-								/>
-								{locked && (
-									<div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-										<Lock size={32} className="text-primary" />
-									</div>
-								)}
-								{isActive && !locked && (
-									<div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded shadow">Active</div>
-								)}
-							</div>
-							<div className="mt-1 text-[10px] md:text-xs font-medium tracking-wide text-center w-32 pointer-events-none">
-								{b.name}
-							</div>
-						</button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="text-center">
-                  <p className="font-bold">{b.name}</p>
-                  {locked ? (
-                    <div className="text-xs text-red-400">
-                      {b.requiredPrestige ? `Requires ${formatNumber(b.requiredPrestige)} Prestige` : ''}
-                      {b.requiredLevel ? `Requires Level ${b.requiredLevel}` : ''}
-                    </div>
-                  ) : (
-                    <div className="text-xs text-green-400">Unlocked</div>
-                  )}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-					);
-				})}
-        </TooltipProvider>
+			{/* Buildings Layer - Scrollable on mobile */}
+			<div className="absolute inset-0 pt-12 pb-28 sm:pb-36 overflow-auto">
+				<div className="relative w-full h-full min-h-[400px] sm:min-h-[500px]">
+					<TooltipProvider>
+						{buildings.map(b => {
+							const locked = isBuildingLocked(b, gameState);
+							const isActive = b.type === 'casino' && gameState?.currentSlotMachine === b.slotMachineIndex;
+							
+							// Adjust scale for mobile - smaller buildings
+							const mobileScale = (b.scale || 1) * 0.7;
+							const desktopScale = b.scale || 1;
+							
+							return (
+								<Tooltip key={b.id}>
+									<TooltipTrigger asChild>
+										<button
+											onClick={() => handleBuildingClick(b)}
+											style={{
+												position: 'absolute',
+												left: `${b.position.x}%`,
+												top: `${b.position.y}%`,
+												transform: `translate(-50%, -50%)`,
+											}}
+											className={`group cursor-pointer transition-all duration-300 relative flex flex-col items-center hover:scale-105 active:scale-95 ${
+												locked ? 'opacity-50 grayscale' : 'opacity-100'
+											} ${isActive ? 'ring-2 sm:ring-4 ring-primary rounded-xl z-10' : ''}`}
+										>
+											<div 
+												className="relative flex items-center justify-center"
+												style={{
+													width: `${64 * mobileScale}px`,
+													height: `${48 * mobileScale}px`,
+												}}
+											>
+												{/* Use CSS for responsive sizing */}
+												<AssetImage
+													src={b.assetName}
+													alt={b.name}
+													className="w-16 h-12 sm:w-24 sm:h-16 md:w-32 md:h-20 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]"
+													style={{
+														transform: `scale(${mobileScale})`,
+													}}
+													loading="lazy"
+												/>
+												{locked && (
+													<div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-lg">
+														<Lock size={20} className="text-primary sm:w-6 sm:h-6 md:w-8 md:h-8" weight="bold" />
+													</div>
+												)}
+												{isActive && !locked && (
+													<div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-xs bg-primary text-primary-foreground rounded shadow font-semibold whitespace-nowrap">
+														Active
+													</div>
+												)}
+											</div>
+											<div className="mt-0.5 sm:mt-1 text-[8px] sm:text-[10px] md:text-xs font-medium tracking-wide text-center w-16 sm:w-24 md:w-32 pointer-events-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-1">
+												{b.name}
+											</div>
+										</button>
+									</TooltipTrigger>
+									<TooltipContent side="top" className="max-w-[200px]">
+										<div className="text-center">
+											<p className="font-bold text-sm">{b.name}</p>
+											<p className="text-xs text-muted-foreground">{b.description}</p>
+											{locked ? (
+												<div className="text-xs text-red-400 mt-1">
+													{b.requiredPrestige ? `Requires ${formatNumber(b.requiredPrestige)} Prestige` : ''}
+													{b.requiredLevel ? `Requires Level ${b.requiredLevel}` : ''}
+												</div>
+											) : (
+												<div className="text-xs text-green-400 mt-1">✓ Unlocked - Tap to enter</div>
+											)}
+										</div>
+									</TooltipContent>
+								</Tooltip>
+							);
+						})}
+					</TooltipProvider>
+				</div>
 			</div>
 
-			{/* Legend / Info */}
-			<div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 space-y-2 bg-background/70 backdrop-blur-sm">
-				<div className="flex flex-wrap gap-2 text-[11px] md:text-xs text-muted-foreground">
-					<span><span className="inline-block w-2 h-2 bg-primary rounded-full mr-1" /> Active</span>
-					<span><span className="inline-block w-2 h-2 bg-gray-400 rounded-full mr-1" /> Locked</span>
-					<span>Tap building to enter or view</span>
+			{/* Legend / Info - Fixed at bottom */}
+			<div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4 space-y-1.5 sm:space-y-2 bg-background/80 backdrop-blur-sm border-t border-primary/10">
+				<div className="flex flex-wrap gap-1.5 sm:gap-2 text-[9px] sm:text-[11px] md:text-xs text-muted-foreground">
+					<span className="inline-flex items-center gap-1">
+						<span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-full" /> 
+						Active
+					</span>
+					<span className="inline-flex items-center gap-1">
+						<span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full" /> 
+						Locked
+					</span>
+					<span className="hidden sm:inline">Tap building to enter</span>
 					{eventTokenIcon && (
 						<span className="inline-flex items-center gap-1">
-							<img
+							<AssetImage
 								src={eventTokenIcon}
 								alt="Event Token"
-								className="w-4 h-4 object-contain icon-blend"
+								className="w-3 h-3 sm:w-4 sm:h-4 object-contain icon-blend"
 								loading="lazy"
 							/>
-							<span>Event Plaza rewards Event Tokens</span>
+							<span className="hidden md:inline">Event Plaza rewards Event Tokens</span>
 						</span>
 					)}
 				</div>
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-					{buildings.filter(b => b.type === 'casino').map(b => (
-						<Card key={`legend-${b.id}`} className={`p-2 flex flex-col gap-1 ${gameState?.currentSlotMachine === b.slotMachineIndex ? 'border-primary' : ''}`}>
-							<div className="text-[10px] md:text-xs font-semibold truncate">{b.name}</div>
-							<div className="text-[9px] md:text-[10px] text-muted-foreground truncate">Prestige {b.requiredPrestige || 0}</div>
-						</Card>
-					))}
+				{/* Casino cards grid - responsive */}
+				<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 sm:gap-2">
+					{buildings.filter(b => b.type === 'casino').map(b => {
+						const locked = isBuildingLocked(b, gameState);
+						return (
+							<Card 
+								key={`legend-${b.id}`} 
+								className={`p-1 sm:p-1.5 md:p-2 flex flex-col gap-0.5 cursor-pointer transition-all hover:bg-primary/10 ${
+									gameState?.currentSlotMachine === b.slotMachineIndex ? 'border-primary bg-primary/5' : ''
+								} ${locked ? 'opacity-50' : ''}`}
+								onClick={() => !locked && b.slotMachineIndex !== undefined && onSelectCasino(b.slotMachineIndex)}
+							>
+								<div className="text-[8px] sm:text-[10px] md:text-xs font-semibold truncate flex items-center gap-1">
+									{locked && <Lock size={10} className="flex-shrink-0" />}
+									<span className="truncate">{b.name}</span>
+								</div>
+								<div className="text-[7px] sm:text-[9px] md:text-[10px] text-muted-foreground truncate">
+									P{b.requiredPrestige || 0}
+								</div>
+							</Card>
+						);
+					})}
 				</div>
 			</div>
 		</div>

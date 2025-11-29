@@ -3,6 +3,7 @@ import { motion, useAnimation, Variants } from 'framer-motion';
 import { SlotTierId, ReelPhase } from '@/types';
 import { SLOT_SYMBOL_ASSETS } from '@/constants/asset.constants';
 import { cn } from '@/lib/utils';
+import { AssetImage } from '@/components/ui/asset-image';
 
 interface ReelStripProps {
   tier: SlotTierId;
@@ -89,7 +90,7 @@ export function ReelStrip({ tier, symbol, phase, delayMs, isWinning }: ReelStrip
           {[...stripSymbols, ...stripSymbols].map((sym, i) => (
             <div key={`spin-${i}`} className="w-full h-20 flex items-center justify-center blur-[1px]">
                {assets[sym as keyof typeof assets] && (
-                 <img 
+                 <AssetImage 
                    src={assets[sym as keyof typeof assets]} 
                    className="w-14 h-14 object-contain opacity-70" 
                    alt=""
@@ -114,7 +115,7 @@ export function ReelStrip({ tier, symbol, phase, delayMs, isWinning }: ReelStrip
           className="w-full h-full flex items-center justify-center z-0"
         >
           {currentAsset ? (
-            <img
+            <AssetImage
               src={currentAsset}
               alt={symbol}
               className={cn(

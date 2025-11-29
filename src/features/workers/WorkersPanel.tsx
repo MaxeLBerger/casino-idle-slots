@@ -1,6 +1,7 @@
 import { WORKER_ROLE_ASSETS } from '@/constants/workers.constants';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { AssetImage } from '@/components/ui/asset-image';
 
 interface WorkerCardProps {
   id: string;
@@ -16,7 +17,7 @@ function WorkerCard({ id, role, level, description }: WorkerCardProps) {
     <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#050317]/80 border border-[#312556]">
       <div className="w-10 h-10 rounded-xl bg-[#0b0418] flex items-center justify-center overflow-hidden">
         {icon && (
-          <img src={icon} alt={role} className="w-7 h-7 object-contain" loading="lazy" />
+          <AssetImage src={icon} alt={role} className="w-7 h-7 object-contain" loading="lazy" />
         )}
       </div>
       <div className="flex-1 min-w-0">

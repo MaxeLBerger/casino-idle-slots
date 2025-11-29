@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/ui/BackButton';
+import { AssetImage } from '@/components/ui/asset-image';
 
 function getActionAsset(id: ActionUiId) {
   return ACTION_UI_ASSETS[id];
@@ -185,7 +186,7 @@ export function SlotCasinoScreen() {
               className="flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold bg-gradient-to-r from-[#fbbf24] via-[#f97316] to-[#ec4899] text-[#050317] shadow-[0_0_30px_rgba(250,204,21,0.6)] disabled:opacity-50"
             >
               {spinIcon && (
-                <img
+                <AssetImage
                   src={spinIcon}
                   alt="Spin"
                   className="w-6 h-6 object-contain"

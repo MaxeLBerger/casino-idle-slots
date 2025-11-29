@@ -16,6 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BackButton } from '@/components/ui/BackButton';
+import { AssetImage } from '@/components/ui/asset-image';
 import { formatNumber } from '@/lib/utils';
 import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants';
 import { XP_PER_LEVEL } from '@/constants/game.constants';
@@ -92,17 +93,17 @@ export const Statistics: React.FC = () => {
       {/* Currency Summary */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <Card className="p-3 bg-card/80 border-border/50 text-center">
-          <img src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-8 h-8 mx-auto mb-1 icon-blend" />
+          <AssetImage src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-8 h-8 mx-auto mb-1 icon-blend" />
           <p className="text-xs text-muted-foreground">Coins</p>
           <p className="font-bold text-primary">{formatNumber(gameState.coins)}</p>
         </Card>
         <Card className="p-3 bg-card/80 border-border/50 text-center">
-          <img src={CURRENCY_ICON_ASSETS.prestigePoints} alt="Prestige" className="w-8 h-8 mx-auto mb-1 icon-blend" />
+          <AssetImage src={CURRENCY_ICON_ASSETS.prestigePoints} alt="Prestige" className="w-8 h-8 mx-auto mb-1 icon-blend" />
           <p className="text-xs text-muted-foreground">Prestige</p>
           <p className="font-bold text-purple-400">{formatNumber(gameState.prestigePoints)}</p>
         </Card>
         <Card className="p-3 bg-card/80 border-border/50 text-center">
-          <img src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-8 h-8 mx-auto mb-1 icon-blend" />
+          <AssetImage src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-8 h-8 mx-auto mb-1 icon-blend" />
           <p className="text-xs text-muted-foreground">Diamonds</p>
           <p className="font-bold text-cyan-400">{formatNumber(gameState.diamonds)}</p>
         </Card>

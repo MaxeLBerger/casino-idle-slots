@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BackButton } from '@/components/ui/BackButton';
+import { AssetImage } from '@/components/ui/asset-image';
 import { formatNumber } from '@/lib/utils';
 import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants';
 
@@ -60,8 +61,8 @@ interface ShopItemCardProps {
 
 const ShopItemCard: React.FC<ShopItemCardProps> = ({ item, onPurchase, canAfford, type }) => {
   const getIcon = () => {
-    if (type === 'coins') return <img src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-12 h-12 icon-blend" />;
-    if (type === 'diamonds') return <img src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-12 h-12 icon-blend" />;
+    if (type === 'coins') return <AssetImage src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-12 h-12 icon-blend" />;
+    if (type === 'diamonds') return <AssetImage src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-12 h-12 icon-blend" />;
     return <Gift size={48} weight="fill" className="text-accent" />;
   };
 
@@ -105,7 +106,7 @@ const ShopItemCard: React.FC<ShopItemCardProps> = ({ item, onPurchase, canAfford
             <span>${item.price.toFixed(2)}</span>
           ) : (
             <span className="flex items-center gap-1">
-              <img src={CURRENCY_ICON_ASSETS.diamonds} alt="" className="w-4 h-4 icon-blend" />
+              <AssetImage src={CURRENCY_ICON_ASSETS.diamonds} alt="" className="w-4 h-4 icon-blend" />
               {item.price}
             </span>
           )}
@@ -169,11 +170,11 @@ export const MainShopScreen: React.FC = () => {
       {/* Currency Display */}
       <div className="flex gap-3 mb-6">
         <Card className="flex-1 p-3 bg-card/80 border-border/50 flex items-center gap-2">
-          <img src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-6 h-6 icon-blend" />
+          <AssetImage src={CURRENCY_ICON_ASSETS.coins} alt="Coins" className="w-6 h-6 icon-blend" />
           <span className="font-bold text-primary">{formatNumber(gameState.coins)}</span>
         </Card>
         <Card className="flex-1 p-3 bg-card/80 border-border/50 flex items-center gap-2">
-          <img src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-6 h-6 icon-blend" />
+          <AssetImage src={CURRENCY_ICON_ASSETS.diamonds} alt="Diamonds" className="w-6 h-6 icon-blend" />
           <span className="font-bold text-cyan-400">{formatNumber(gameState.diamonds)}</span>
         </Card>
       </div>

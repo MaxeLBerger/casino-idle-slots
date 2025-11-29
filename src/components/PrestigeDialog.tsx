@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
+import { AssetImage } from '@/components/ui/asset-image'
 import { PRESTIGE_RANK_ASSETS } from '@/constants/game.constants'
 import {
   calculatePrestigeReward,
@@ -91,7 +92,7 @@ export function PrestigeDialog({
           <Card className="p-6 bg-gradient-to-br from-primary/20 to-accent/10 border-primary/50 relative overflow-hidden">
             {newRankBadge && (
               <div className="absolute -right-2 -top-4 opacity-40">
-                <img
+                <AssetImage
                   src={newRankBadge}
                   alt={newRank.name}
                   className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] icon-blend"
@@ -118,7 +119,7 @@ export function PrestigeDialog({
             </div>
             <div className="flex items-center gap-3 text-sm mt-2">
               {currentRankBadge && (
-                <img
+                <AssetImage
                   src={currentRankBadge}
                   alt={currentRank.name}
                   className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(148,163,184,0.8)] icon-blend"
@@ -135,7 +136,7 @@ export function PrestigeDialog({
             {newRank.name !== currentRank.name && (
               <div className="mt-3 p-2 bg-background/50 rounded flex items-center justify-center gap-2">
                 {newRankBadge && (
-                  <img
+                  <AssetImage
                     src={newRankBadge}
                     alt={newRank.name}
                     className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] icon-blend"

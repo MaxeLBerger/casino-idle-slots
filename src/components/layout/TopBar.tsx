@@ -7,6 +7,7 @@ import { XP_PER_LEVEL, XP_REWARDS } from '@/constants/game.constants';
 import { formatNumber } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { Star, Lightning, Trophy } from '@phosphor-icons/react';
+import { AssetImage } from '@/components/ui/asset-image';
 import {
   Tooltip,
   TooltipContent,
@@ -158,7 +159,7 @@ export const TopBar: React.FC<{ className?: string }> = ({ className }) => {
             onClick={() => navigateTo('UPGRADES_LAB')}
             className='flex items-center gap-1 bg-card/80 rounded-full px-3 py-1 border border-border/50 hover:bg-card transition-colors'
           >
-            <img src={CURRENCY_ICON_ASSETS.coins} alt='Coins' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
+            <AssetImage src={CURRENCY_ICON_ASSETS.coins} alt='Coins' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
             <span className='text-primary font-bold text-xs sm:text-sm'>{formatNumber(gameState.coins)}</span>
           </button>
 
@@ -167,7 +168,7 @@ export const TopBar: React.FC<{ className?: string }> = ({ className }) => {
             onClick={() => navigateTo('PRESTIGE_LOUNGE')}
             className='flex items-center gap-1 bg-card/80 rounded-full px-3 py-1 border border-border/50 hover:bg-card transition-colors'
           >
-            <img src={CURRENCY_ICON_ASSETS.prestigePoints} alt='Prestige' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
+            <AssetImage src={CURRENCY_ICON_ASSETS.prestigePoints} alt='Prestige' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
             <span className='text-purple-400 font-bold text-xs sm:text-sm'>{formatNumber(gameState.prestigePoints)}</span>
           </button>
 
@@ -176,7 +177,7 @@ export const TopBar: React.FC<{ className?: string }> = ({ className }) => {
             onClick={() => navigateTo('MAIN_SHOP', { shopTab: 'diamonds' })}
             className='flex items-center gap-1 bg-card/80 rounded-full px-3 py-1 border border-border/50 hover:bg-card transition-colors'
           >
-            <img src={CURRENCY_ICON_ASSETS.diamonds} alt='Diamonds' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
+            <AssetImage src={CURRENCY_ICON_ASSETS.diamonds} alt='Diamonds' className='w-5 h-5 sm:w-6 sm:h-6 icon-blend' />
             <span className='text-cyan-400 font-bold text-xs sm:text-sm'>{formatNumber(gameState.diamonds)}</span>
           </button>
         </div>
@@ -194,7 +195,7 @@ export const TopBar: React.FC<{ className?: string }> = ({ className }) => {
                       currentScreen === item.screen ? 'bg-primary/20' : 'hover:bg-card'
                     )}
                   >
-                    <img src={item.icon} alt={item.label} className='w-6 h-6 icon-blend' />
+                    <AssetImage src={item.icon} alt={item.label} className='w-6 h-6 icon-blend' />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -212,7 +213,7 @@ export const TopBar: React.FC<{ className?: string }> = ({ className }) => {
                     currentScreen === 'SETTINGS' ? 'bg-primary/20' : 'hover:bg-card'
                   )}
                 >
-                  <img src={UI_ICON_ASSETS.settings} alt='Settings' className='w-6 h-6 icon-blend' />
+                  <AssetImage src={UI_ICON_ASSETS.settings} alt='Settings' className='w-6 h-6 icon-blend' />
                 </button>
               </TooltipTrigger>
               <TooltipContent>

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { AssetImage } from '@/components/ui/asset-image'
 import { DailyChallenge } from '@/lib/achievements'
 import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants'
 
@@ -80,7 +81,7 @@ export function DailyChallenges({
             <div className="flex items-center gap-2 mb-4">
               <Badge className="bg-primary/15 text-primary flex items-center gap-1">
                 {CURRENCY_ICON_ASSETS.coins && (
-                  <img
+                  <AssetImage
                     src={CURRENCY_ICON_ASSETS.coins}
                     alt="Coins"
                     className="w-3.5 h-3.5 object-contain"
