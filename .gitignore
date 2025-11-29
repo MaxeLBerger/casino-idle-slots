@@ -30,6 +30,7 @@ build
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/mcp.json
 .idea
 .DS_Store
 *.suo
@@ -58,11 +59,15 @@ coverage
 
 # Spark specific
 **/agent-eval-report*
-packages
+# packages - commented out, we need packages/casino-mcp-server
 pids
 .file-manifest
 .devcontainer/
 .spark-workbench-id
+
+# MCP Server build artifacts
+packages/casino-mcp-server/dist/
+packages/casino-mcp-server/node_modules/
 
 # Debug
 *.tsbuildinfo
