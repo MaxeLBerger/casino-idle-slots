@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "casino-dev-tools": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["packages/casino-mcp-server/dist/index.js"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
