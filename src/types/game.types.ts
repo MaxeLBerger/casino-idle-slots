@@ -74,6 +74,25 @@ export type AvatarId =
   | 'security'
   | 'vipHost';
 
+// Worker unlock requirements
+export type WorkerUnlockRequirement =
+  | { type: 'worker'; workerId: string; level: number }
+  | { type: 'prestige'; prestigePoints: number }
+  | null;
+
+// Worker configuration for the idle economy
+export interface WorkerConfig {
+  roleId: string;
+  name: string;
+  description: string;
+  baseCost: number;
+  costMultiplier: number;
+  baseIncome: number;
+  incomePerLevel: number;
+  maxLevel: number;
+  unlockRequirement: WorkerUnlockRequirement;
+}
+
 export interface PlayerPreferences {
   soundEnabled: boolean;
   musicEnabled: boolean;
@@ -108,7 +127,7 @@ export interface GameState {
   prestigePoints: number;
   diamonds: number;
   eventTokenBalances: Record<EventTokenId, number>;
-  totalPrestigeEarned?: number; // Track lifetime prestige points for milestones
+  totalPrestigeEarned?: number;
   
   // Player Progress
   level: number;
@@ -117,7 +136,7 @@ export interface GameState {
   totalWins: number;
   biggestWin: number;
   totalEarnings: number;
-  lifetimeEarnings?: number; // Track earnings across all prestiges
+  lifetimeEarnings?: number;
   
   lifetimeSpins?: number;
   lifetimeWins?: number;
@@ -152,7 +171,12 @@ export interface GameState {
   dailyChallengeCompleted: boolean;
   avatarId: AvatarId;
   preferences: PlayerPreferences;
-  workers: WorkerState[];
+  
+  // Workers - Record of workerId to level (0 = not hired)
+  workers: Record<string, number>;
+  
+  // Prestige
+  prestigeLevel: number;
   
   // Timestamps
   lastTimestamp: number;

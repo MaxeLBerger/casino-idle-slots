@@ -8,7 +8,6 @@ import {
   GameConfig,
   GameState,
   PlayerPreferences,
-  WorkerState,
 } from '@/types';
 import { SLOT_MACHINE_CONFIGS } from './slot.constants';
 
@@ -36,20 +35,6 @@ export const DEFAULT_PLAYER_PREFERENCES: PlayerPreferences = {
   autoSpinEnabled: false,
   autoSpinBatchSize: 10,
 };
-
-const WORKER_BLUEPRINT: WorkerState[] = [
-  { role: 'cashier', level: 1, isUnlocked: true, efficiencyBonus: 0.05 },
-  { role: 'host', level: 1, isUnlocked: false, efficiencyBonus: 0.04 },
-  { role: 'security', level: 1, isUnlocked: false, efficiencyBonus: 0.03 },
-  { role: 'analyst', level: 1, isUnlocked: false, efficiencyBonus: 0.04 },
-  { role: 'vipConcierge', level: 0, isUnlocked: false, efficiencyBonus: 0.05 },
-  { role: 'marketing', level: 0, isUnlocked: false, efficiencyBonus: 0.03 },
-  { role: 'technician', level: 0, isUnlocked: false, efficiencyBonus: 0.02 },
-  { role: 'manager', level: 0, isUnlocked: false, efficiencyBonus: 0.06 },
-];
-
-export const createDefaultWorkers = (): WorkerState[] =>
-  WORKER_BLUEPRINT.map((worker) => ({ ...worker }));
 
 const DEFAULT_BET = SLOT_MACHINE_CONFIGS[0]?.betOptions?.[0] ?? 10;
 
@@ -119,7 +104,12 @@ export const DEFAULT_GAME_STATE: GameState = {
   dailyChallengeCompleted: false,
   avatarId: 'highRoller',
   preferences: { ...DEFAULT_PLAYER_PREFERENCES },
-  workers: createDefaultWorkers(),
+  
+  // Workers - Record of workerId to level (0 = not hired, starts empty)
+  workers: {},
+  
+  // Prestige level (times prestiged)
+  prestigeLevel: 0,
   
   // Timestamps
   lastTimestamp: Date.now(),
