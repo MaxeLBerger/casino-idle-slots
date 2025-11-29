@@ -1,13 +1,19 @@
 {
     "name": "casino-idle-slots",
     "private": true,
-    "version": "1.0.0",
+    "version": "2.0.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "mcp:dev": "cd packages/casino-mcp-server && npm run dev",
+        "mcp:build": "cd packages/casino-mcp-server && npm run build",
+        "mcp:start": "cd packages/casino-mcp-server && npm run start",
         "kill": "fuser -k 5000/tcp",
-        "build": "tsc -b --noCheck && vite build",
+        "typecheck": "tsc -b --noEmit",
+        "build": "tsc -b && vite build",
+        "build:fast": "tsc -b --noCheck && vite build",
         "lint": "eslint .",
+        "check": "npm run typecheck && npm run lint",
         "optimize": "vite optimize",
         "preview": "vite preview"
     },
