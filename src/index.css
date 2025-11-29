@@ -185,3 +185,78 @@ h1, h2, h3, .orbitron {
 .coin-glow {
   animation: coin-glow 2s ease-in-out infinite;
 }
+
+@keyframes reel-spin {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes reel-blur {
+  0% {
+    filter: blur(0px);
+  }
+  50% {
+    filter: blur(1.5px);
+  }
+  100% {
+    filter: blur(0px);
+  }
+}
+
+@keyframes reel-stop-bounce {
+  0% {
+    transform: translateY(-12px);
+  }
+  60% {
+    transform: translateY(4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.slot-reel--spinning {
+  animation: reel-spin 0.9s ease-in-out infinite;
+}
+
+.slot-reel--spinning img {
+  animation: reel-blur 0.6s ease-in-out infinite;
+}
+
+.slot-reel--stop {
+  animation: reel-stop-bounce 0.45s ease-out;
+}
+
+.slot-reel--win {
+  animation: winning-reel 0.9s ease-in-out 3;
+}
+
+/* =============================================================================
+   FIX: Black background removal for game assets
+   Uses mix-blend-mode to make black backgrounds transparent
+   ============================================================================= */
+
+/* Apply to all game icon images automatically */
+.game-icon,
+img[src*="/assets/ui_items/"],
+img[src*="/assets/actions/"],
+img[src*="/assets/ranks/"] {
+  mix-blend-mode: screen;
+}
+
+/* Manual class for other icons that need it */
+.icon-blend {
+  mix-blend-mode: screen;
+}
+
+/* Alternative: lighten mode preserves colors better for some icons */
+.icon-blend-lighten {
+  mix-blend-mode: lighten;
+}
