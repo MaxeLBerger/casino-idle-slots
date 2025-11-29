@@ -53,8 +53,10 @@ export function PrestigeDialog({
   
   const currentRank = getPrestigeRank(currentPrestigePoints)
   const newRank = getPrestigeRank(newPrestigeTotal)
-  const currentRankBadge = PRESTIGE_RANK_ASSETS[currentRank.id]
-  const newRankBadge = PRESTIGE_RANK_ASSETS[newRank.id]
+  const currentRankKey = currentRank.name.toLowerCase() as keyof typeof PRESTIGE_RANK_ASSETS
+  const newRankKey = newRank.name.toLowerCase() as keyof typeof PRESTIGE_RANK_ASSETS
+  const currentRankBadge = PRESTIGE_RANK_ASSETS[currentRankKey]
+  const newRankBadge = PRESTIGE_RANK_ASSETS[newRankKey]
 
   const handleConfirm = () => {
     if (!confirming) {
@@ -92,7 +94,7 @@ export function PrestigeDialog({
                 <img
                   src={newRankBadge}
                   alt={newRank.name}
-                  className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.9)]"
+                  className="w-16 h-16 object-contain drop-shadow-[0_0_16px_rgba(251,191,36,0.9)] icon-blend"
                   loading="lazy"
                 />
               </div>
@@ -119,7 +121,7 @@ export function PrestigeDialog({
                 <img
                   src={currentRankBadge}
                   alt={currentRank.name}
-                  className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(148,163,184,0.8)]"
+                  className="w-8 h-8 object-contain drop-shadow-[0_0_10px_rgba(148,163,184,0.8)] icon-blend"
                   loading="lazy"
                 />
               )}
@@ -136,7 +138,7 @@ export function PrestigeDialog({
                   <img
                     src={newRankBadge}
                     alt={newRank.name}
-                    className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.9)]"
+                    className="w-7 h-7 object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] icon-blend"
                     loading="lazy"
                   />
                 )}

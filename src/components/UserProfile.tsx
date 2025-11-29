@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { User, SignOut, Trophy, Sparkle, Coins, Lightning, FloppyDisk, Check, Crown } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -71,15 +71,34 @@ export function UserProfile({
     }
   }
 
-  const getTimeSinceLastSave = () => {
-    if (!lastSaveTime) return 'Never'
-    const seconds = Math.floor((Date.now() - lastSaveTime) / 1000)
-    if (seconds < 60) return `${seconds}s ago`
-    const minutes = Math.floor(seconds / 60)
-    if (minutes < 60) return `${minutes}m ago`
-    const hours = Math.floor(minutes / 60)
-    return `${hours}h ago`
-  }
+  const [timeSinceSave, setTimeSinceSave] = useState<string>('Never')
+
+  useEffect(() => {
+    const updateTime = () => {
+      if (!lastSaveTime) {
+        setTimeSinceSave('Never')
+        return
+      }
+      const seconds = Math.floor((Date.now() - lastSaveTime) / 1000)
+      if (seconds < 60) {
+        setTimeSinceSave(`${seconds}s ago`)
+        return
+      }
+      const minutes = Math.floor(seconds / 60)
+      if (minutes < 60) {
+        setTimeSinceSave(`${minutes}m ago`)
+        return
+      }
+      const hours = Math.floor(minutes / 60)
+      setTimeSinceSave(`${hours}h ago`)
+    }
+
+    updateTime()
+    const interval = setInterval(updateTime, 10000)
+    return () => clearInterval(interval)
+  }, [lastSaveTime])
+
+  const getTimeSinceLastSave = () => timeSinceSave
 
   if (!isLoggedIn) {
     return (

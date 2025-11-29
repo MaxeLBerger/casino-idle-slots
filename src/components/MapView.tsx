@@ -5,8 +5,14 @@ import { SlotMachineConfig } from '@/types/slot.types';
 import { Lock } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { CURRENCY_ICON_ASSETS } from '@/constants/economy.constants';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { formatNumber } from '@/lib/utils';
 
 interface MapViewProps {
 	gameState: GameState | null;
@@ -23,21 +29,19 @@ const isBuildingLocked = (b: typeof MAP_BUILDINGS[number], gameState: GameState 
 	return false;
 };
 
-export function MapView({ gameState, slotMachines, onSelectCasino, onClose }: MapViewProps) {
+export function MapView({ gameState, onSelectCasino, onClose }: MapViewProps) {
 	const buildings = useMemo(() => MAP_BUILDINGS, []);
 	const eventTokenIcon = CURRENCY_ICON_ASSETS.eventTokenDragonJade;
 
 	const handleBuildingClick = (b: typeof MAP_BUILDINGS[number]) => {
 		const locked = isBuildingLocked(b, gameState);
 		if (locked) {
-			toast.error('Locked');
 			return;
 		}
 		if (b.type === 'casino' && typeof b.slotMachineIndex === 'number') {
 			onSelectCasino(b.slotMachineIndex);
-			toast.success(`Entered ${b.name}`);
 		} else {
-			toast.info(b.name, { description: b.description });
+			// Non-casino facilities don't trigger toasts anymore; future inline panel can go here.
 		}
 	};
 
@@ -62,12 +66,14 @@ export function MapView({ gameState, slotMachines, onSelectCasino, onClose }: Ma
 
 			{/* Buildings Layer */}
 			<div className="absolute inset-0">
+        <TooltipProvider>
 				{buildings.map(b => {
 					const locked = isBuildingLocked(b, gameState);
 					const isActive = b.type === 'casino' && gameState?.currentSlotMachine === b.slotMachineIndex;
 					return (
+            <Tooltip key={b.id}>
+              <TooltipTrigger asChild>
 						<button
-							key={b.id}
 							onClick={() => handleBuildingClick(b)}
 							style={{
 								position: 'absolute',
@@ -99,8 +105,24 @@ export function MapView({ gameState, slotMachines, onSelectCasino, onClose }: Ma
 								{b.name}
 							</div>
 						</button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-center">
+                  <p className="font-bold">{b.name}</p>
+                  {locked ? (
+                    <div className="text-xs text-red-400">
+                      {b.requiredPrestige ? `Requires ${formatNumber(b.requiredPrestige)} Prestige` : ''}
+                      {b.requiredLevel ? `Requires Level ${b.requiredLevel}` : ''}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-green-400">Unlocked</div>
+                  )}
+                </div>
+              </TooltipContent>
+            </Tooltip>
 					);
 				})}
+        </TooltipProvider>
 			</div>
 
 			{/* Legend / Info */}
@@ -114,7 +136,7 @@ export function MapView({ gameState, slotMachines, onSelectCasino, onClose }: Ma
 							<img
 								src={eventTokenIcon}
 								alt="Event Token"
-								className="w-4 h-4 object-contain"
+								className="w-4 h-4 object-contain icon-blend"
 								loading="lazy"
 							/>
 							<span>Event Plaza rewards Event Tokens</span>

@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Crown, Medal, Sparkle, ArrowUp, CloudArrowUp } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { 
@@ -29,19 +28,13 @@ interface LeaderboardProps {
 
 const CATEGORIES: LeaderboardCategory[] = ['coins', 'totalSpins', 'biggestWin', 'totalEarnings', 'level', 'prestigePoints']
 
-export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: LeaderboardProps) {
+export function Leaderboard({ open, onOpenChange, currentUserId }: LeaderboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<LeaderboardCategory>('coins')
   const [leaderboardData, setLeaderboardData] = useState<Record<string, LeaderboardEntry[]>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [playerRanks, setPlayerRanks] = useState<Record<string, number | null>>({})
 
-  useEffect(() => {
-    if (open) {
-      loadLeaderboards()
-    }
-  }, [open])
-
-  const loadLeaderboards = async () => {
+  const loadLeaderboards = useCallback(async () => {
     setIsLoading(true)
     try {
       const data: Record<string, LeaderboardEntry[]> = {}
@@ -64,7 +57,7 @@ export function Leaderboard({ open, onOpenChange, currentUserId, userLevel }: Le
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [currentUserId])
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Crown size={24} weight="fill" className="text-yellow-400" />
