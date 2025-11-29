@@ -8,15 +8,29 @@ export type GameScreen =
   | 'MAIN_SHOP'
   | 'AVATAR_WARDROBE'
   | 'SOCIAL_HUB'
-  | 'SETTINGS';
+  | 'SETTINGS'
+  | 'ACHIEVEMENTS'
+  | 'STATISTICS';
+
+export interface NavigationParams {
+  slotMachineIndex?: number;
+  workerId?: string;
+  shopTab?: 'diamonds' | 'coins' | 'special';
+  [key: string]: any;
+}
+
+export interface NavigationEntry {
+  screen: GameScreen;
+  params?: NavigationParams;
+}
 
 export interface NavigationState {
   currentScreen: GameScreen;
-  previousScreen: GameScreen | null;
-  params?: Record<string, any>;
+  history: NavigationEntry[];
+  params?: NavigationParams;
 }
 
 export interface NavigationContextType extends NavigationState {
-  navigateTo: (screen: GameScreen, params?: Record<string, any>) => void;
+  navigateTo: (screen: GameScreen, params?: NavigationParams) => void;
   goBack: () => void;
 }

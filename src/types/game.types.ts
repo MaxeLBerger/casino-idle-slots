@@ -29,6 +29,8 @@ export type CurrencyId =
   | 'eventTokenCelestial'
   | 'limitedPass';
 
+export type EventTokenId = Exclude<CurrencyId, 'coins' | 'prestigePoints' | 'diamonds'>;
+
 export type UiIconId =
   | 'map'
   | 'shop'
@@ -72,6 +74,21 @@ export type AvatarId =
   | 'security'
   | 'vipHost';
 
+export interface PlayerPreferences {
+  soundEnabled: boolean;
+  musicEnabled: boolean;
+  hapticsEnabled: boolean;
+  autoSpinEnabled: boolean;
+  autoSpinBatchSize: number;
+}
+
+export interface WorkerState {
+  role: WorkerRoleId;
+  level: number;
+  isUnlocked: boolean;
+  efficiencyBonus: number;
+}
+
 export interface SpinResult {
   id: string;
   timestamp: number;
@@ -81,12 +98,16 @@ export interface SpinResult {
   symbols: string[];
   machineName?: string;
   multiplier?: number;
+  winTier?: 'small' | 'big' | 'mega' | 'jackpot' | 'ultra';
+  winningIndices?: number[];
 }
 
 export interface GameState {
   // Currency & Resources
   coins: number;
   prestigePoints: number;
+  diamonds: number;
+  eventTokenBalances: Record<EventTokenId, number>;
   totalPrestigeEarned?: number; // Track lifetime prestige points for milestones
   
   // Player Progress
@@ -112,11 +133,16 @@ export interface GameState {
   spinMultiplier: number;
   idleIncomeLevel: number;
   idleIncomePerSecond: number;
+  reelSpeedLevel: number;
+  jackpotChanceLevel: number;
+  workerEfficiencyLevel: number;
+  offlineEarningsLevel: number;
   totalUpgrades: number;
   
   // Slot Machines
   currentSlotMachine: number;
   unlockedSlotMachines: number[];
+  currentBet: number;
   
   // Achievements & Challenges
   unlockedAchievements: string[];
@@ -124,6 +150,9 @@ export interface GameState {
   dailyChallengeDate: string;
   dailyChallengeProgress: number;
   dailyChallengeCompleted: boolean;
+  avatarId: AvatarId;
+  preferences: PlayerPreferences;
+  workers: WorkerState[];
   
   // Timestamps
   lastTimestamp: number;
