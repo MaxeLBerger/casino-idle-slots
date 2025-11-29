@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useGame } from '@/contexts/GameContext';
-import { SlotMachineView } from '@/features/slot-machine/SlotMachineView';
-import { CityMapView } from '@/features/map/CityMapView';
+import { SlotCasinoScreen } from '@/features/slot-machine/SlotCasinoScreen';
+import { CasinoCityMapScreen } from '@/features/map/CasinoCityMapScreen';
 import { WorkersPanel } from '@/features/workers/WorkersPanel';
 import { UpgradesPanel } from '@/features/upgrades/UpgradesPanel';
 import { PrestigeDialog } from '@/components/PrestigeDialog';
@@ -10,11 +10,13 @@ import { MainShopScreen } from '@/features/shop/MainShopScreen';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { AvatarWardrobeScreen } from '@/features/avatar/AvatarWardrobeScreen';
 import { SocialHubScreen } from '@/features/social/SocialHubScreen';
+import { Statistics } from '@/components/Statistics';
 import { WORKER_ROLE_ASSETS } from '@/constants/workers.constants';
+import { GAME_CONFIG } from '@/constants/game.constants';
+import { calculatePrestigeStartingCoins } from '@/lib/prestige';
 
 // Wrapper for Workers to map state
 const WorkersScreenWrapper = () => {
-  const { gameState } = useGame();
   // TODO: Map actual workers from state
   const workers = [
     { id: '1', role: 'bartender' as keyof typeof WORKER_ROLE_ASSETS, level: 1, description: 'Serves drinks' },
@@ -30,7 +32,7 @@ const WorkersScreenWrapper = () => {
 
 // Wrapper for Upgrades to map state
 const UpgradesScreenWrapper = () => {
-  const { gameState, setGameState } = useGame();
+  const { gameState } = useGame();
   
   // Placeholder handlers
   const handleUpgradeSpin = () => console.log('Upgrade Spin');
@@ -55,22 +57,67 @@ const UpgradesScreenWrapper = () => {
 
 // Wrapper for Prestige
 const PrestigeScreenWrapper = () => {
-  const { gameState } = useGame();
-  // PrestigeDialog is a Dialog, we might need to adapt it to be a screen or just open it.
-  // For now, let's render it as a screen content if possible, or just a placeholder.
+  const { gameState, setGameState, saveGame } = useGame();
+  const { goBack } = useNavigation();
+
+  const handlePrestige = () => {
+    // Calculate new prestige values
+    const newPrestigePoints = gameState.prestigePoints + 1; // Simplified; real calculation would use calculatePrestigeReward
+    const startingCoins = calculatePrestigeStartingCoins(newPrestigePoints, GAME_CONFIG.STARTING_COINS);
+    
+    setGameState(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        // Reset progress
+        coins: startingCoins,
+        totalEarnings: 0,
+        totalSpins: 0,
+        totalWins: 0,
+        biggestWin: 0,
+        winStreak: 0,
+        // Keep and increment prestige
+        prestigePoints: newPrestigePoints,
+        totalPrestigeEarned: (prev.totalPrestigeEarned ?? 0) + 1,
+        // Transfer to lifetime stats
+        lifetimeEarnings: (prev.lifetimeEarnings ?? 0) + prev.totalEarnings,
+        lifetimeSpins: (prev.lifetimeSpins ?? 0) + prev.totalSpins,
+        lifetimeWins: (prev.lifetimeWins ?? 0) + prev.totalWins,
+        lifetimeBiggestWin: Math.max(prev.lifetimeBiggestWin ?? 0, prev.biggestWin),
+        // Reset slot machines
+        currentSlotMachine: 0,
+        unlockedSlotMachines: [0],
+        // Reset upgrades
+        spinPowerLevel: 0,
+        spinMultiplier: 1,
+        idleIncomeLevel: 1,
+        idleIncomePerSecond: 1,
+        reelSpeedLevel: 0,
+        jackpotChanceLevel: 0,
+        workerEfficiencyLevel: 0,
+        offlineEarningsLevel: 0,
+      };
+    });
+    
+    saveGame();
+    goBack();
+  };
+
+  const handleClose = () => {
+    goBack();
+  };
+
   return (
     <div className='p-4 flex items-center justify-center h-full'>
       <PrestigeDialog 
         open={true} 
-        onOpenChange={() => {}} 
-        currentCoins={gameState.coins}
-        lifetimeEarnings={gameState.lifetimeEarnings}
-        prestigePoints={gameState.prestigePoints}
-        onPrestige={() => console.log('Prestige')}
+        onOpenChange={handleClose}
+        currentPrestigePoints={gameState.prestigePoints ?? 0}
+        totalEarnings={gameState.totalEarnings ?? 0}
+        currentCoins={gameState.coins ?? 0}
+        level={gameState.level ?? 1}
+        onConfirm={handlePrestige}
       />
-      <div className='absolute bottom-8'>
-        <BackButton />
-      </div>
     </div>
   );
 };
@@ -86,15 +133,14 @@ const BackButton = () => {
 
 export const ScreenRouter: React.FC = () => {
   const { currentScreen } = useNavigation();
-  const { gameState } = useGame();
 
   switch (currentScreen) {
     case 'LOADING':
       return <div className='flex items-center justify-center h-full text-gold-400'>Loading Casino...</div>;
     case 'CITY_MAP':
-      return <CityMapView avatarId='highRoller' />; // TODO: Get avatar from state
+      return <CasinoCityMapScreen avatarId='highRoller' />; // TODO: Get avatar from state
     case 'SLOT_MACHINE':
-      return <SlotMachineView />;
+      return <SlotCasinoScreen />;
     case 'WORKERS_HQ':
       return <WorkersScreenWrapper />;
     case 'UPGRADES_LAB':
@@ -109,6 +155,8 @@ export const ScreenRouter: React.FC = () => {
       return <AvatarWardrobeScreen />;
     case 'SOCIAL_HUB':
       return <SocialHubScreen />;
+    case 'STATISTICS':
+      return <Statistics />;
     default:
       return <div className='text-white'>Screen not found: {currentScreen}</div>;
   }
